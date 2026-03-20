@@ -34,7 +34,7 @@ npm run dev
 | Variable | Description |
 |----------|-------------|
 | `NEXTAUTH_SECRET` | Secret for JWT signing (min 32 chars) |
-| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://api.bitmacro.io`) |
+| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`) |
 
 ---
 
@@ -44,10 +44,13 @@ npm run dev
 relay-panel (this repo)
     │  HTTP + JWT
     ▼
-relay-api (central hub)
-    │  Bearer token
+relay-api (Vercel)
+    │  HTTP REST + Bearer JWT
     ▼
-relay-agent(s)
+relay-agent
+    │  child_process spawn()
+    ▼
+strfry (local C++ process / LMDB)
 ```
 
 ---
