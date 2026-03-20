@@ -19,8 +19,8 @@ export default async function HomePage() {
     secureCookie: process.env.NODE_ENV === "production",
     cookieName:
       process.env.NODE_ENV === "production"
-        ? "__Secure-next-auth.session-token"
-        : "next-auth.session-token",
+        ? "__Secure-authjs.session-token"
+        : "authjs.session-token",
     raw: true,
   });
   const relays = token
