@@ -18,7 +18,11 @@ export default async function HomePage() {
     ? await fetch(apiUrl("relays"), {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
-      }).then((r) => (r.ok ? r.json() : { relays: [] }))
+      }).then(async (r) => {
+        const body = await r.text();
+        console.log("[relay-panel] GET /relays response:", r.status, r.statusText, "body:", body);
+        return r.ok ? JSON.parse(body) : { relays: [] };
+      })
     : { relays: [] };
 
   return (
