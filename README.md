@@ -8,9 +8,10 @@ Next.js frontend for the [BitMacro Relay Manager](https://bitmacro.io) ecosystem
 
 ## Stack
 
-- Next.js 14 (App Router)
-- Tailwind CSS + shadcn/ui
-- NextAuth.js
+- Next.js 16 (App Router, Turbopack)
+- React 19
+- Tailwind CSS v4 + shadcn/ui
+- NextAuth.js v5
 
 ---
 
