@@ -1,5 +1,11 @@
 # relay-panel
 
+[![CI](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-BSL_1.1-orange)](LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/bitmacro/relay-panel)
+
 **Manage Nostr relays from the browser.**
 
 Next.js frontend for the [BitMacro Relay Manager](https://bitmacro.io) ecosystem. This panel **consumes only the relay-api** — it never talks directly to relay-agents or Supabase.
@@ -43,6 +49,22 @@ relay-api (central hub)
     ▼
 relay-agent(s)
 ```
+
+---
+
+## Ecosystem
+
+| Project | Description | License |
+|---------|-------------|---------|
+| [relay-agent](https://github.com/bitmacro/relay-agent) | REST API agent for strfry | MIT |
+| [relay-api](https://github.com/bitmacro/relay-api) | Central hub (Supabase, proxy) | Private |
+| **relay-panel** | This repo — frontend | BSL 1.1 |
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and PR guidelines.
 
 ---
 
