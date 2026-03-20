@@ -13,7 +13,16 @@ export default async function HomePage() {
   const req = new Request("https://relay-panel.bitmacro.io", {
     headers: headersList,
   });
-  const token = await getToken({ req, raw: true });
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === "production",
+    cookieName:
+      process.env.NODE_ENV === "production"
+        ? "__Secure-next-auth.session-token"
+        : "next-auth.session-token",
+    raw: true,
+  });
   const relays = token
     ? await fetch(apiUrl("relays"), {
         headers: { Authorization: `Bearer ${token}` },
