@@ -1,13 +1,37 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import type { User } from "next-auth";
 import { DashboardContent } from "./dashboard-content";
+import { EventsTab } from "./events-tab";
+import { AccessTab } from "./access-tab";
+import { ConfigTab } from "./config-tab";
 
 interface Relay {
   id: string;
   name: string | null;
   endpoint: string | null;
+}
+
+interface RelayStats {
+  total_events?: number;
+  db_size?: string;
+  uptime?: number;
+  version?: string;
+  error?: string;
+  detail?: string;
+  _status?: number;
+  _ok?: boolean;
+}
+
+interface RelayHealth {
+  status?: string;
+  timestamp?: string;
+  error?: string;
+  detail?: string;
+  _status?: number;
+  _ok?: boolean;
 }
 
 interface RelayPanelShellProps {
@@ -16,11 +40,60 @@ interface RelayPanelShellProps {
   providerUserId?: string | null;
 }
 
+const TABS = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "events", label: "Eventos" },
+  { id: "access", label: "Acesso" },
+  { id: "config", label: "Config" },
+] as const;
+
+type TabId = (typeof TABS)[number]["id"];
+
 export function RelayPanelShell({
   user,
   relays,
   providerUserId,
 }: RelayPanelShellProps) {
+  const [selectedId, setSelectedId] = useState<string | null>(relays[0]?.id ?? null);
+  const [stats, setStats] = useState<RelayStats | null>(null);
+  const [health, setHealth] = useState<RelayHealth | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+
+  useEffect(() => {
+    setSelectedId(relays[0]?.id ?? null);
+  }, [relays]);
+
+  useEffect(() => {
+    if (!selectedId) {
+      setStats(null);
+      setHealth(null);
+      return;
+    }
+    setLoading(true);
+    const fetchWithStatus = (path: string) =>
+      fetch(path).then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        return { ...json, _status: r.status, _ok: r.ok };
+      });
+    Promise.all([
+      fetchWithStatus(`/api/relay/${selectedId}/stats`),
+      fetchWithStatus(`/api/relay/${selectedId}/health`),
+    ])
+      .then(([s, h]) => {
+        setStats(s);
+        setHealth(h);
+      })
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : "network_error";
+        setStats({ error: "fetch_error", detail: msg });
+        setHealth({ error: "fetch_error", detail: msg });
+      })
+      .finally(() => setLoading(false));
+  }, [selectedId]);
+
+  const selectedRelay = relays.find((r) => r.id === selectedId);
+
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-[#e2e2e2]">
       <div className="mx-auto max-w-[900px] rounded-xl border border-[#2a2a2a] bg-[#141414] p-0 shadow-xl">
@@ -46,11 +119,89 @@ export function RelayPanelShell({
             </button>
           </div>
         </div>
-        <DashboardContent
-          relays={relays}
-          providerUserId={providerUserId}
-          user={user}
-        />
+
+        {/* Relay chips */}
+        <div className="flex flex-wrap gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-2">
+          {relays.length === 0 ? (
+            <p className="text-xs text-[#666]">
+              No relays. Add relay_configs in Supabase with provider_user_id ={" "}
+              {providerUserId && (
+                <code className="rounded bg-[#252525] px-1.5 py-0.5 font-mono">
+                  {providerUserId}
+                </code>
+              )}
+            </p>
+          ) : (
+            relays.map((r, i) => (
+              <button
+                key={r.id}
+                type="button"
+                onClick={() => setSelectedId(r.id)}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
+                  selectedId === r.id
+                    ? "border-[#5a3a0a] bg-[#1e1a0e] text-[#f7931a]"
+                    : "border-[#333] bg-[#1f1f1f] text-[#888] hover:border-[#444] hover:text-[#ccc]"
+                }`}
+              >
+                <span
+                  className={`h-1.5 w-1.5 rounded-full ${
+                    i === 0 ? "bg-[#22c55e]" : i === 1 ? "bg-[#3b82f6]" : "bg-[#f7931a]"
+                  }`}
+                />
+                {r.name ?? r.endpoint ?? r.id.slice(0, 8)}
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Nav tabs */}
+        <nav className="flex gap-0.5 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`border-b-2 px-3 py-2 text-[12px] transition-colors ${
+                activeTab === tab.id
+                  ? "border-[#f7931a] font-medium text-[#f0f0f0]"
+                  : "border-transparent text-[#666] hover:text-[#ccc]"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+
+        {/* Tab content */}
+        <div className="p-4">
+          {relays.length === 0 ? (
+            <p className="py-8 text-center text-[12px] text-[#666]">
+              Adicione relays em Supabase para começar.
+            </p>
+          ) : (
+            <>
+              {activeTab === "dashboard" && (
+                <DashboardContent
+                  stats={stats}
+                  health={health}
+                  selectedRelay={selectedRelay ?? null}
+                  loading={loading}
+                />
+              )}
+              {activeTab === "events" && <EventsTab />}
+              {activeTab === "access" && <AccessTab />}
+              {activeTab === "config" && (
+                <ConfigTab
+                  endpoint={selectedRelay?.endpoint ?? null}
+                  statsVersion={stats?.version}
+                  statsUptime={stats?.uptime}
+                  healthOk={health?.status === "ok"}
+                  loading={loading}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

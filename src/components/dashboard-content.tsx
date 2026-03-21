@@ -1,8 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { User } from "next-auth";
-
 interface Relay {
   id: string;
   name: string | null;
@@ -30,9 +27,10 @@ interface RelayHealth {
 }
 
 interface DashboardContentProps {
-  relays: Relay[];
-  providerUserId?: string | null;
-  user: User | null;
+  stats: RelayStats | null;
+  health: RelayHealth | null;
+  selectedRelay: Relay | null;
+  loading: boolean;
 }
 
 function formatUptime(seconds?: number): string {
@@ -50,173 +48,162 @@ function formatNumber(n?: number): string {
   return n.toLocaleString("pt-PT");
 }
 
+const KIND_ACTIVITY_MOCK = [
+  { kind: 1, desc: "Notas de texto", events: 51240, pct: "60.8%" },
+  { kind: 0, desc: "Perfil de utilizador", events: 18920, pct: "22.4%" },
+  { kind: 3, desc: "Listas de contactos", events: 8110, pct: "9.6%" },
+  { kind: 4, desc: "DMs encriptados", events: 3900, pct: "4.6%" },
+  { kind: 6, desc: "Reposts", events: 2142, pct: "2.5%" },
+];
+
+const KIND_STYLES: Record<number, string> = {
+  0: "bg-[#2a1a4a] text-[#a78bfa]",
+  1: "bg-[#0c2a4a] text-[#60a5fa]",
+  3: "bg-[#0a2a1a] text-[#4ade80]",
+  4: "bg-[#2a1a0a] text-[#fb923c]",
+  6: "bg-[#2a0a0a] text-[#f87171]",
+};
+
 export function DashboardContent({
-  relays,
-  providerUserId,
+  stats,
+  health,
+  selectedRelay,
+  loading,
 }: DashboardContentProps) {
-  const [selectedId, setSelectedId] = useState<string | null>(
-    relays[0]?.id ?? null
-  );
-  const [stats, setStats] = useState<RelayStats | null>(null);
-  const [health, setHealth] = useState<RelayHealth | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setSelectedId(relays[0]?.id ?? null);
-  }, [relays]);
-
-  useEffect(() => {
-    if (!selectedId) {
-      setStats(null);
-      setHealth(null);
-      return;
-    }
-    setLoading(true);
-    const fetchWithStatus = (path: string) =>
-      fetch(path).then(async (r) => {
-        const json = await r.json().catch(() => ({}));
-        return { ...json, _status: r.status, _ok: r.ok };
-      });
-    Promise.all([
-      fetchWithStatus(`/api/relay/${selectedId}/stats`),
-      fetchWithStatus(`/api/relay/${selectedId}/health`),
-    ])
-      .then(([s, h]) => {
-        setStats(s);
-        setHealth(h);
-      })
-      .catch((err) => {
-        const msg = err instanceof Error ? err.message : "network_error";
-        setStats({ error: "fetch_error", detail: msg });
-        setHealth({ error: "fetch_error", detail: msg });
-      })
-      .finally(() => setLoading(false));
-  }, [selectedId]);
-
-  const selectedRelay = relays.find((r) => r.id === selectedId);
-
   return (
-    <>
-      {/* Relay chips */}
-      <div className="flex flex-wrap gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-2">
-        {relays.length === 0 ? (
-          <p className="text-xs text-[#666]">
-            No relays. Add relay_configs in Supabase with provider_user_id ={" "}
-            {providerUserId && (
-              <code className="rounded bg-[#252525] px-1.5 py-0.5 font-mono">
-                {providerUserId}
-              </code>
-            )}
-          </p>
-        ) : (
-          relays.map((r, i) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setSelectedId(r.id)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                selectedId === r.id
-                  ? "border-[#5a3a0a] bg-[#1e1a0e] text-[#f7931a]"
-                  : "border-[#333] bg-[#1f1f1f] text-[#888] hover:border-[#444] hover:text-[#ccc]"
-              }`}
+    <div className="space-y-4">
+      {/* Metrics */}
+      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+          <div className="text-[11px] text-[#555]">Total eventos</div>
+          <div className="text-xl font-semibold text-[#f0f0f0]">
+            {loading ? "…" : formatNumber(stats?.total_events)}
+          </div>
+          <div className="mt-0.5 text-[11px] text-[#444]">strfry</div>
+        </div>
+        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+          <div className="text-[11px] text-[#555]">DB size</div>
+          <div className="text-xl font-semibold text-[#f0f0f0]">
+            {loading ? "…" : stats?.db_size ?? "—"}
+          </div>
+          <div className="mt-0.5 text-[11px] text-[#444]">LMDB</div>
+        </div>
+        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+          <div className="text-[11px] text-[#555]">Pubkeys ativas</div>
+          <div className="text-xl font-semibold text-[#f0f0f0]">—</div>
+          <div className="mt-0.5 text-[11px] text-[#444]">7 dias</div>
+        </div>
+        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+          <div className="text-[11px] text-[#555]">Bloqueados</div>
+          <div className="text-xl font-semibold text-[#f0f0f0]">—</div>
+          <div className="mt-0.5 text-[11px] text-[#444]">na blacklist</div>
+        </div>
+      </div>
+
+      {/* Atividade por kind */}
+      <div>
+        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
+          Atividade por kind
+        </div>
+        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
+          <table className="w-full table-fixed border-collapse text-[12px]">
+            <thead>
+              <tr>
+                <th className="w-[60px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  Kind
+                </th>
+                <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  Descrição
+                </th>
+                <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  Eventos
+                </th>
+                <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  %
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {KIND_ACTIVITY_MOCK.map((row) => (
+                <tr
+                  key={row.kind}
+                  className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
+                >
+                  <td className="px-2.5 py-2">
+                    <span
+                      className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                        KIND_STYLES[row.kind] ?? "bg-[#252525] text-[#888]"
+                      }`}
+                    >
+                      {row.kind}
+                    </span>
+                  </td>
+                  <td className="overflow-hidden px-2.5 py-2 text-[#ccc] text-ellipsis whitespace-nowrap">
+                    {row.desc}
+                  </td>
+                  <td className="px-2.5 py-2 text-right text-[#ccc]">
+                    {row.events.toLocaleString("pt-PT")}
+                  </td>
+                  <td className="px-2.5 py-2 text-right text-[#ccc]">
+                    {row.pct}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-1.5 text-[11px] text-[#555]">
+          Dados de exemplo. A API de breakdown por kind será integrada em breve.
+        </p>
+      </div>
+
+      {/* Estado da ligação */}
+      <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
+        <div className="mb-3 text-[13px] font-medium text-[#ddd]">
+          Estado da ligação
+        </div>
+        <div className="flex flex-wrap gap-5 text-sm">
+          <div>
+            <span className="text-[#555]">Versão strfry: </span>
+            <strong className="text-[#ccc]">
+              {loading ? "…" : stats?.version ?? "—"}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[#555]">Uptime: </span>
+            <strong className="text-[#ccc]">
+              {loading ? "…" : formatUptime(stats?.uptime)}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[#555]">relay-agent: </span>
+            <strong
+              className={
+                health?.status === "ok"
+                  ? "text-[#22c55e]"
+                  : health?.error
+                  ? "text-[#f87171]"
+                  : "text-[#ccc]"
+              }
+              title={health?.detail ?? health?.error}
             >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  i === 0 ? "bg-[#22c55e]" : i === 1 ? "bg-[#3b82f6]" : "bg-[#f7931a]"
-                }`}
-              />
-              {r.name ?? r.endpoint ?? r.id.slice(0, 8)}
-            </button>
-          ))
-        )}
+              {loading
+                ? "…"
+                : health?.status === "ok"
+                ? "online"
+                : health?._status
+                ? `${health.error ?? "erro"} (${health._status}${health.detail ? ` — ${health.detail}` : ""})`
+                : health?.error ?? "—"}
+            </strong>
+          </div>
+          <div>
+            <span className="text-[#555]">Endpoint: </span>
+            <strong className="font-mono text-[11px] text-[#666]">
+              {selectedRelay?.endpoint ?? "—"}
+            </strong>
+          </div>
+        </div>
       </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {relays.length === 0 ? null : (
-          <>
-            {/* Metrics */}
-            <div className="mb-4 grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-              <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-                <div className="text-[11px] text-[#555]">Total eventos</div>
-                <div className="text-xl font-semibold text-[#f0f0f0]">
-                  {loading ? "…" : formatNumber(stats?.total_events)}
-                </div>
-                <div className="mt-0.5 text-[11px] text-[#444]">strfry</div>
-              </div>
-              <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-                <div className="text-[11px] text-[#555]">DB size</div>
-                <div className="text-xl font-semibold text-[#f0f0f0]">
-                  {loading ? "…" : stats?.db_size ?? "—"}
-                </div>
-                <div className="mt-0.5 text-[11px] text-[#444]">LMDB</div>
-              </div>
-              <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-                <div className="text-[11px] text-[#555]">Uptime</div>
-                <div className="text-xl font-semibold text-[#f0f0f0]">
-                  {loading ? "…" : formatUptime(stats?.uptime)}
-                </div>
-                <div className="mt-0.5 text-[11px] text-[#444]">strfry</div>
-              </div>
-              <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-                <div className="text-[11px] text-[#555]">Versão strfry</div>
-                <div className="text-xl font-semibold text-[#f0f0f0]">
-                  {loading ? "…" : stats?.version ?? "—"}
-                </div>
-                <div className="mt-0.5 text-[11px] text-[#444]">binário</div>
-              </div>
-            </div>
-
-            {/* Config / Estado da ligação */}
-            <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-              <div className="mb-3 text-[13px] font-medium text-[#ddd]">
-                Estado da ligação
-              </div>
-              <div className="flex flex-wrap gap-5 text-sm">
-                <div>
-                  <span className="text-[#555]">Versão strfry: </span>
-                  <strong className="text-[#ccc]">
-                    {loading ? "…" : stats?.version ?? "—"}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-[#555]">Uptime: </span>
-                  <strong className="text-[#ccc]">
-                    {loading ? "…" : formatUptime(stats?.uptime)}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-[#555]">relay-agent: </span>
-                  <strong
-                    className={
-                      health?.status === "ok"
-                        ? "text-[#22c55e]"
-                        : health?.error
-                        ? "text-[#f87171]"
-                        : "text-[#ccc]"
-                    }
-                    title={health?.detail ?? health?.error}
-                  >
-                    {loading
-                      ? "…"
-                      : health?.status === "ok"
-                      ? "online"
-                      : health?._status
-                      ? `${health.error ?? "erro"} (${health._status}${health.detail ? ` — ${health.detail}` : ""})`
-                      : health?.error ?? "—"}
-                  </strong>
-                </div>
-                <div>
-                  <span className="text-[#555]">Endpoint: </span>
-                  <strong className="font-mono text-[11px] text-[#666]">
-                    {selectedRelay?.endpoint ?? "—"}
-                  </strong>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-    </>
+    </div>
   );
 }
