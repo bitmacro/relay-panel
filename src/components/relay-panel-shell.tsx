@@ -61,7 +61,8 @@ export function RelayPanelShell({
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
 
   useEffect(() => {
-    setSelectedId(relays[0]?.id ?? null);
+    const ids = new Set(relays.map((r) => r.id));
+    setSelectedId((prev) => (prev && ids.has(prev) ? prev : relays[0]?.id ?? null));
   }, [relays]);
 
   useEffect(() => {
@@ -192,6 +193,7 @@ export function RelayPanelShell({
               {activeTab === "access" && <AccessTab />}
               {activeTab === "config" && (
                 <ConfigTab
+                  selectedId={selectedId}
                   endpoint={selectedRelay?.endpoint ?? null}
                   statsVersion={stats?.version}
                   statsUptime={stats?.uptime}

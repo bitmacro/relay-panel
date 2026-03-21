@@ -1,0 +1,37 @@
+import { auth } from "@/lib/auth";
+import { apiUrl } from "@/lib/api";
+import { NextRequest, NextResponse } from "next/server";
+
+export async function POST(req: NextRequest) {
+  const session = await auth();
+  const apiKey = process.env.RELAY_API_KEY;
+  const providerUserId = (session?.user as { id?: string })?.id;
+
+  if (!apiKey || !providerUserId) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const body = await req.json().catch(() => ({}));
+  const res = await fetch(apiUrl("relays"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": apiKey,
+      "X-Provider-User-Id": providerUserId,
+    },
+    body: JSON.stringify(body),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  }).catch((err) => {
+    const isTimeout = err instanceof Error && err.name === "AbortError";
+    return new Response(
+      JSON.stringify({
+        error: isTimeout ? "gateway_timeout" : "api_unavailable",
+        detail: err instanceof Error ? err.message : String(err),
+      }),
+      { status: 504, headers: { "Content-Type": "application/json" } }
+    ) as Response;
+  });
+  const json = await res.json();
+  return NextResponse.json(json, { status: res.status });
+}
