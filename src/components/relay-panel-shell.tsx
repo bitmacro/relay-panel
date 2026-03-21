@@ -100,8 +100,16 @@ export function RelayPanelShell({
       <div className="mx-auto max-w-[900px] rounded-xl border border-[#2a2a2a] bg-[#141414] p-0 shadow-xl">
         {/* Topbar */}
         <div className="flex items-center gap-3 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-2.5">
-          <span className="text-[13px] font-semibold tracking-wide text-[#f0f0f0]">
-            Bit<span className="text-[#f7931a]">Macro</span> Relay Manager
+          <img
+            src="/bitmacro-logo.png"
+            alt="BitMacro"
+            className="h-8 w-8 shrink-0 rounded-full object-contain"
+          />
+          <span
+            className="text-[13px] font-bold tracking-wide text-white"
+            style={{ fontFamily: "var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif" }}
+          >
+            BitMacro Relay Manager
           </span>
           <span className="ml-2 text-[11px] text-[#444]">
             {typeof window !== "undefined"
