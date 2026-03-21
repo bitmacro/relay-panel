@@ -1,7 +1,17 @@
 {
-  "name": "relay-panel",
+  "name": "@bitmacro/relay-panel",
   "version": "0.1.0",
+  "description": "Web UI for managing Nostr relays via relay-api",
   "private": true,
+  "license": "BSL-1.1",
+  "author": "BitMacro <hello@bitmacro.io>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitmacro/relay-panel.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
