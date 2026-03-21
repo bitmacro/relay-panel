@@ -1,8 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { apiUrl } from "@/lib/api";
-import { Dashboard } from "@/components/dashboard";
+import { RelayPanelShell } from "@/components/relay-panel-shell";
 
 export default async function HomePage() {
   const session = await auth();
@@ -27,8 +26,8 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col p-8">
-      <Dashboard
+    <div className="p-6">
+      <RelayPanelShell
         user={session.user ?? null}
         relays={relays.relays ?? []}
         providerUserId={providerUserId ?? null}
