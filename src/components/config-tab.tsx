@@ -40,12 +40,16 @@ export function ConfigTab({
   const [addForm, setAddForm] = useState({ name: "", endpoint: "", token: "" });
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [probing, setProbing] = useState(false);
+  const [probeResult, setProbeResult] = useState<{ ok?: boolean; error?: string; elapsed?: number; detail?: string } | null>(null);
 
   useEffect(() => {
     if (!selectedId) {
       setConfig(null);
+      setProbeResult(null);
       return;
     }
+    setProbeResult(null);
     setConfigLoading(true);
     setError(null);
     fetch(`/api/relay/${selectedId}/config`)
@@ -62,6 +66,25 @@ export function ConfigTab({
       .finally(() => setConfigLoading(false));
   }, [selectedId]);
 
+  const handleProbe = async () => {
+    if (!selectedId) return;
+    setProbing(true);
+    setProbeResult(null);
+    try {
+      const r = await fetch(`/api/relay/${selectedId}/probe`);
+      const json = await r.json();
+      setProbeResult({
+        ok: json.ok,
+        error: json.error,
+        elapsed: json.elapsed,
+        detail: json.detail,
+      });
+    } catch (err) {
+      setProbeResult({ ok: false, error: "network_error", detail: err instanceof Error ? err.message : String(err) });
+    } finally {
+      setProbing(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!selectedId || !config) return;
@@ -302,6 +325,14 @@ export function ConfigTab({
             >
               {loading ? "…" : healthOk ? "online" : "offline"}
             </strong>
+            <button
+              type="button"
+              onClick={handleProbe}
+              disabled={probing || !selectedId}
+              className="ml-2 rounded border border-[#444] px-2 py-0.5 text-[11px] text-[#888] hover:bg-[#252525] hover:text-[#ccc] disabled:opacity-50"
+            >
+              {probing ? "A verificar…" : "Verificar conexão"}
+            </button>
           </div>
           <div>
             <span className="text-[#555]">Endpoint: </span>
@@ -310,6 +341,22 @@ export function ConfigTab({
             </strong>
           </div>
         </div>
+        {probeResult && (
+          <div className="mt-3 rounded border border-[#2a2a2a] bg-[#141414] px-2.5 py-1.5 text-[11px]">
+            {probeResult.ok ? (
+              <span className="text-[#22c55e]">
+                Conexão OK
+                {probeResult.elapsed != null ? ` (${probeResult.elapsed}ms)` : ""}
+              </span>
+            ) : (
+              <span className="text-[#f87171]">
+                {probeResult.error ?? "Erro"}
+                {probeResult.detail ? `: ${probeResult.detail}` : ""}
+                {probeResult.elapsed != null ? ` (${probeResult.elapsed}ms)` : ""}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
