@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import type { User } from "next-auth";
@@ -50,7 +51,7 @@ const TABS = [
 type TabId = (typeof TABS)[number]["id"];
 
 export function RelayPanelShell({
-  user,
+  user: _user, // eslint-disable-line @typescript-eslint/no-unused-vars -- reserved for future use
   relays,
   providerUserId,
 }: RelayPanelShellProps) {
@@ -62,16 +63,20 @@ export function RelayPanelShell({
 
   useEffect(() => {
     const ids = new Set(relays.map((r) => r.id));
-    setSelectedId((prev) => (prev && ids.has(prev) ? prev : relays[0]?.id ?? null));
+    queueMicrotask(() =>
+      setSelectedId((prev) => (prev && ids.has(prev) ? prev : relays[0]?.id ?? null))
+    );
   }, [relays]);
 
   useEffect(() => {
     if (!selectedId) {
-      setStats(null);
-      setHealth(null);
+      queueMicrotask(() => {
+        setStats(null);
+        setHealth(null);
+      });
       return;
     }
-    setLoading(true);
+    queueMicrotask(() => setLoading(true));
     const fetchWithStatus = (path: string) =>
       fetch(path).then(async (r) => {
         const json = await r.json().catch(() => ({}));
@@ -101,9 +106,11 @@ export function RelayPanelShell({
         {/* Topbar */}
         <div className="flex items-center gap-3 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-2.5">
           <div className="flex items-center gap-1.5">
-            <img
+            <Image
               src="/bitmacro-logo.png"
               alt="BitMacro"
+              width={20}
+              height={20}
               className="h-5 w-5 shrink-0 rounded-full object-contain"
             />
             <span
