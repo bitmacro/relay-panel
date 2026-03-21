@@ -2,7 +2,13 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
-export const maxDuration = 120;
+export const maxDuration = 300;
+
+const BASE_URL = process.env.RELAY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "";
+
+function relayApiUrl(path: string): string {
+  return `${BASE_URL.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+}
 
 async function proxy(
   method: string,
@@ -17,6 +23,13 @@ async function proxy(
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  if (!BASE_URL) {
+    return NextResponse.json(
+      { error: "config_error", detail: "RELAY_API_URL ou NEXT_PUBLIC_API_URL não configurado" },
+      { status: 500 }
+    );
+  }
+
   const opts: RequestInit = {
     method,
     headers: {
@@ -24,14 +37,14 @@ async function proxy(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(110_000),
+    signal: AbortSignal.timeout(280_000),
   };
   if (body && (method === "PATCH" || method === "POST")) {
     opts.headers = { ...opts.headers, "Content-Type": "application/json" } as HeadersInit;
     opts.body = JSON.stringify(body);
   }
 
-  const res = await fetch(apiUrl(`relay/${id}`), opts).catch((err) => {
+  const res = await fetch(relayApiUrl(`relay/${id}`), opts).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(
       JSON.stringify({

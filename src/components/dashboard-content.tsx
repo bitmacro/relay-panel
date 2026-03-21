@@ -1,5 +1,7 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
+
 interface Relay {
   id: string;
   name: string | null;
@@ -33,6 +35,21 @@ interface DashboardContentProps {
   loading: boolean;
 }
 
+const KIND_DESC: Record<number, string> = {
+  0: "Perfil de utilizador",
+  1: "Notas de texto",
+  2: "Recomendação de relay",
+  3: "Listas de contactos",
+  4: "DMs encriptados",
+  5: "Eliminação de eventos",
+  6: "Reposts",
+  7: "Reação",
+  8: "Badge",
+  9: "Generic repost",
+  10: "Unknown",
+  11: "Lista de definições",
+};
+
 function formatUptime(seconds?: number): string {
   if (seconds == null) return "—";
   const d = Math.floor(seconds / 86400);
@@ -48,14 +65,6 @@ function formatNumber(n?: number): string {
   return n.toLocaleString("pt-PT");
 }
 
-const KIND_ACTIVITY_MOCK = [
-  { kind: 1, desc: "Notas de texto", events: 51240, pct: "60.8%" },
-  { kind: 0, desc: "Perfil de utilizador", events: 18920, pct: "22.4%" },
-  { kind: 3, desc: "Listas de contactos", events: 8110, pct: "9.6%" },
-  { kind: 4, desc: "DMs encriptados", events: 3900, pct: "4.6%" },
-  { kind: 6, desc: "Reposts", events: 2142, pct: "2.5%" },
-];
-
 const KIND_STYLES: Record<number, string> = {
   0: "bg-[#2a1a4a] text-[#a78bfa]",
   1: "bg-[#0c2a4a] text-[#60a5fa]",
@@ -64,12 +73,59 @@ const KIND_STYLES: Record<number, string> = {
   6: "bg-[#2a0a0a] text-[#f87171]",
 };
 
+type KindRow = { kind: number; desc: string; events: number; pct: string };
+
 export function DashboardContent({
   stats,
   health,
   selectedRelay,
   loading,
 }: DashboardContentProps) {
+  const [kindActivity, setKindActivity] = useState<KindRow[]>([]);
+  const [kindLoading, setKindLoading] = useState(false);
+
+  const fetchKindActivity = useCallback(async (relayId: string) => {
+    setKindLoading(true);
+    try {
+      const res = await fetch(`/api/relay/${relayId}/events?limit=3000`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(30_000),
+      });
+      const events = (await res.json()) as { kind?: number }[];
+      if (!Array.isArray(events)) {
+        setKindActivity([]);
+        return;
+      }
+      const counts: Record<number, number> = {};
+      for (const e of events) {
+        const k = e.kind ?? 0;
+        counts[k] = (counts[k] ?? 0) + 1;
+      }
+      const total = events.length;
+      const rows: KindRow[] = Object.entries(counts)
+        .map(([k, n]) => ({
+          kind: parseInt(k, 10),
+          desc: KIND_DESC[parseInt(k, 10)] ?? `Kind ${k}`,
+          events: n,
+          pct: total > 0 ? `${((n / total) * 100).toFixed(1)}%` : "0%",
+        }))
+        .sort((a, b) => b.events - a.events);
+      setKindActivity(rows);
+    } catch {
+      setKindActivity([]);
+    } finally {
+      setKindLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (selectedRelay?.id && !loading) {
+      fetchKindActivity(selectedRelay.id);
+    } else {
+      setKindActivity([]);
+    }
+  }, [selectedRelay?.id, loading, fetchKindActivity]);
+
   return (
     <div className="space-y-4">
       {/* Metrics */}
@@ -124,36 +180,52 @@ export function DashboardContent({
               </tr>
             </thead>
             <tbody>
-              {KIND_ACTIVITY_MOCK.map((row) => (
-                <tr
-                  key={row.kind}
-                  className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
-                >
-                  <td className="px-2.5 py-2">
-                    <span
-                      className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                        KIND_STYLES[row.kind] ?? "bg-[#252525] text-[#888]"
-                      }`}
-                    >
-                      {row.kind}
-                    </span>
-                  </td>
-                  <td className="overflow-hidden px-2.5 py-2 text-[#ccc] text-ellipsis whitespace-nowrap">
-                    {row.desc}
-                  </td>
-                  <td className="px-2.5 py-2 text-right text-[#ccc]">
-                    {row.events.toLocaleString("pt-PT")}
-                  </td>
-                  <td className="px-2.5 py-2 text-right text-[#ccc]">
-                    {row.pct}
+              {kindLoading ? (
+                <tr>
+                  <td colSpan={4} className="px-2.5 py-6 text-center text-[12px] text-[#666]">
+                    A carregar…
                   </td>
                 </tr>
-              ))}
+              ) : kindActivity.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-2.5 py-6 text-center text-[12px] text-[#555]">
+                    Sem dados. Seleciona um relay com eventos.
+                  </td>
+                </tr>
+              ) : (
+                kindActivity.map((row) => (
+                  <tr
+                    key={row.kind}
+                    className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
+                  >
+                    <td className="px-2.5 py-2">
+                      <span
+                        className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                          KIND_STYLES[row.kind] ?? "bg-[#252525] text-[#888]"
+                        }`}
+                      >
+                        {row.kind}
+                      </span>
+                    </td>
+                    <td className="overflow-hidden px-2.5 py-2 text-[#ccc] text-ellipsis whitespace-nowrap">
+                      {row.desc}
+                    </td>
+                    <td className="px-2.5 py-2 text-right text-[#ccc]">
+                      {row.events.toLocaleString("pt-PT")}
+                    </td>
+                    <td className="px-2.5 py-2 text-right text-[#ccc]">
+                      {row.pct}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
         <p className="mt-1.5 text-[11px] text-[#555]">
-          Dados de exemplo. A API de breakdown por kind será integrada em breve.
+          {kindActivity.length > 0
+            ? `Baseado em amostra de ${kindActivity.reduce((s, r) => s + r.events, 0).toLocaleString("pt-PT")} eventos.`
+            : "Amostra dos eventos mais recentes do relay."}
         </p>
       </div>
 
