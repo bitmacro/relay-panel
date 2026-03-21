@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 async function proxy(
   method: string,
   id: string,
@@ -22,7 +24,7 @@ async function proxy(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(14_000),
+    signal: AbortSignal.timeout(30_000),
   };
   if (body && (method === "PATCH" || method === "POST")) {
     opts.headers = { ...opts.headers, "Content-Type": "application/json" } as HeadersInit;

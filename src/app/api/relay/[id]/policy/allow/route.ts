@@ -2,10 +2,8 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
-export const maxDuration = 60;
-
-export async function GET(
-  _req: NextRequest,
+export async function POST(
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await auth();
@@ -17,13 +15,16 @@ export async function GET(
   }
 
   const { id } = await params;
-  const res = await fetch(apiUrl(`relay/${id}/config`), {
+  const body = await req.json().catch(() => ({}));
+  const res = await fetch(apiUrl(`relay/${id}/policy/allow`), {
+    method: "POST",
     headers: {
       "X-API-Key": apiKey,
       "X-Provider-User-Id": providerUserId,
+      "Content-Type": "application/json",
     },
-    cache: "no-store",
-    signal: AbortSignal.timeout(30_000),
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(12_000),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(

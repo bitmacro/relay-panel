@@ -2,8 +2,6 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
-export const maxDuration = 60;
-
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -17,13 +15,13 @@ export async function GET(
   }
 
   const { id } = await params;
-  const res = await fetch(apiUrl(`relay/${id}/config`), {
+  const res = await fetch(apiUrl(`relay/${id}/policy`), {
     headers: {
       "X-API-Key": apiKey,
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(10_000),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(

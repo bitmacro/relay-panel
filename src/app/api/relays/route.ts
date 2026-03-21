@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
   const session = await auth();
   const apiKey = process.env.RELAY_API_KEY;
@@ -21,7 +23,7 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify(body),
     cache: "no-store",
-    signal: AbortSignal.timeout(14_000),
+    signal: AbortSignal.timeout(30_000),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(
