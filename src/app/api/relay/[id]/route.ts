@@ -30,6 +30,8 @@ async function proxy(
     );
   }
 
+  const url = method === "PATCH" ? relayApiUrl("relay-update") : relayApiUrl(`relay/${id}`);
+  const reqBody = method === "PATCH" && body ? { id, ...(body as object) } : body;
   const opts: RequestInit = {
     method,
     headers: {
@@ -39,12 +41,12 @@ async function proxy(
     cache: "no-store",
     signal: AbortSignal.timeout(280_000),
   };
-  if (body && (method === "PATCH" || method === "POST")) {
+  if (reqBody && (method === "PATCH" || method === "POST")) {
     opts.headers = { ...opts.headers, "Content-Type": "application/json" } as HeadersInit;
-    opts.body = JSON.stringify(body);
+    opts.body = JSON.stringify(reqBody);
   }
 
-  const res = await fetch(relayApiUrl(`relay/${id}`), opts).catch((err) => {
+  const res = await fetch(url, opts).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(
       JSON.stringify({

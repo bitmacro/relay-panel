@@ -103,10 +103,10 @@ export function RelayPanelShell({
           <img
             src="/bitmacro-logo.png"
             alt="BitMacro"
-            className="h-8 w-8 shrink-0 rounded-full object-contain"
+            className="h-4 w-4 shrink-0 rounded-full object-contain"
           />
           <span
-            className="text-[13px] font-bold tracking-wide text-white"
+            className="text-[16px] font-bold tracking-wide text-white"
             style={{ fontFamily: "var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif" }}
           >
             BitMacro Relay Manager
