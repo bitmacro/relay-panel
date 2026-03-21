@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     },
     body: JSON.stringify(body),
     cache: "no-store",
-    signal: AbortSignal.timeout(10_000),
+    signal: AbortSignal.timeout(14_000),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(

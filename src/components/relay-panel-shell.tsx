@@ -122,7 +122,7 @@ export function RelayPanelShell({
         </div>
 
         {/* Relay chips */}
-        <div className="flex flex-wrap gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-2">
+        <div className="flex flex-wrap gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-3">
           {relays.length === 0 ? (
             <p className="text-xs text-[#666]">
               No relays. Add relay_configs in Supabase with provider_user_id ={" "}
@@ -156,7 +156,7 @@ export function RelayPanelShell({
         </div>
 
         {/* Nav tabs */}
-        <nav className="flex gap-0.5 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4">
+        <nav className="flex gap-0.5 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 pt-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -174,7 +174,7 @@ export function RelayPanelShell({
         </nav>
 
         {/* Tab content */}
-        <div className="p-4">
+        <div className="p-5">
           {relays.length === 0 ? (
             <p className="py-8 text-center text-[12px] text-[#666]">
               Adicione relays em Supabase para começar.
