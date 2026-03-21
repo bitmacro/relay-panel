@@ -188,7 +188,7 @@ export function RelayPanelShell({
                   loading={loading}
                 />
               )}
-              {activeTab === "events" && <EventsTab />}
+              {activeTab === "events" && <EventsTab selectedId={selectedId} />}
               {activeTab === "access" && <AccessTab />}
               {activeTab === "config" && (
                 <ConfigTab
