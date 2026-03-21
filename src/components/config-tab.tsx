@@ -145,8 +145,23 @@ export function ConfigTab({
 
   const handleAdd = async () => {
     const { name, endpoint, token } = addForm;
-    if (!name.trim() || !endpoint.trim() || !token.trim()) {
-      setAddError("Preencha nome, endpoint e token");
+    const n = name.trim();
+    const e = endpoint.trim();
+    const t = token.trim();
+    if (!n || !e || !t) {
+      setAddError("Preencha nome, URL do agente e token");
+      return;
+    }
+    if (n.length > 100) {
+      setAddError("Nome deve ter no máximo 100 caracteres");
+      return;
+    }
+    if (!/^https?:\/\//.test(e) && !e.includes(".")) {
+      setAddError("URL do agente inválida (ex.: https://agent.example.com)");
+      return;
+    }
+    if (t.length < 8) {
+      setAddError("Token deve ter pelo menos 8 caracteres");
       return;
     }
     setAddSaving(true);
@@ -155,7 +170,7 @@ export function ConfigTab({
       const r = await fetch("/api/relays", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), endpoint: endpoint.trim(), token: token.trim() }),
+        body: JSON.stringify({ name: n, endpoint: e.replace(/\/$/, ""), token: t }),
       });
       const json = await r.json();
       if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao criar");
