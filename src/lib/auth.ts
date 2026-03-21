@@ -14,9 +14,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
+    jwt({ token, account }) {
+      // Use GitHub numeric ID (providerAccountId) for API auth; token.sub is internal UUID
+      if (account?.providerAccountId) {
+        token.providerUserId = account.providerAccountId;
+      }
+      return token;
+    },
     session({ session, token }) {
-      if (session.user && token.sub) {
-        (session.user as { id?: string }).id = token.sub;
+      if (session.user) {
+        (session.user as { id?: string }).id =
+          (token.providerUserId as string) ?? token.sub ?? undefined;
       }
       return session;
     },
