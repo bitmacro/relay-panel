@@ -54,11 +54,13 @@ export function EventsTab({ selectedId }: EventsTabProps) {
 
   useEffect(() => {
     if (!selectedId) {
-      setEvents([]);
+      queueMicrotask(() => setEvents([]));
       return;
     }
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      setLoading(true);
+      setError(null);
+    });
     const params = new URLSearchParams();
     params.set("limit", "50");
     if (filterKind) params.set("kinds", filterKind);

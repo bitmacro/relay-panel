@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
