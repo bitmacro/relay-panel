@@ -81,7 +81,13 @@ export function ConfigTab({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const json = await r.json();
+      const text = await r.text();
+      let json: { error?: string; detail?: string };
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(r.status === 504 ? "Tempo limite excedido. A API pode estar em cold start. Tenta novamente." : "Resposta inválida do servidor.");
+      }
       if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao guardar");
       setConfig((prev) => (prev ? { ...prev, ...body, token: body.token || prev.token } : null));
       router.refresh();
@@ -98,7 +104,13 @@ export function ConfigTab({
     setError(null);
     try {
       const r = await fetch(`/api/relay/${selectedId}`, { method: "DELETE" });
-      const json = await r.json();
+      const text = await r.text();
+      let json: { error?: string; detail?: string };
+      try {
+        json = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(r.status === 504 ? "Tempo limite excedido. Tenta novamente." : "Resposta inválida do servidor.");
+      }
       if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao apagar");
       router.refresh();
     } catch (err) {

@@ -30,8 +30,10 @@ interface AccessTabProps {
   selectedId: string | null;
 }
 
+type DisplayEntry = PolicyEntry & { source: "whitelist" | "users" };
+
 export function AccessTab({ selectedId }: AccessTabProps) {
-  const [entries, setEntries] = useState<PolicyEntry[]>([]);
+  const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [addValue, setAddValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,15 +47,29 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     setLoading(true);
     setError(null);
     try {
-      const policyRes = await fetch(`/api/relay/${selectedId}/policy`, {
-        cache: "no-store",
-      });
-      const policyJson = await policyRes.json();
+      const [policyRes, usersRes] = await Promise.all([
+        fetch(`/api/relay/${selectedId}/policy`, { cache: "no-store" }),
+        fetch(`/api/relay/${selectedId}/users?limit=200`, { cache: "no-store" }),
+      ]);
+      const policyJson = await policyRes.json().catch(() => ({}));
+      const usersJson = await usersRes.json().catch(() => ({}));
+      const policyEntries = (policyJson?.entries ?? []) as PolicyEntry[];
+      const users = (usersJson?.users ?? []) as string[];
+      const policyMap = new Map(policyEntries.map((e) => [e.pubkey, e.status]));
+      const merged: DisplayEntry[] = [];
+      for (const e of policyEntries) {
+        merged.push({ ...e, source: "whitelist" });
+      }
+      for (const pubkey of users) {
+        if (!policyMap.has(pubkey)) {
+          merged.push({ pubkey, status: "allowed", source: "users" });
+        }
+      }
       if (!policyRes.ok) {
         setError(policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy");
-        setEntries([]);
+        setEntries(merged);
       } else {
-        setEntries(policyJson?.entries ?? []);
+        setEntries(merged);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro de rede");
@@ -68,7 +84,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   }, [fetchData]);
 
 
-  async function toggleAccess(entry: PolicyEntry) {
+  async function toggleAccess(entry: DisplayEntry) {
     if (!selectedId || actionPending) return;
     const newStatus = entry.status === "allowed" ? "blocked" : "allowed";
     const path = newStatus === "blocked" ? "block" : "allow";
@@ -87,13 +103,17 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       setEntries((prev) =>
         prev.some((e) => e.pubkey === entry.pubkey)
           ? prev.map((e) => (e.pubkey === entry.pubkey ? { ...e, status: newStatus } : e))
-          : [...prev, { pubkey: entry.pubkey, status: newStatus }]
+          : [...prev, { ...entry, status: newStatus, source: "whitelist" as const }]
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro de rede");
     } finally {
       setActionPending(null);
     }
+  }
+
+  function canToggle(entry: DisplayEntry) {
+    return entry.source === "whitelist";
   }
 
   async function handleAdd() {
@@ -117,9 +137,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       }
       setEntries((prev) => {
         if (prev.some((e) => e.pubkey === hex)) {
-          return prev.map((e) => (e.pubkey === hex ? { ...e, status: "allowed" } : e));
+          return prev.map((e) => (e.pubkey === hex ? { ...e, status: "allowed" as const, source: "whitelist" as const } : e));
         }
-        return [...prev, { pubkey: hex, status: "allowed" }];
+        return [...prev, { pubkey: hex, status: "allowed" as const, source: "whitelist" as const }];
       });
       setAddValue("");
     } catch (err) {
@@ -151,6 +171,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         <div className="flex items-center gap-2.5 border-b border-[#222] bg-[#1f1f1f] px-3 py-2 text-[11px] font-medium text-[#555]">
           <span className="min-w-[120px]">Pubkey</span>
           <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap" />
+          <span className="min-w-[60px]">Origem</span>
           <span className="min-w-[80px]">Estado</span>
           <span className="min-w-[50px] text-center">Acesso</span>
         </div>
@@ -160,12 +181,12 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           </div>
         ) : entries.length === 0 ? (
           <div className="px-3 py-6 text-center text-[12px] text-[#555]">
-            Nenhuma entrada no whitelist. Adicione uma pubkey.
+            Nenhuma entrada. Whitelist vazio e sem utilizadores com eventos.
           </div>
         ) : (
           entries.map((e) => (
             <div
-              key={e.pubkey}
+              key={`${e.pubkey}-${e.source}`}
               className="flex items-center gap-2.5 border-b border-[#222] px-3 py-2.5 text-[12px] last:border-b-0"
             >
               <span className="min-w-[120px] font-mono text-[11px] text-[#888]">
@@ -173,6 +194,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               </span>
               <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[11px] text-[#555]">
                 {e.pubkey}
+              </span>
+              <span className="min-w-[60px] text-[10px] text-[#666]">
+                {e.source === "whitelist" ? "whitelist" : "eventos"}
               </span>
               <span
                 className={`min-w-[80px] rounded-full px-1.5 py-0.5 text-[10px] font-medium ${
@@ -184,6 +208,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 {e.status === "allowed" ? "permitido" : "bloqueado"}
               </span>
               <div className="ml-auto">
+                {canToggle(e) ? (
                 <button
                   type="button"
                   onClick={() => toggleAccess(e)}
@@ -200,6 +225,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                     }`}
                   />
                 </button>
+                ) : (
+                  <span className="text-[10px] text-[#555]">—</span>
+                )}
               </div>
             </div>
           ))

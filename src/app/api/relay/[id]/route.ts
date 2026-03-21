@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 async function proxy(
   method: string,
@@ -24,7 +24,7 @@ async function proxy(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(60_000),
+    signal: AbortSignal.timeout(110_000),
   };
   if (body && (method === "PATCH" || method === "POST")) {
     opts.headers = { ...opts.headers, "Content-Type": "application/json" } as HeadersInit;
@@ -41,8 +41,17 @@ async function proxy(
       { status: 504, headers: { "Content-Type": "application/json" } }
     ) as Response;
   });
-  const json = await res.json();
-  return NextResponse.json(json, { status: res.status });
+  const text = await res.text();
+  let json: unknown;
+  try {
+    json = text ? JSON.parse(text) : {};
+  } catch {
+    json = {
+      error: "invalid_response",
+      detail: res.status === 504 ? "O gateway excedeu o tempo limite. Tenta novamente." : "Resposta inválida do servidor.",
+    };
+  }
+  return NextResponse.json(json, { status: res.ok ? res.status : res.status >= 400 ? res.status : 500 });
 }
 
 export async function PATCH(
