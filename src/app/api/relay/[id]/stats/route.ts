@@ -21,6 +21,16 @@ export async function GET(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
+    signal: AbortSignal.timeout(12_000),
+  }).catch((err) => {
+    const isTimeout = err instanceof Error && err.name === "AbortError";
+    return new Response(
+      JSON.stringify({
+        error: isTimeout ? "gateway_timeout" : "api_unavailable",
+        detail: err instanceof Error ? err.message : String(err),
+      }),
+      { status: 504, headers: { "Content-Type": "application/json" } }
+    ) as Response;
   });
   const json = await res.json();
   return NextResponse.json(json, { status: res.status });

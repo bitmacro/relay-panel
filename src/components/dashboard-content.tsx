@@ -15,12 +15,18 @@ interface RelayStats {
   uptime?: number;
   version?: string;
   error?: string;
+  detail?: string;
+  _status?: number;
+  _ok?: boolean;
 }
 
 interface RelayHealth {
   status?: string;
   timestamp?: string;
   error?: string;
+  detail?: string;
+  _status?: number;
+  _ok?: boolean;
 }
 
 interface DashboardContentProps {
@@ -66,17 +72,23 @@ export function DashboardContent({
       return;
     }
     setLoading(true);
+    const fetchWithStatus = (path: string) =>
+      fetch(path).then(async (r) => {
+        const json = await r.json().catch(() => ({}));
+        return { ...json, _status: r.status, _ok: r.ok };
+      });
     Promise.all([
-      fetch(`/api/relay/${selectedId}/stats`).then((r) => r.json()),
-      fetch(`/api/relay/${selectedId}/health`).then((r) => r.json()),
+      fetchWithStatus(`/api/relay/${selectedId}/stats`),
+      fetchWithStatus(`/api/relay/${selectedId}/health`),
     ])
       .then(([s, h]) => {
         setStats(s);
         setHealth(h);
       })
-      .catch(() => {
-        setStats({ error: "fetch_error" });
-        setHealth({ error: "fetch_error" });
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : "network_error";
+        setStats({ error: "fetch_error", detail: msg });
+        setHealth({ error: "fetch_error", detail: msg });
       })
       .finally(() => setLoading(false));
   }, [selectedId]);
@@ -183,8 +195,15 @@ export function DashboardContent({
                         ? "text-[#f87171]"
                         : "text-[#ccc]"
                     }
+                    title={health?.detail ?? health?.error}
                   >
-                    {loading ? "…" : health?.status === "ok" ? "online" : health?.error ?? "—"}
+                    {loading
+                      ? "…"
+                      : health?.status === "ok"
+                      ? "online"
+                      : health?._status
+                      ? `${health.error ?? "erro"} (${health._status}${health.detail ? ` — ${health.detail}` : ""})`
+                      : health?.error ?? "—"}
                   </strong>
                 </div>
                 <div>
