@@ -24,7 +24,7 @@ async function proxy(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(60_000),
   };
   if (body && (method === "PATCH" || method === "POST")) {
     opts.headers = { ...opts.headers, "Content-Type": "application/json" } as HeadersInit;

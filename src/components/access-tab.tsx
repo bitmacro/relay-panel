@@ -32,7 +32,6 @@ interface AccessTabProps {
 
 export function AccessTab({ selectedId }: AccessTabProps) {
   const [entries, setEntries] = useState<PolicyEntry[]>([]);
-  const [users, setUsers] = useState<string[]>([]);
   const [addValue, setAddValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,33 +40,24 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   const fetchData = useCallback(async () => {
     if (!selectedId) {
       setEntries([]);
-      setUsers([]);
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const [policyRes, usersRes] = await Promise.all([
-        fetch(`/api/relay/${selectedId}/policy`, { cache: "no-store" }),
-        fetch(`/api/relay/${selectedId}/users?limit=500`, { cache: "no-store" }),
-      ]);
+      const policyRes = await fetch(`/api/relay/${selectedId}/policy`, {
+        cache: "no-store",
+      });
       const policyJson = await policyRes.json();
-      const usersJson = await usersRes.json();
       if (!policyRes.ok) {
         setError(policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy");
         setEntries([]);
       } else {
         setEntries(policyJson?.entries ?? []);
       }
-      if (!usersRes.ok) {
-        setUsers([]);
-      } else {
-        setUsers(usersJson?.users ?? []);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro de rede");
       setEntries([]);
-      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -77,16 +67,6 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     fetchData();
   }, [fetchData]);
 
-  const mergedEntries: { pubkey: string; status: "allowed" | "blocked"; inUsers: boolean }[] = [];
-  const policyMap = new Map(entries.map((e) => [e.pubkey, e.status]));
-  for (const e of entries) {
-    mergedEntries.push({ ...e, inUsers: users.includes(e.pubkey) });
-  }
-  for (const pubkey of users) {
-    if (!policyMap.has(pubkey)) {
-      mergedEntries.push({ pubkey, status: "allowed", inUsers: true });
-    }
-  }
 
   async function toggleAccess(entry: PolicyEntry) {
     if (!selectedId || actionPending) return;
@@ -178,12 +158,12 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           <div className="px-3 py-6 text-center text-[12px] text-[#666]">
             A carregar…
           </div>
-        ) : mergedEntries.length === 0 ? (
+        ) : entries.length === 0 ? (
           <div className="px-3 py-6 text-center text-[12px] text-[#555]">
-            Nenhuma entrada. Adicione uma pubkey ou o relay não tem whitelist.
+            Nenhuma entrada no whitelist. Adicione uma pubkey.
           </div>
         ) : (
-          mergedEntries.map((e) => (
+          entries.map((e) => (
             <div
               key={e.pubkey}
               className="flex items-center gap-2.5 border-b border-[#222] px-3 py-2.5 text-[12px] last:border-b-0"
