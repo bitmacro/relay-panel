@@ -31,6 +31,7 @@ export default async function HomePage() {
       <Dashboard
         user={session.user ?? null}
         relays={relays.relays ?? []}
+        providerUserId={providerUserId ?? null}
       />
     </div>
   );
