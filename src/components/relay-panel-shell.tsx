@@ -74,7 +74,7 @@ export function RelayPanelShell({
     const ids = new Set(relays.map((r) => r.id));
     const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
     const preferred = stored && ids.has(stored) ? stored : relays[0]?.id ?? null;
-    setSelectedId(preferred);
+    queueMicrotask(() => setSelectedId(preferred));
   }, [relays]);
 
   useEffect(() => {
