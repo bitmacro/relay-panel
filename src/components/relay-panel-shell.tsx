@@ -14,6 +14,7 @@ interface Relay {
   id: string;
   name: string | null;
   endpoint: string | null;
+  color?: string | null;
 }
 
 interface RelayStats {
@@ -127,8 +128,6 @@ export function RelayPanelShell({
               : "relay-panel.bitmacro.io"}
           </span>
           <div className="ml-auto flex items-center gap-3">
-            <span className="h-[7px] w-[7px] rounded-full bg-[#22c55e] shadow-[0_0_6px_rgba(34,197,94,0.5)]" />
-            <span className="text-[11px] text-[#666]">online</span>
             <button
               type="button"
               onClick={() => signOut({ callbackUrl: "/auth/signin" })}

@@ -6,6 +6,7 @@ interface Relay {
   id: string;
   name: string | null;
   endpoint: string | null;
+  color?: string | null;
 }
 
 interface RelayStats {
@@ -26,6 +27,27 @@ interface RelayHealth {
   detail?: string;
   _status?: number;
   _ok?: boolean;
+}
+
+function formatHealthError(health: RelayHealth | null): string {
+  if (!health) return "—";
+  const status = health._status;
+  const err = health.error ?? health.detail;
+  const suffix = status != null ? ` (${status})` : "";
+  if (err === "agent_unavailable")
+    return `Agente indisponível${suffix}. O relay-agent não responde; verifica se está a correr e se o proxy encaminha corretamente.`;
+  if (err === "agent_timeout")
+    return `Agente não respondeu a tempo${suffix}. O relay-agent demorou demasiado.`;
+  if (err === "gateway_timeout" || err === "supabase_timeout")
+    return `Tempo limite excedido${suffix}. Tenta novamente.`;
+  if (err === "relay not found")
+    return `Relay não encontrado${suffix}.`;
+  if (status === 502)
+    return `Proxy 502 Bad Gateway${suffix}. O relay-agent pode estar offline ou o proxy não encaminha corretamente.`;
+  if (status === 503)
+    return `Serviço indisponível (503)${suffix}. O relay-agent pode estar offline ou em estado unhealthy.`;
+  if (err) return `${err}${suffix}`;
+  return `Erro${suffix}`;
 }
 
 interface DashboardContentProps {
@@ -263,9 +285,7 @@ export function DashboardContent({
                 ? "…"
                 : health?.status === "ok"
                 ? "online"
-                : health?._status
-                ? `${health.error ?? "erro"} (${health._status}${health.detail ? ` — ${health.detail}` : ""})`
-                : health?.error ?? "—"}
+                : formatHealthError(health)}
             </strong>
           </div>
           <div>

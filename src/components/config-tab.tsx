@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { RelayColorPicker } from "./relay-color-picker";
 
 interface ConfigTabProps {
   selectedId: string | null;
@@ -37,6 +38,7 @@ export function ConfigTab({
     endpoint: string;
     token: string;
     agent_relay_id?: string;
+    color?: string;
   } | null>(null);
   const [configLoading, setConfigLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -137,6 +139,7 @@ export function ConfigTab({
     if (config.endpoint) body.endpoint = config.endpoint;
     if (config.token.trim()) body.token = config.token.trim();
     body.agent_relay_id = config.agent_relay_id?.trim() || null;
+    body.color = config.color?.trim() || null;
     if (Object.keys(body).length === 0) {
       setSaving(false);
       return;
@@ -162,6 +165,7 @@ export function ConfigTab({
               ...body,
               token: (body.token as string) || prev.token,
               agent_relay_id: body.agent_relay_id ?? prev.agent_relay_id ?? "",
+              color: body.color ?? prev.color ?? "",
             }
           : null
       );
@@ -247,6 +251,10 @@ export function ConfigTab({
                   className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
                 />
               </div>
+              <RelayColorPicker
+                value={config.color ?? ""}
+                onChange={(hex) => setConfig((p) => (p ? { ...p, color: hex } : null))}
+              />
               {error && <p className="text-[12px] text-[#f87171]">{error}</p>}
               <div className="flex gap-2">
                 <button

@@ -10,7 +10,7 @@ export default async function HomePage() {
   const apiKey = process.env.RELAY_API_KEY;
   const providerUserId = (session.user as { id?: string })?.id;
 
-  let relays = { relays: [] as { id: string; name: string | null; endpoint: string | null }[] };
+  let relays = { relays: [] as { id: string; name: string | null; endpoint: string | null; color?: string | null }[] };
 
   if (apiKey && providerUserId) {
     const r = await fetch(apiUrl("relays"), {
