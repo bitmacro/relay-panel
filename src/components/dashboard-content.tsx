@@ -100,10 +100,12 @@ type KindRow = { kind: number; desc: string; events: number; pct: string };
 
 function formatEventsError(err: unknown): string {
   const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
+  if (msg.includes("relay unavailable"))
+    return "Relay indisponível (LMDB). O strfry pode estar bloqueado ou maxreaders é insuficiente. Verifica strfry.conf no servidor e aumenta maxreaders.";
   if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
-    return "O agente não respondeu ao pedido de eventos. Pode estar ocupado ou o pedido demorou demasiado. Tenta clicar em «Atualizar».";
+    return "O agente não respondeu. Pode estar ocupado ou o pedido demorou demasiado. Tenta atualizar.";
   if (msg.includes("timeout") || msg.includes("agent_timeout"))
-    return "O pedido demorou demasiado. O relay pode ter muitos eventos. Tenta «Atualizar».";
+    return "O pedido demorou demasiado. O relay pode ter muitos eventos. Tenta atualizar.";
   if (msg.includes("502") || msg.includes("503"))
     return "Proxy ou agente indisponível. Verifica a ligação ao relay-agent.";
   return msg || "Erro ao carregar eventos.";

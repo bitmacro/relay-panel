@@ -181,10 +181,13 @@ export function RelayPanelShell({
           <button
             type="button"
             onClick={handleRefresh}
-            className="ml-auto rounded border border-[#333] px-2.5 py-1 text-[11px] text-[#888] transition-colors hover:border-[#444] hover:bg-[#252525] hover:text-[#ccc]"
+            className="ml-auto flex h-8 w-8 items-center justify-center rounded border border-[#333] text-[#888] transition-colors hover:border-[#444] hover:bg-[#252525] hover:text-[#ccc]"
             title="Atualizar dados do relay"
+            aria-label="Atualizar"
           >
-            Atualizar
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
           </button>
         </nav>
 
