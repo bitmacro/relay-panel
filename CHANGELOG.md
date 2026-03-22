@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-03-22
+
+### Added
+
+- Relay selector: choose which relay to view (multi-relay support)
+- Create relay form in content area (styled like Config tab)
+- Agent Relay ID field on relay creation
+- Relay color picker and persistence of selected relay (localStorage)
+
+### Changed
+
+- Create form moved from top bar into main content component
+- Compatible with relay-agent v0.2 and relay-api multi-relay endpoints
+
 ## [0.1.0] - 2026-03-21
 
 ### Added
