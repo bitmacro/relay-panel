@@ -9,6 +9,7 @@ import { DashboardContent } from "./dashboard-content";
 import { EventsTab } from "./events-tab";
 import { AccessTab } from "./access-tab";
 import { ConfigTab } from "./config-tab";
+import { CreateRelayTab } from "./create-relay-tab";
 import { RelaySelectorRow } from "./relay-selector-row";
 
 interface Relay {
@@ -67,6 +68,7 @@ export function RelayPanelShell({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showCreateForm, setShowCreateForm] = useState(false);
 
   useEffect(() => {
     const ids = new Set(relays.map((r) => r.id));
@@ -158,7 +160,11 @@ export function RelayPanelShell({
         <RelaySelectorRow
           relays={relays}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={(id) => {
+            setSelectedId(id);
+            if (id) setShowCreateForm(false);
+          }}
+          onStartCreate={() => setShowCreateForm(true)}
           providerUserId={providerUserId}
         />
 
@@ -193,10 +199,21 @@ export function RelayPanelShell({
 
         {/* Tab content */}
         <div className="p-5">
-          {relays.length === 0 ? (
-            <p className="py-8 text-center text-[12px] text-[#666]">
-              Adicione relays em Supabase para começar.
-            </p>
+          {showCreateForm ? (
+            <CreateRelayTab onCancel={() => setShowCreateForm(false)} />
+          ) : relays.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="mb-4 text-[12px] text-[#666]">
+                Adicione o seu primeiro relay.
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowCreateForm(true)}
+                className="rounded border border-[#5a3a0a] px-4 py-2 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
+              >
+                + Novo relay
+              </button>
+            </div>
           ) : (
             <>
               {activeTab === "dashboard" && (
