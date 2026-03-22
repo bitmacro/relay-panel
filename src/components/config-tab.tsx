@@ -31,7 +31,13 @@ export function ConfigTab({
   loading,
 }: ConfigTabProps) {
   const router = useRouter();
-  const [config, setConfig] = useState<{ id: string; name: string; endpoint: string; token: string } | null>(null);
+  const [config, setConfig] = useState<{
+    id: string;
+    name: string;
+    endpoint: string;
+    token: string;
+    agent_relay_id?: string;
+  } | null>(null);
   const [configLoading, setConfigLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -90,10 +96,11 @@ export function ConfigTab({
     if (!selectedId || !config) return;
     setSaving(true);
     setError(null);
-    const body: Record<string, string> = {};
+    const body: Record<string, string | null> = {};
     if (config.name) body.name = config.name;
     if (config.endpoint) body.endpoint = config.endpoint;
     if (config.token.trim()) body.token = config.token.trim();
+    body.agent_relay_id = config.agent_relay_id?.trim() || null;
     if (Object.keys(body).length === 0) {
       setSaving(false);
       return;
@@ -112,7 +119,16 @@ export function ConfigTab({
         throw new Error(r.status === 504 ? "Tempo limite excedido. A API pode estar em cold start. Tenta novamente." : "Resposta inválida do servidor.");
       }
       if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao guardar");
-      setConfig((prev) => (prev ? { ...prev, ...body, token: body.token || prev.token } : null));
+      setConfig((prev) =>
+        prev
+          ? {
+              ...prev,
+              ...body,
+              token: (body.token as string) || prev.token,
+              agent_relay_id: body.agent_relay_id ?? prev.agent_relay_id ?? "",
+            }
+          : null
+      );
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao guardar");
@@ -281,6 +297,16 @@ export function ConfigTab({
                   value={config.name}
                   onChange={(e) => setConfig((p) => (p ? { ...p, name: e.target.value } : null))}
                   className="max-w-[300px] rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc]"
+                />
+              </div>
+              <div>
+                <div className="mb-1 text-[11px] text-[#555]">Agent Relay ID</div>
+                <input
+                  type="text"
+                  value={config.agent_relay_id ?? ""}
+                  onChange={(e) => setConfig((p) => (p ? { ...p, agent_relay_id: e.target.value } : null))}
+                  placeholder="ex: public (deixar vazio para agente dedicado)"
+                  className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
                 />
               </div>
               {error && <p className="text-[12px] text-[#f87171]">{error}</p>}
