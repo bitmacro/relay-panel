@@ -4,7 +4,7 @@
   "description": "Web UI for managing Nostr relays via relay-api",
   "private": true,
   "license": "BSL-1.1",
-  "author": "BitMacro <hello@bitmacro.io>",
+  "author": "BitMacro <contact@bitmacro.io>",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/bitmacro/relay-panel.git"

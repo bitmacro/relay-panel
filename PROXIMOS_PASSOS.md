@@ -30,7 +30,7 @@ Lista atualizada considerando o que já foi implementado.
 - [x] GET /policy com filtro de comentários e pubkeys inválidas
 
 ### CORS / Domínios
-- [x] Relay-agent: CORS para relay-panel.bitmacro.cloud, relay-panel.bitmacro.pro
+- [x] Relay-agent: CORS para relay-panel.bitmacro.io
 
 ---
 

@@ -35,7 +35,7 @@ npm run dev
 | Variable | Description |
 |----------|-------------|
 | `NEXTAUTH_SECRET` | Secret for JWT signing (min 32 chars) |
-| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.cloud`) |
+| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`) |
 
 ---
 
