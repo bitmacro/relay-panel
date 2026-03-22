@@ -8,6 +8,7 @@ import { DashboardContent } from "./dashboard-content";
 import { EventsTab } from "./events-tab";
 import { AccessTab } from "./access-tab";
 import { ConfigTab } from "./config-tab";
+import { RelaySelectorRow } from "./relay-selector-row";
 
 interface Relay {
   id: string;
@@ -138,39 +139,13 @@ export function RelayPanelShell({
           </div>
         </div>
 
-        {/* Relay chips */}
-        <div className="flex flex-wrap gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 py-3">
-          {relays.length === 0 ? (
-            <p className="text-xs text-[#666]">
-              No relays. Add relay_configs in Supabase with provider_user_id ={" "}
-              {providerUserId && (
-                <code className="rounded bg-[#252525] px-1.5 py-0.5 font-mono">
-                  {providerUserId}
-                </code>
-              )}
-            </p>
-          ) : (
-            relays.map((r, i) => (
-              <button
-                key={r.id}
-                type="button"
-                onClick={() => setSelectedId(r.id)}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] transition-colors ${
-                  selectedId === r.id
-                    ? "border-[#5a3a0a] bg-[#1e1a0e] text-[#f7931a]"
-                    : "border-[#333] bg-[#1f1f1f] text-[#888] hover:border-[#444] hover:text-[#ccc]"
-                }`}
-              >
-                <span
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    i === 0 ? "bg-[#22c55e]" : i === 1 ? "bg-[#3b82f6]" : "bg-[#f7931a]"
-                  }`}
-                />
-                {r.name ?? r.endpoint ?? r.id.slice(0, 8)}
-              </button>
-            ))
-          )}
-        </div>
+        {/* Relay selector + Add relay (global) */}
+        <RelaySelectorRow
+          relays={relays}
+          selectedId={selectedId}
+          onSelect={setSelectedId}
+          providerUserId={providerUserId}
+        />
 
         {/* Nav tabs */}
         <nav className="flex gap-0.5 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 pt-1">

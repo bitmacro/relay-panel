@@ -42,12 +42,14 @@ export function ConfigTab({
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [addForm, setAddForm] = useState({ name: "", endpoint: "", token: "" });
-  const [addSaving, setAddSaving] = useState(false);
-  const [addError, setAddError] = useState<string | null>(null);
   const [probing, setProbing] = useState(false);
-  const [probeResult, setProbeResult] = useState<{ ok?: boolean; error?: string; elapsed?: number; detail?: string } | null>(null);
+  const [probeResult, setProbeResult] = useState<{
+    ok?: boolean;
+    error?: string;
+    status?: number;
+    elapsed?: number;
+    detail?: string;
+  } | null>(null);
 
   useEffect(() => {
     if (!selectedId) {
@@ -82,15 +84,49 @@ export function ConfigTab({
       setProbeResult({
         ok: json.ok,
         error: json.error,
+        status: json.status,
         elapsed: json.elapsed,
         detail: json.detail,
       });
     } catch (err) {
-      setProbeResult({ ok: false, error: "network_error", detail: err instanceof Error ? err.message : String(err) });
+      setProbeResult({
+        ok: false,
+        error: "network_error",
+        detail: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setProbing(false);
     }
   };
+
+  function getProbeMessage(res: NonNullable<typeof probeResult>): string {
+    if (res.ok) {
+      return `Conexão OK${res.elapsed != null ? ` (${res.elapsed}ms)` : ""}`;
+    }
+    const elapsed = res.elapsed != null ? ` (${res.elapsed}ms)` : "";
+    switch (res.error) {
+      case "handler_timeout":
+        return `O proxy da API demorou demasiado a responder${elapsed}. Verifica a latência até ao relay-api.`;
+      case "relay_not_found":
+        return `Relay não encontrado na base de dados${elapsed}. Confirma que o relay está configurado em relay_configs.`;
+      case "network_error":
+        return `Erro de rede${elapsed}: ${res.detail ?? "sem detalhes"}.`;
+      default:
+        break;
+    }
+    switch (res.status) {
+      case 502:
+        return `Proxy retornou 502 Bad Gateway${elapsed}. O relay-agent pode estar offline ou o proxy reverso (nginx/openresty) não está a encaminhar corretamente para o agente. Verifica: 1) docker ps | grep relay-agent 2) curl http://localhost:7810/health 3) configuração do upstream no proxy.`;
+      case 503:
+        return `Serviço indisponível (503)${elapsed}. O relay-agent pode estar a arrancar, em unhealthy ou o proxy não consegue ligar ao upstream.`;
+      case 401:
+        return `Token inválido (401)${elapsed}. O Bearer token nas Config não corresponde ao configurado no RELAY_INSTANCES do agente.`;
+      case 404:
+        return `Agent Relay ID inválido (404)${elapsed}. O valor "${res.detail ?? "?"}" não existe em RELAY_INSTANCES. Confirma o id no agente.`;
+      default:
+        return res.error ?? res.detail ?? `Erro${elapsed}`;
+    }
+  }
 
   const handleSave = async () => {
     if (!selectedId || !config) return;
@@ -159,106 +195,8 @@ export function ConfigTab({
     }
   };
 
-  const handleAdd = async () => {
-    const { name, endpoint, token } = addForm;
-    const n = name.trim();
-    const e = endpoint.trim();
-    const t = token.trim();
-    if (!n || !e || !t) {
-      setAddError("Preencha nome, URL do agente e token");
-      return;
-    }
-    if (n.length > 100) {
-      setAddError("Nome deve ter no máximo 100 caracteres");
-      return;
-    }
-    if (!/^https?:\/\//.test(e) && !e.includes(".")) {
-      setAddError("URL do agente inválida (ex.: https://agent.example.com)");
-      return;
-    }
-    if (t.length < 8) {
-      setAddError("Token deve ter pelo menos 8 caracteres");
-      return;
-    }
-    setAddSaving(true);
-    setAddError(null);
-    try {
-      const r = await fetch("/api/relays", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: n, endpoint: e.replace(/\/$/, ""), token: t }),
-      });
-      const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao criar");
-      setAddForm({ name: "", endpoint: "", token: "" });
-      setShowAddForm(false);
-      router.refresh();
-    } catch (err) {
-      setAddError(err instanceof Error ? err.message : "Erro ao criar");
-    } finally {
-      setAddSaving(false);
-    }
-  };
-
   return (
     <div className="space-y-3">
-      {/* Add relay */}
-      <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <span className="text-[13px] font-medium text-[#ddd]">Adicionar relay</span>
-          <button
-            type="button"
-            onClick={() => setShowAddForm((v) => !v)}
-            className="rounded border border-[#5a3a0a] px-3 py-1 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
-          >
-            {showAddForm ? "Cancelar" : "+ Novo relay"}
-          </button>
-        </div>
-        {showAddForm && (
-          <div className="space-y-2">
-            <div>
-              <div className="mb-1 text-[11px] text-[#555]">Nome</div>
-              <input
-                type="text"
-                value={addForm.name}
-                onChange={(e) => setAddForm((p) => ({ ...p, name: e.target.value }))}
-                placeholder="relay.bitmacro.io"
-                className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
-              />
-            </div>
-            <div>
-              <div className="mb-1 text-[11px] text-[#555]">URL do agente</div>
-              <input
-                type="text"
-                value={addForm.endpoint}
-                onChange={(e) => setAddForm((p) => ({ ...p, endpoint: e.target.value }))}
-                placeholder="https://agent-private.bitmacro.io"
-                className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
-              />
-            </div>
-            <div>
-              <div className="mb-1 text-[11px] text-[#555]">Bearer token</div>
-              <input
-                type="password"
-                value={addForm.token}
-                onChange={(e) => setAddForm((p) => ({ ...p, token: e.target.value }))}
-                placeholder="Token do relay-agent"
-                className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
-              />
-            </div>
-            {addError && <p className="text-[12px] text-[#f87171]">{addError}</p>}
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={addSaving}
-              className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e] disabled:opacity-50"
-            >
-              {addSaving ? "A criar…" : "Criar"}
-            </button>
-          </div>
-        )}
-      </div>
-
       {/* Edit relay */}
       {selectedId && (
         <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
@@ -385,16 +323,9 @@ export function ConfigTab({
         {probeResult && (
           <div className="mt-3 rounded border border-[#2a2a2a] bg-[#141414] px-2.5 py-1.5 text-[11px]">
             {probeResult.ok ? (
-              <span className="text-[#22c55e]">
-                Conexão OK
-                {probeResult.elapsed != null ? ` (${probeResult.elapsed}ms)` : ""}
-              </span>
+              <span className="text-[#22c55e]">{getProbeMessage(probeResult)}</span>
             ) : (
-              <span className="text-[#f87171]">
-                {probeResult.error ?? "Erro"}
-                {probeResult.detail ? `: ${probeResult.detail}` : ""}
-                {probeResult.elapsed != null ? ` (${probeResult.elapsed}ms)` : ""}
-              </span>
+              <span className="text-[#f87171]">{getProbeMessage(probeResult)}</span>
             )}
           </div>
         )}
