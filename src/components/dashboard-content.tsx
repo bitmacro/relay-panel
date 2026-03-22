@@ -55,6 +55,7 @@ interface DashboardContentProps {
   health: RelayHealth | null;
   selectedRelay: Relay | null;
   loading: boolean;
+  refreshTrigger?: number;
 }
 
 const KIND_DESC: Record<number, string> = {
@@ -97,30 +98,47 @@ const KIND_STYLES: Record<number, string> = {
 
 type KindRow = { kind: number; desc: string; events: number; pct: string };
 
+function formatEventsError(err: unknown): string {
+  const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
+  if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
+    return "O agente não respondeu ao pedido de eventos. Pode estar ocupado ou o pedido demorou demasiado. Tenta clicar em «Atualizar».";
+  if (msg.includes("timeout") || msg.includes("agent_timeout"))
+    return "O pedido demorou demasiado. O relay pode ter muitos eventos. Tenta «Atualizar».";
+  if (msg.includes("502") || msg.includes("503"))
+    return "Proxy ou agente indisponível. Verifica a ligação ao relay-agent.";
+  return msg || "Erro ao carregar eventos.";
+}
+
 export function DashboardContent({
   stats,
   health,
   selectedRelay,
   loading,
+  refreshTrigger,
 }: DashboardContentProps) {
   const [kindActivity, setKindActivity] = useState<KindRow[]>([]);
   const [kindLoading, setKindLoading] = useState(false);
+  const [kindError, setKindError] = useState<string | null>(null);
 
   const fetchKindActivity = useCallback(async (relayId: string) => {
     setKindLoading(true);
+    setKindError(null);
     try {
-      const res = await fetch(`/api/relay/${relayId}/events?limit=3000`, {
+      const res = await fetch(`/api/relay/${relayId}/events?limit=1000`, {
         cache: "no-store",
         signal: AbortSignal.timeout(30_000),
       });
-      const events = (await res.json()) as { kind?: number }[];
-      if (!Array.isArray(events)) {
-        setKindActivity([]);
-        return;
+      const json = (await res.json()) as { kind?: number }[] | { error?: string; detail?: string };
+      if (!res.ok) {
+        const err = json && typeof json === "object" && !Array.isArray(json)
+          ? (json as { error?: string; detail?: string }).error ?? (json as { detail?: string }).detail
+          : "agent unavailable";
+        throw new Error(err);
       }
+      const events = Array.isArray(json) ? json : [];
       const counts: Record<number, number> = {};
       for (const e of events) {
-        const k = e.kind ?? 0;
+        const k = (e as { kind?: number }).kind ?? 0;
         counts[k] = (counts[k] ?? 0) + 1;
       }
       const total = events.length;
@@ -133,8 +151,9 @@ export function DashboardContent({
         }))
         .sort((a, b) => b.events - a.events);
       setKindActivity(rows);
-    } catch {
+    } catch (err) {
       setKindActivity([]);
+      setKindError(formatEventsError(err));
     } finally {
       setKindLoading(false);
     }
@@ -145,8 +164,9 @@ export function DashboardContent({
       fetchKindActivity(selectedRelay.id);
     } else {
       setKindActivity([]);
+      setKindError(null);
     }
-  }, [selectedRelay?.id, loading, fetchKindActivity]);
+  }, [selectedRelay?.id, loading, refreshTrigger, fetchKindActivity]);
 
   return (
     <div className="space-y-4">
@@ -206,6 +226,12 @@ export function DashboardContent({
                 <tr>
                   <td colSpan={4} className="px-2.5 py-6 text-center text-[12px] text-[#666]">
                     A carregar…
+                  </td>
+                </tr>
+              ) : kindError ? (
+                <tr>
+                  <td colSpan={4} className="px-2.5 py-6 text-center">
+                    <p className="text-[12px] text-[#f87171]">{kindError}</p>
                   </td>
                 </tr>
               ) : kindActivity.length === 0 ? (

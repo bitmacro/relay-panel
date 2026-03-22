@@ -40,11 +40,23 @@ function truncateContent(content: string, max = 60): string {
   return `${content.slice(0, max)}…`;
 }
 
-interface EventsTabProps {
-  selectedId: string | null;
+function formatEventsError(err: unknown): string {
+  const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
+  if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
+    return "O agente não respondeu. Pode estar ocupado ou o pedido demorou demasiado. Tenta «Atualizar».";
+  if (msg.includes("timeout") || msg.includes("agent_timeout"))
+    return "O pedido demorou demasiado. Tenta «Atualizar».";
+  if (msg.includes("502") || msg.includes("503"))
+    return "Proxy ou agente indisponível. Verifica a ligação ao relay-agent.";
+  return msg || "Erro ao carregar eventos.";
 }
 
-export function EventsTab({ selectedId }: EventsTabProps) {
+interface EventsTabProps {
+  selectedId: string | null;
+  refreshTrigger?: number;
+}
+
+export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const [events, setEvents] = useState<NostrEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,17 +90,20 @@ export function EventsTab({ selectedId }: EventsTabProps) {
     fetch(`/api/relay/${selectedId}/events?${params.toString()}`)
       .then(async (r) => {
         const json = await r.json();
-        if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao carregar");
+        if (!r.ok) {
+          const err = json?.error ?? json?.detail ?? "agent unavailable";
+          throw new Error(err);
+        }
         if (json?.error && !Array.isArray(json)) throw new Error(json.error);
         return Array.isArray(json) ? json : [];
       })
       .then(setEvents)
       .catch((err) => {
         setEvents([]);
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        setError(formatEventsError(err));
       })
       .finally(() => setLoading(false));
-  }, [selectedId, filterKind, filterTime, searchAuthors]);
+  }, [selectedId, filterKind, filterTime, searchAuthors, refreshTrigger]);
 
   function handleDelete(id: string) {
     setEvents((prev) => prev.filter((e) => e.id !== id));

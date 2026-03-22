@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import type { User } from "next-auth";
 import { DashboardContent } from "./dashboard-content";
@@ -43,6 +44,8 @@ interface RelayPanelShellProps {
   providerUserId?: string | null;
 }
 
+const STORAGE_KEY = "relay-panel-selected-id";
+
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
   { id: "events", label: "Eventos" },
@@ -57,18 +60,31 @@ export function RelayPanelShell({
   relays,
   providerUserId,
 }: RelayPanelShellProps) {
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(relays[0]?.id ?? null);
   const [stats, setStats] = useState<RelayStats | null>(null);
   const [health, setHealth] = useState<RelayHealth | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
     const ids = new Set(relays.map((r) => r.id));
-    queueMicrotask(() =>
-      setSelectedId((prev) => (prev && ids.has(prev) ? prev : relays[0]?.id ?? null))
-    );
+    const stored = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+    const preferred = stored && ids.has(stored) ? stored : relays[0]?.id ?? null;
+    setSelectedId(preferred);
   }, [relays]);
+
+  useEffect(() => {
+    if (selectedId && typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, selectedId);
+    }
+  }, [selectedId]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshTrigger((t) => t + 1);
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -98,7 +114,7 @@ export function RelayPanelShell({
         setHealth({ error: "fetch_error", detail: msg });
       })
       .finally(() => setLoading(false));
-  }, [selectedId]);
+  }, [selectedId, refreshTrigger]);
 
   const selectedRelay = relays.find((r) => r.id === selectedId);
 
@@ -146,8 +162,8 @@ export function RelayPanelShell({
           providerUserId={providerUserId}
         />
 
-        {/* Nav tabs */}
-        <nav className="flex gap-0.5 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 pt-1">
+        {/* Nav tabs + Refresh */}
+        <nav className="flex items-center gap-2 border-b border-[#2a2a2a] bg-[#1a1a1a] px-4 pt-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -162,6 +178,14 @@ export function RelayPanelShell({
               {tab.label}
             </button>
           ))}
+          <button
+            type="button"
+            onClick={handleRefresh}
+            className="ml-auto rounded border border-[#333] px-2.5 py-1 text-[11px] text-[#888] transition-colors hover:border-[#444] hover:bg-[#252525] hover:text-[#ccc]"
+            title="Atualizar dados do relay"
+          >
+            Atualizar
+          </button>
         </nav>
 
         {/* Tab content */}
@@ -178,9 +202,12 @@ export function RelayPanelShell({
                   health={health}
                   selectedRelay={selectedRelay ?? null}
                   loading={loading}
+                  refreshTrigger={refreshTrigger}
                 />
               )}
-              {activeTab === "events" && <EventsTab selectedId={selectedId} />}
+              {activeTab === "events" && (
+                <EventsTab selectedId={selectedId} refreshTrigger={refreshTrigger} />
+              )}
               {activeTab === "access" && <AccessTab selectedId={selectedId} />}
               {activeTab === "config" && (
                 <ConfigTab

@@ -36,7 +36,7 @@ export async function GET(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(45_000),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(
