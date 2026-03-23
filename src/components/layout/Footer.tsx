@@ -16,7 +16,7 @@ export function Footer() {
         </div>
         <span className="text-border">·</span>
         <span className="font-mono text-[10px] bg-secondary border border-border px-1.5 py-0.5 rounded">
-          v0.2.1
+          v0.2.2
         </span>
         <span className="text-border">·</span>
         <span>relay-panel.bitmacro.io</span>

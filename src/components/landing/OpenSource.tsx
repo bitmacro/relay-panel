@@ -47,7 +47,7 @@ export function OpenSource() {
                 relay-panel.bitmacro.io
               </code>
               <p className="text-[12px] text-muted-foreground mb-4">
-                CI · Next.js · v0.2.1
+                CI · Next.js · v0.2.2
               </p>
               <Link
                 href="https://github.com/bitmacro/relay-panel"

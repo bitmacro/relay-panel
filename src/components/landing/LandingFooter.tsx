@@ -16,7 +16,7 @@ export function LandingFooter() {
           <span className="text-[13px] font-medium">Relay Manager</span>
           <span className="text-border">·</span>
           <span className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded">
-            v0.2.1
+            v0.2.2
           </span>
         </div>
         <div className="flex items-center gap-4 text-[12px] text-muted-foreground">

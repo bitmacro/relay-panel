@@ -48,7 +48,7 @@ export default function SignInPage() {
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground mt-5">
-          © 2026 BitMacro · relay-panel v0.2.1
+          © 2026 BitMacro · relay-panel v0.2.2
         </p>
       </div>
     </div>
