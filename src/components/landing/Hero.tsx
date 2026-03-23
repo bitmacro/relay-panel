@@ -46,12 +46,12 @@ export function Hero() {
 
           <ScrollReveal delay={120} direction="left" className="flex-1 mt-12 lg:mt-0">
             <div className="relative rounded-2xl border border-border overflow-hidden glass-card elevation-1 hover:elevation-2 transition-all duration-400 hover:border-[#f7931a]/30">
-              <div className="aspect-video relative bg-secondary/50">
+              <div className="aspect-[2/1] relative bg-secondary/50">
                 <Image
                   src="/panel.png"
                   alt="BitMacro Relay Manager — Dashboard with relay table, sidebar and status badges"
                   fill
-                  className="object-cover object-top"
+                  className="object-contain object-top"
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   priority
                 />

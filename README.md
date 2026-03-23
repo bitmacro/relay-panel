@@ -8,7 +8,7 @@
 
 **Manage your Nostr relay without touching the terminal.**
 
-Web UI for the [BitMacro Relay Manager](https://bitmacro.io) ecosystem. Visual dashboard for relay operators — moderation, access control, Lightning payments and multi-relay management in one panel.
+Web UI for the [BitMacro Relay Manager](https://relay-panel.bitmacro.io) ecosystem. Visual dashboard for relay operators — moderation, access control, Lightning payments and multi-relay management in one panel.
 
 🔗 **[relay-panel.bitmacro.io](https://relay-panel.bitmacro.io)** — landing + sign in with GitHub
 

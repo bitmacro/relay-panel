@@ -10,9 +10,12 @@ export function HowItWorks() {
           </h2>
         </ScrollReveal>
 
-        <div className="flex flex-col lg:flex-row lg:items-stretch gap-6 lg:gap-4">
+        <div className="relative flex flex-col lg:flex-row lg:items-stretch lg:justify-center gap-6 lg:gap-5 max-w-4xl mx-auto">
+          {/* Backdrop glow */}
+          <div className="absolute inset-0 -inset-x-8 top-1/2 -translate-y-1/2 h-32 bg-gradient-to-r from-transparent via-[#f7931a]/5 to-transparent pointer-events-none rounded-full blur-2xl" />
+
           <ScrollReveal delay={0}>
-            <div className="flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift min-w-0">
+            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">
                 relay-agent
               </div>
@@ -32,9 +35,9 @@ export function HowItWorks() {
           </ScrollReveal>
 
           {/* Arrow */}
-          <div className="flex lg:flex-col items-center justify-center text-muted-foreground/50">
+          <div className="flex lg:flex-col items-center justify-center text-muted-foreground/50 group/arrow">
             <svg
-              className="w-8 h-8 lg:w-6 lg:h-6 rotate-90 lg:rotate-0"
+              className="w-8 h-8 lg:w-6 lg:h-6 rotate-90 lg:rotate-0 transition-colors duration-300 group-hover/arrow:text-[#f7931a]/70"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -49,7 +52,7 @@ export function HowItWorks() {
           </div>
 
           <ScrollReveal delay={100}>
-            <div className="flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift min-w-0">
+            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">
                 relay-api
               </div>
@@ -66,9 +69,9 @@ export function HowItWorks() {
           </ScrollReveal>
 
           {/* Arrow */}
-          <div className="flex lg:flex-col items-center justify-center text-muted-foreground/50">
+          <div className="flex lg:flex-col items-center justify-center text-muted-foreground/50 group/arrow">
             <svg
-              className="w-8 h-8 lg:w-6 lg:h-6 rotate-90 lg:rotate-0"
+              className="w-8 h-8 lg:w-6 lg:h-6 rotate-90 lg:rotate-0 transition-colors duration-300 group-hover/arrow:text-[#f7931a]/70"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -83,7 +86,7 @@ export function HowItWorks() {
           </div>
 
           <ScrollReveal delay={200}>
-            <div className="flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift min-w-0">
+            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">
                 relay-panel
               </div>
