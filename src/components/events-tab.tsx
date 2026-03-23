@@ -65,6 +65,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const [filterKind, setFilterKind] = useState<string>("");
   const [filterTime, setFilterTime] = useState<string>("24h");
   const [searchAuthors, setSearchAuthors] = useState("");
+  const [blockTarget, setBlockTarget] = useState<{ pubkey: string } | null>(null);
+  const [blockPending, setBlockPending] = useState(false);
 
   useEffect(() => {
     if (!selectedId) {
@@ -109,6 +111,29 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
   function handleDelete(id: string) {
     setEvents((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  async function handleBlockConfirm() {
+    if (!selectedId || !blockTarget || blockPending) return;
+    setBlockPending(true);
+    try {
+      const res = await fetch(`/api/relay/${selectedId}/policy/block`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pubkey: blockTarget.pubkey }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setError(json?.error ?? json?.detail ?? "Erro ao bloquear");
+        return;
+      }
+      setEvents((prev) => prev.filter((e) => e.pubkey !== blockTarget.pubkey));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro de rede");
+    } finally {
+      setBlockTarget(null);
+      setBlockPending(false);
+    }
   }
 
   return (
@@ -186,12 +211,19 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                   className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
                 >
                   <td className="overflow-hidden px-2.5 py-2 align-middle text-ellipsis whitespace-nowrap">
-                    <span
-                      className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                        KIND_STYLES[e.kind] ?? "bg-[#252525] text-[#888]"
-                      }`}
-                    >
-                      {e.kind}
+                    <span className="inline-flex items-center gap-1">
+                      <span
+                        className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                          KIND_STYLES[e.kind] ?? "bg-[#252525] text-[#888]"
+                        }`}
+                      >
+                        {e.kind}
+                      </span>
+                      {e.kind >= 20000 && e.kind <= 29999 && (
+                        <span className="inline-flex rounded-md border border-[#444] bg-[#252525] px-1.5 py-0.5 text-[10px] text-[#888]">
+                          ephemeral
+                        </span>
+                      )}
                     </span>
                   </td>
                   <td className="overflow-hidden px-2.5 py-2 font-mono text-[11px] text-[#555] text-ellipsis whitespace-nowrap">
@@ -207,15 +239,16 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     <button
                       type="button"
                       onClick={() => handleDelete(e.id)}
-                      className="rounded border border-[#5a1a1a] px-2 py-0.5 text-[10px] text-[#f87171] transition-colors hover:bg-[#2a0a0a]"
+                      className="rounded border border-[#444] px-2 py-0.5 text-[10px] text-[#888] transition-colors hover:bg-[#252525]"
                       title="Remove da lista (não apaga no relay)"
                     >
                       Remover
                     </button>
                     <button
                       type="button"
-                      className="ml-1 rounded border border-[#333] px-2 py-0.5 text-[10px] text-[#888] transition-colors hover:bg-[#252525]"
-                      title="Em breve"
+                      onClick={() => setBlockTarget({ pubkey: e.pubkey })}
+                      className="ml-1 rounded border border-[#7f1d1d] bg-[#7f1d1d] px-2 py-0.5 text-[10px] text-white transition-colors hover:bg-[#991b1b]"
+                      title="Bloquear pubkey no relay"
                     >
                       Block
                     </button>
@@ -230,6 +263,42 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         <p className="py-8 text-center text-[12px] text-[#666]">
           Nenhum evento. Ajuste os filtros ou aguarde novos eventos.
         </p>
+      )}
+
+      {blockTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="block-dialog-title"
+        >
+          <div className="mx-4 w-full max-w-sm rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-xl">
+            <h2 id="block-dialog-title" className="text-[13px] font-medium text-[#ccc]">
+              Bloquear pubkey?
+            </h2>
+            <p className="mt-2 text-[12px] text-[#666]">
+              A pubkey será adicionada à blacklist. Eventos futuros desta pubkey serão rejeitados pelo relay.
+            </p>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setBlockTarget(null)}
+                disabled={blockPending}
+                className="rounded border border-[#444] px-3 py-1.5 text-[12px] text-[#888] hover:bg-[#252525] disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleBlockConfirm}
+                disabled={blockPending}
+                className="rounded border border-[#7f1d1d] bg-[#7f1d1d] px-3 py-1.5 text-[12px] text-white hover:bg-[#991b1b] disabled:opacity-50"
+              >
+                {blockPending ? "A bloquear…" : "Block"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
