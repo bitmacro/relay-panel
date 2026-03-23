@@ -194,7 +194,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filtrar por pubkey (hex ou npub)"
+            placeholder="Filtrar por pubkey..."
             className="w-full rounded-md border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
           />
         </div>

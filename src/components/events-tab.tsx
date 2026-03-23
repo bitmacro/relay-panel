@@ -211,7 +211,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                   className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
                 >
                   <td className="overflow-hidden px-2.5 py-2 align-middle text-ellipsis whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <span
                         className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
                           KIND_STYLES[e.kind] ?? "bg-[#252525] text-[#888]"
@@ -219,12 +219,12 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                       >
                         {e.kind}
                       </span>
-                      {e.kind >= 20000 && e.kind <= 29999 && (
-                        <span className="inline-flex rounded-md border border-[#444] bg-[#252525] px-1.5 py-0.5 text-[10px] text-[#888]">
+                      {Number(e.kind) >= 20000 && Number(e.kind) <= 29999 && (
+                        <span className="text-xs text-muted-foreground border border-border rounded px-1">
                           ephemeral
                         </span>
                       )}
-                    </span>
+                    </div>
                   </td>
                   <td className="overflow-hidden px-2.5 py-2 font-mono text-[11px] text-[#555] text-ellipsis whitespace-nowrap">
                     {truncatePubkey(e.pubkey)}
