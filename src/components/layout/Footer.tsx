@@ -31,6 +31,8 @@ export function Footer() {
       <div className="flex items-center gap-3.5 text-[11px] text-muted-foreground">
         <a
           href="https://bitmacro.io"
+          target="_blank"
+          rel="noopener noreferrer"
           className="hover:text-foreground transition-colors"
         >
           BitMacro Ecosystem ↗

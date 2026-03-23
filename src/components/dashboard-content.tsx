@@ -188,14 +188,24 @@ export function DashboardContent({
           </div>
           <div className="mt-0.5 text-[11px] text-[#444]">LMDB</div>
         </div>
-        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+        <div
+          className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
+          title="Requer relay-agent v0.3+"
+        >
           <div className="text-[11px] text-[#555]">Pubkeys ativas</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">—</div>
+          <div className="text-xl font-semibold text-muted-foreground">
+            Não disponível
+          </div>
           <div className="mt-0.5 text-[11px] text-[#444]">7 dias</div>
         </div>
-        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
+        <div
+          className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
+          title="Requer relay-agent v0.3+"
+        >
           <div className="text-[11px] text-[#555]">Bloqueados</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">—</div>
+          <div className="text-xl font-semibold text-muted-foreground">
+            Não disponível
+          </div>
           <div className="mt-0.5 text-[11px] text-[#444]">na blacklist</div>
         </div>
       </div>
