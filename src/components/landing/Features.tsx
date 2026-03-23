@@ -1,3 +1,5 @@
+import { ScrollReveal } from "./ScrollReveal";
+
 const FEATURES = [
   {
     icon: "📊",
@@ -35,24 +37,28 @@ export function Features() {
   return (
     <section
       id="features"
-      className="py-20 md:py-28 px-6 bg-secondary/30 scroll-mt-20"
+      className="py-20 md:py-28 px-6 scroll-mt-20 section-glow-divider relative"
     >
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-[22px] md:text-[26px] font-bold text-foreground mb-12 text-center">
-          Everything you need to run a relay
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <ScrollReveal>
+          <h2 className="text-[22px] md:text-[26px] font-bold text-foreground mb-12 text-center">
+            Everything you need to run a relay
+          </h2>
+        </ScrollReveal>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {FEATURES.map((f, i) => (
-            <div
-              key={i}
-              className="p-5 rounded-xl border border-border bg-card hover:border-[#f7931a]/40 transition-colors"
-            >
-              <span className="text-2xl mb-3 block">{f.icon}</span>
-              <h3 className="text-[15px] font-semibold text-foreground mb-1">
-                {f.title}
-              </h3>
-              <p className="text-[13px] text-muted-foreground">{f.desc}</p>
-            </div>
+            <ScrollReveal key={i} delay={i * 60}>
+              <div className="group glass-card rounded-2xl p-6 elevation-1 card-hover-lift relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-[#f7931a]/10 to-transparent opacity-0 transition-opacity duration-400 card-hover-accent" />
+                <span className="text-2xl mb-3 block card-hover-scale transition-transform duration-300">
+                  {f.icon}
+                </span>
+                <h3 className="text-[15px] font-semibold text-foreground mb-1 card-hover-text transition-colors duration-300">
+                  {f.title}
+                </h3>
+                <p className="text-[13px] text-muted-foreground relative">{f.desc}</p>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       </div>

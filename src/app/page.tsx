@@ -28,9 +28,9 @@ export default async function LandingPage() {
   if (session?.user) redirect("/relays");
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-landing-premium">
       <LandingNav />
-      <main className="flex-1">
+      <main className="flex-1 relative z-10">
         <Hero />
         <ProblemSection />
         <HowItWorks />
