@@ -1,11 +1,17 @@
+import Image from "next/image";
+
 export function Footer() {
   return (
     <footer className="bg-card border-t border-border px-7 py-3.5 flex items-center justify-between gap-3 flex-wrap shrink-0">
       <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
         <div className="flex items-center gap-1.5">
-          <div className="w-[18px] h-[18px] bg-[#f7931a] rounded flex items-center justify-center text-[9px] font-bold text-black font-mono">
-            B
-          </div>
+          <Image
+            src="/bitmacro-logo.png"
+            alt="BitMacro"
+            width={18}
+            height={18}
+            className="w-[18px] h-[18px] object-contain"
+          />
           <span>BitMacro Relay Manager</span>
         </div>
         <span className="text-border">·</span>

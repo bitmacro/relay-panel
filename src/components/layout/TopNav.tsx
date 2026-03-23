@@ -1,4 +1,5 @@
 import type { User } from "next-auth";
+import Image from "next/image";
 import { TopNavControls } from "./TopNavControls";
 
 interface TopNavProps {
@@ -10,9 +11,13 @@ export function TopNav({ user }: TopNavProps) {
     <header className="h-14 bg-card border-b border-border flex items-center px-6 gap-3 sticky top-0 z-50 shrink-0">
       {/* Logo */}
       <div className="flex items-center gap-2 shrink-0">
-        <div className="w-8 h-8 bg-[#f7931a] rounded-lg flex items-center justify-center font-bold text-[15px] text-black font-mono">
-          B
-        </div>
+        <Image
+          src="/bitmacro-logo.png"
+          alt="BitMacro"
+          width={32}
+          height={32}
+          className="w-8 h-8 object-contain"
+        />
         <span className="text-[15px] font-semibold tracking-tight">
           BitMacro Relay Manager
         </span>

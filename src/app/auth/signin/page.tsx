@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 
 export default function SignInPage() {
@@ -8,9 +9,13 @@ export default function SignInPage() {
       <div className="w-full max-w-[380px]">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
-          <div className="w-10 h-10 bg-[#f7931a] rounded-xl flex items-center justify-center font-bold text-[18px] text-black font-mono">
-            B
-          </div>
+          <Image
+            src="/bitmacro-logo.png"
+            alt="BitMacro"
+            width={40}
+            height={40}
+            className="w-10 h-10 object-contain"
+          />
           <div>
             <div className="text-[17px] font-semibold tracking-tight">BitMacro Relay Manager</div>
             <div className="text-[11px] text-muted-foreground font-mono">relay-panel.bitmacro.io</div>
