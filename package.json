@@ -1,6 +1,6 @@
 {
   "name": "@bitmacro/relay-panel",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Web UI for managing Nostr relays via relay-api",
   "private": true,
   "license": "BSL-1.1",
@@ -24,6 +24,8 @@
     "lucide-react": "^0.460.0",
     "next": "^16",
     "next-auth": "^5.0.0-beta.25",
+    "next-intl": "^4.8.3",
+    "next-themes": "^0.4.6",
     "nostr-tools": "^2.23.3",
     "react": "^19",
     "react-dom": "^19",
