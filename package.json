@@ -5,10 +5,23 @@
   "private": true,
   "license": "BSL-1.1",
   "author": "BitMacro <contact@bitmacro.io>",
+  "homepage": "https://relay-panel.bitmacro.io",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bitmacro/relay-panel.git"
+    "url": "https://github.com/bitmacro/relay-panel.git"
   },
+  "bugs": {
+    "url": "https://github.com/bitmacro/relay-panel/issues"
+  },
+  "keywords": [
+    "nostr",
+    "relay",
+    "strfry",
+    "nostr-relay",
+    "relay-manager",
+    "bitcoin",
+    "lightning"
+  ],
   "engines": {
     "node": ">=20"
   },

@@ -11,6 +11,9 @@ import { OpenSource } from "@/components/landing/OpenSource";
 import { CTASection } from "@/components/landing/CTASection";
 import { LandingFooter } from "@/components/landing/LandingFooter";
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_APP_URL ?? "https://relay-panel.bitmacro.io";
+
 export const metadata: Metadata = {
   title: "BitMacro Relay Manager — Manage your Nostr relay without touching the terminal",
   description:
@@ -18,9 +21,27 @@ export const metadata: Metadata = {
   openGraph: {
     images: ["/og-relay-manager.png"],
   },
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? "https://relay-panel.bitmacro.io"
-  ),
+  metadataBase: new URL(BASE_URL),
+  alternates: {
+    canonical: `${BASE_URL}/`,
+  },
+};
+
+const JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "BitMacro Relay Manager",
+  applicationCategory: "DeveloperApplication",
+  operatingSystem: "Web",
+  url: "https://relay-panel.bitmacro.io",
+  description:
+    "Visual dashboard for Nostr relay operators — moderation, access control, Lightning payments and multi-relay management.",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  author: { "@type": "Organization", name: "BitMacro", url: "https://bitmacro.io" },
+  sameAs: [
+    "https://github.com/bitmacro/relay-panel",
+    "https://github.com/bitmacro/relay-agent",
+  ],
 };
 
 export default async function LandingPage() {
@@ -28,6 +49,11 @@ export default async function LandingPage() {
   if (session?.user) redirect("/relays");
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+      />
     <div className="min-h-screen flex flex-col bg-landing-premium">
       <LandingNav />
       <main className="flex-1 relative z-10">
@@ -41,5 +67,6 @@ export default async function LandingPage() {
       </main>
       <LandingFooter />
     </div>
+    </>
   );
 }

@@ -6,6 +6,9 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
 
+**[→ Web UI: relay-panel.bitmacro.io](https://relay-panel.bitmacro.io)**  
+**[→ BitMacro Ecosystem: bitmacro.io](https://bitmacro.io)**
+
 **Manage your Nostr relay without touching the terminal.**
 
 Web UI for the [BitMacro Relay Manager](https://relay-panel.bitmacro.io) ecosystem. Visual dashboard for relay operators — moderation, access control, Lightning payments and multi-relay management in one panel.
@@ -109,6 +112,14 @@ Nostr relay (strfry)
 ## Deploy
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/bitmacro/relay-panel)
+
+---
+
+## Related
+
+- [relay-panel](https://relay-panel.bitmacro.io) — Web UI for relay operators (BSL 1.1)
+- [relay-api](https://github.com/bitmacro/relay-api) — Central API hub (private)
+- [BitMacro](https://bitmacro.io) — Bitcoin, Lightning & Nostr ecosystem
 
 ---
 

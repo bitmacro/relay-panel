@@ -6,20 +6,33 @@ export function LandingFooter() {
     <footer className="border-t border-border bg-card px-6 py-8">
       <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="flex items-center gap-2">
-          <Image
+          <a
+            href="https://bitmacro.io"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <Image
             src="/bitmacro-logo.png"
             alt="BitMacro"
             width={24}
             height={24}
             className="w-6 h-6 object-contain"
-          />
-          <span className="text-[13px] font-medium">Relay Manager</span>
+              />
+            <span className="text-[13px] font-medium">Relay Manager</span>
+          </a>
           <span className="text-border">·</span>
           <span className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded">
             v0.2.2
           </span>
         </div>
         <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
+          <Link
+            href="https://bitmacro.io"
+            className="hover:text-foreground transition-colors"
+          >
+            BitMacro — Bitcoin, Lightning & Nostr tools ↗
+          </Link>
           <Link
             href="https://github.com/bitmacro/relay-panel"
             target="_blank"
