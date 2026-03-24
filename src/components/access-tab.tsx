@@ -41,6 +41,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [policyFailed, setPolicyFailed] = useState(false);
   const [actionPending, setActionPending] = useState<string | null>(null);
 
   const q = search.trim().toLowerCase();
@@ -63,6 +64,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     }
     setLoading(true);
     setError(null);
+    setPolicyFailed(false);
     try {
       const [policyRes, usersRes] = await Promise.all([
         fetch(`/api/relay/${selectedId}/policy`, { cache: "no-store" }),
@@ -70,6 +72,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       ]);
       const policyJson = await policyRes.json().catch(() => ({}));
       const usersJson = await usersRes.json().catch(() => ({}));
+      if (!policyRes.ok) {
+        setPolicyFailed(true);
+        setError(
+          policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy"
+        );
+        setEntries([]);
+        return;
+      }
       const policyEntries = (policyJson?.entries ?? []) as PolicyEntry[];
       const users = (usersJson?.users ?? []) as string[];
       const policyMap = new Map(policyEntries.map((e) => [e.pubkey, e.status]));
@@ -82,13 +92,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           merged.push({ pubkey, status: "allowed", source: "users" });
         }
       }
-      if (!policyRes.ok) {
-        setError(policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy");
-        setEntries(merged);
-      } else {
-        setEntries(merged);
-      }
+      setEntries(merged);
     } catch (err) {
+      setPolicyFailed(true);
       setError(err instanceof Error ? err.message : "Erro de rede");
       setEntries([]);
     } finally {
@@ -188,6 +194,18 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           {error}
         </div>
       )}
+      {policyFailed && !loading ? (
+        <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-8 text-center">
+          <p className="mb-3 text-[13px] text-[#f87171]">Erro ao carregar policy</p>
+          <button
+            type="button"
+            onClick={() => void fetchData()}
+            className="rounded-md border border-border bg-transparent px-3 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-secondary"
+          >
+            Tentar novamente
+          </button>
+        </div>
+      ) : (
       <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
         <div className="border-b border-[#222] bg-[#1f1f1f] px-3 py-2">
           <input
@@ -316,6 +334,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           </button>
         </div>
       </div>
+      )}
     </div>
   );
 }

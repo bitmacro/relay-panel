@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { getKindInfo, type KindCategory } from "@/lib/nostr-kinds";
+import {
+  CATEGORY_LABELS,
+  getKindInfo,
+  type KindCategory,
+} from "@/lib/nostr-kinds";
 
 const KIND_STYLES: Record<number, string> = {
   0: "bg-[#2a1a4a] text-[#a78bfa]",
@@ -71,6 +75,18 @@ function isEphemeralKind(kind: number): boolean {
   return kind >= 20000 && kind <= 29999;
 }
 
+function categoryFilterLabel(v: CategoryFilterValue): string {
+  if (v === "all") return "Todas as categorias";
+  if (v === "no_ephemeral") return "Sem ephemeral";
+  return CATEGORY_LABELS[v as KindCategory];
+}
+
+function filterPeriodPhrase(filterTime: string): string {
+  if (filterTime === "24h") return "nas últimas 24 horas";
+  if (filterTime === "7d") return "na última semana";
+  return "na amostra carregada";
+}
+
 interface EventsTabProps {
   selectedId: string | null;
   refreshTrigger?: number;
@@ -81,7 +97,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filterCategory, setFilterCategory] =
-    useState<CategoryFilterValue>("content");
+    useState<CategoryFilterValue>("no_ephemeral");
   const [filterKind, setFilterKind] = useState<string>("");
   const [filterTime, setFilterTime] = useState<string>("24h");
   const [searchAuthors, setSearchAuthors] = useState("");
@@ -244,6 +260,31 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         </p>
       )}
 
+      {!loading &&
+      events.length > 0 &&
+      filteredEvents.length === 0 &&
+      !error &&
+      filterCategory !== "all" ? (
+        <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-12 text-center text-muted-foreground">
+          <p className="text-[13px]">
+            Nenhum evento de categoria{" "}
+            <strong className="text-foreground">
+              {categoryFilterLabel(filterCategory)}
+            </strong>{" "}
+            {filterPeriodPhrase(filterTime)}.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setFilterCategory("all");
+              setFilterKind("");
+            }}
+            className="mt-3 text-sm text-[#f7931a] underline underline-offset-2 hover:text-[#e07b10]"
+          >
+            Ver todos os eventos
+          </button>
+        </div>
+      ) : (
       <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
         <table className="w-full table-fixed border-collapse text-[12px]">
           <thead>
@@ -328,14 +369,20 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           </tbody>
         </table>
       </div>
+      )}
       {!loading && events.length === 0 && !error && (
         <p className="py-8 text-center text-[12px] text-[#666]">
           Nenhum evento. Ajuste os filtros ou aguarde novos eventos.
         </p>
       )}
-      {!loading && events.length > 0 && filteredEvents.length === 0 && !error && (
+      {!loading &&
+        events.length > 0 &&
+        filteredEvents.length === 0 &&
+        !error &&
+        filterCategory === "all" &&
+        filterKind !== "" && (
         <p className="py-8 text-center text-[12px] text-[#666]">
-          Nenhum evento corresponde aos filtros de categoria/kind.
+          Nenhum evento corresponde ao kind selecionado.
         </p>
       )}
 
