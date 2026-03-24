@@ -44,11 +44,13 @@ export default async function RelaysLayout({
     apiKey && providerUserId ? await fetchRelays(apiKey, providerUserId) : [];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex min-h-dvh flex-col">
       <TopNav user={session.user ?? null} />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <Sidebar relays={relays} />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
+          {children}
+        </main>
       </div>
       <Footer />
     </div>

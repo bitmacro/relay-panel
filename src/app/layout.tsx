@@ -38,7 +38,7 @@ export default function RootLayout({
       className={`dark ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >
-      <body>
+      <body className="min-h-dvh">
         <Providers>{children}</Providers>
       </body>
     </html>
