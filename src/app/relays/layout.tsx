@@ -4,6 +4,7 @@ import { apiUrl } from "@/lib/api";
 import { TopNav } from "@/components/layout/TopNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
+import pkg from "../../../package.json";
 
 interface Relay {
   id: string;
@@ -52,7 +53,10 @@ export default async function RelaysLayout({
           {children}
         </main>
       </div>
-      <Footer />
+      <Footer
+        panelVersion={pkg.version}
+        defaultRelayId={relays[0]?.id ?? null}
+      />
     </div>
   );
 }
