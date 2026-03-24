@@ -54,14 +54,22 @@ function formatEventsError(err: unknown): string {
   return msg || "Erro ao carregar eventos.";
 }
 
-const CATEGORY_OPTIONS: { value: "all" | KindCategory; label: string }[] = [
+/** Categoria no filtro: inclui modos especiais além de KindCategory */
+type CategoryFilterValue = "all" | "no_ephemeral" | KindCategory;
+
+const CATEGORY_OPTIONS: { value: CategoryFilterValue; label: string }[] = [
   { value: "all", label: "Todas as categorias" },
+  { value: "no_ephemeral", label: "Sem ephemeral" },
   { value: "content", label: "Conteúdo (kind 1, 6, 7…)" },
   { value: "dms", label: "DMs (kind 4, 1059)" },
   { value: "ephemeral", label: "Ephemeral (20000–29999)" },
   { value: "replaceable", label: "Replaceable (10000–39999)" },
   { value: "system", label: "Sistema (kind 0, 3, 5…)" },
 ];
+
+function isEphemeralKind(kind: number): boolean {
+  return kind >= 20000 && kind <= 29999;
+}
 
 interface EventsTabProps {
   selectedId: string | null;
@@ -72,7 +80,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const [events, setEvents] = useState<NostrEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterCategory, setFilterCategory] = useState<"all" | KindCategory>("all");
+  const [filterCategory, setFilterCategory] =
+    useState<CategoryFilterValue>("content");
   const [filterKind, setFilterKind] = useState<string>("");
   const [filterTime, setFilterTime] = useState<string>("24h");
   const [searchAuthors, setSearchAuthors] = useState("");
@@ -82,6 +91,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const kindOptions = useMemo(() => {
     const unique = [...new Set(events.map((e) => e.kind))].sort((a, b) => a - b);
     if (filterCategory === "all") return unique;
+    if (filterCategory === "no_ephemeral") {
+      return unique.filter((k) => !isEphemeralKind(k));
+    }
     return unique.filter((k) => getKindInfo(k).category === filterCategory);
   }, [events, filterCategory]);
 
@@ -95,7 +107,11 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     return events.filter((event) => {
       const info = getKindInfo(event.kind);
       const matchesCategory =
-        filterCategory === "all" || info.category === filterCategory;
+        filterCategory === "all"
+          ? true
+          : filterCategory === "no_ephemeral"
+            ? !isEphemeralKind(event.kind)
+            : info.category === filterCategory;
       const matchesKind =
         filterKind === "" || event.kind === Number(filterKind);
       return matchesCategory && matchesKind;
@@ -177,7 +193,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           <select
             value={filterCategory}
             onChange={(e) =>
-              setFilterCategory(e.target.value as "all" | KindCategory)
+              setFilterCategory(e.target.value as CategoryFilterValue)
             }
             className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
           >
