@@ -190,7 +190,8 @@ export function DashboardContent({
       totals[cat] += row.events;
     }
     const total = Object.values(totals).reduce((a, b) => a + b, 0);
-    return { totals, total };
+    const maxCount = Math.max(...Object.values(totals), 0);
+    return { totals, total, maxCount };
   }, [kindActivity]);
 
   return (
@@ -255,6 +256,10 @@ export function DashboardContent({
                   categorySummary.total > 0
                     ? (n / categorySummary.total) * 100
                     : 0;
+                const barWidthPct =
+                  categorySummary.maxCount > 0
+                    ? (n / categorySummary.maxCount) * 100
+                    : 0;
                 return (
                   <li
                     key={cat}
@@ -274,7 +279,7 @@ export function DashboardContent({
                     <div className="h-2 min-w-[120px] flex-1 overflow-hidden rounded bg-[#252525]">
                       <div
                         className="h-full rounded bg-[#3a3a3a]"
-                        style={{ width: `${pct}%` }}
+                        style={{ width: `${barWidthPct}%` }}
                       />
                     </div>
                   </li>
