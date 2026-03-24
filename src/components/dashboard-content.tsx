@@ -128,6 +128,9 @@ export function DashboardContent({
   const [kindActivity, setKindActivity] = useState<KindRow[]>([]);
   const [kindLoading, setKindLoading] = useState(false);
   const [kindError, setKindError] = useState<string | null>(null);
+  const [pubkeySampleCount, setPubkeySampleCount] = useState<number | null>(null);
+  const [blockedPolicyCount, setBlockedPolicyCount] = useState<number | null>(null);
+  const [metricsLoading, setMetricsLoading] = useState(false);
 
   const fetchKindActivity = useCallback(async (relayId: string) => {
     setKindLoading(true);
@@ -168,14 +171,61 @@ export function DashboardContent({
     }
   }, []);
 
+  const fetchDashboardMetrics = useCallback(async (relayId: string) => {
+    setMetricsLoading(true);
+    try {
+      const [usersRes, policyRes] = await Promise.all([
+        fetch(`/api/relay/${relayId}/users?limit=10000`, {
+          cache: "no-store",
+          signal: AbortSignal.timeout(25_000),
+        }),
+        fetch(`/api/relay/${relayId}/policy`, {
+          cache: "no-store",
+          signal: AbortSignal.timeout(15_000),
+        }),
+      ]);
+      if (usersRes.ok) {
+        const j = (await usersRes.json()) as { users?: string[] };
+        setPubkeySampleCount(Array.isArray(j.users) ? j.users.length : null);
+      } else {
+        setPubkeySampleCount(null);
+      }
+      if (policyRes.ok) {
+        const j = (await policyRes.json()) as {
+          entries?: { status?: string }[];
+        };
+        const blocked = (j.entries ?? []).filter(
+          (e) => e.status === "blocked"
+        ).length;
+        setBlockedPolicyCount(blocked);
+      } else {
+        setBlockedPolicyCount(null);
+      }
+    } catch {
+      setPubkeySampleCount(null);
+      setBlockedPolicyCount(null);
+    } finally {
+      setMetricsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (selectedRelay?.id && !loading) {
       fetchKindActivity(selectedRelay.id);
+      fetchDashboardMetrics(selectedRelay.id);
     } else {
       setKindActivity([]);
       setKindError(null);
+      setPubkeySampleCount(null);
+      setBlockedPolicyCount(null);
     }
-  }, [selectedRelay?.id, loading, refreshTrigger, fetchKindActivity]);
+  }, [
+    selectedRelay?.id,
+    loading,
+    refreshTrigger,
+    fetchKindActivity,
+    fetchDashboardMetrics,
+  ]);
 
   const categorySummary = useMemo(() => {
     const totals: Record<KindCategory, number> = {
@@ -190,8 +240,7 @@ export function DashboardContent({
       totals[cat] += row.events;
     }
     const total = Object.values(totals).reduce((a, b) => a + b, 0);
-    const maxCount = Math.max(...Object.values(totals), 0);
-    return { totals, total, maxCount };
+    return { totals, total };
   }, [kindActivity]);
 
   return (
@@ -214,23 +263,33 @@ export function DashboardContent({
         </div>
         <div
           className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
-          title="Requer relay-agent v0.3+"
+          title="Contagem de pubkeys únicas a partir de uma amostra strfry (kinds 0, 1 e 3; limite de eventos no agent)."
         >
-          <div className="text-[11px] text-[#555]">Pubkeys ativas</div>
-          <div className="text-xl font-semibold text-muted-foreground">
-            Não disponível
+          <div className="text-[11px] text-[#555]">Pubkeys únicas</div>
+          <div className="text-xl font-semibold text-[#f0f0f0]">
+            {loading || metricsLoading
+              ? "…"
+              : pubkeySampleCount != null
+                ? formatNumber(pubkeySampleCount)
+                : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">7 dias</div>
+          <div className="mt-0.5 text-[11px] text-[#444]">
+            Amostra kinds 0·1·3 (máx. 10k eventos)
+          </div>
         </div>
         <div
           className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
-          title="Requer relay-agent v0.3+"
+          title="Linhas !pubkey na whitelist (bloqueados)."
         >
           <div className="text-[11px] text-[#555]">Bloqueados</div>
-          <div className="text-xl font-semibold text-muted-foreground">
-            Não disponível
+          <div className="text-xl font-semibold text-[#f0f0f0]">
+            {loading || metricsLoading
+              ? "…"
+              : blockedPolicyCount != null
+                ? formatNumber(blockedPolicyCount)
+                : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">na blacklist</div>
+          <div className="mt-0.5 text-[11px] text-[#444]">Whitelist (!)</div>
         </div>
       </div>
 
@@ -256,10 +315,8 @@ export function DashboardContent({
                   categorySummary.total > 0
                     ? (n / categorySummary.total) * 100
                     : 0;
-                const barWidthPct =
-                  categorySummary.maxCount > 0
-                    ? (n / categorySummary.maxCount) * 100
-                    : 0;
+                /* Bar width must match the % column (share of total), not share of max category */
+                const barWidthPct = pct;
                 return (
                   <li
                     key={cat}

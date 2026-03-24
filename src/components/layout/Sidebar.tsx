@@ -46,19 +46,6 @@ export function Sidebar({ relays }: SidebarProps) {
             </svg>
             Relays
           </Link>
-          <button
-            type="button"
-            className="flex items-center gap-2.5 px-2 py-[7px] rounded-md text-[13px] transition-colors w-full text-left text-muted-foreground hover:bg-secondary hover:text-foreground"
-          >
-            <svg
-              className="w-4 h-4 shrink-0 opacity-70"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-            >
-              <path d="M8 1a7 7 0 100 14A7 7 0 008 1zM7 4h2v5H7V4zm0 6h2v2H7v-2z" />
-            </svg>
-            Logs de Auditoria
-          </button>
         </div>
 
         <div className="h-px bg-border mx-3 my-3" />
