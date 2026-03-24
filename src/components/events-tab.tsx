@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { getKindInfo, type KindCategory } from "@/lib/nostr-kinds";
 
 const KIND_STYLES: Record<number, string> = {
   0: "bg-[#2a1a4a] text-[#a78bfa]",
@@ -53,6 +54,15 @@ function formatEventsError(err: unknown): string {
   return msg || "Erro ao carregar eventos.";
 }
 
+const CATEGORY_OPTIONS: { value: "all" | KindCategory; label: string }[] = [
+  { value: "all", label: "Todas as categorias" },
+  { value: "content", label: "Conteúdo (kind 1, 6, 7…)" },
+  { value: "dms", label: "DMs (kind 4, 1059)" },
+  { value: "ephemeral", label: "Ephemeral (20000–29999)" },
+  { value: "replaceable", label: "Replaceable (10000–39999)" },
+  { value: "system", label: "Sistema (kind 0, 3, 5…)" },
+];
+
 interface EventsTabProps {
   selectedId: string | null;
   refreshTrigger?: number;
@@ -62,11 +72,35 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const [events, setEvents] = useState<NostrEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filterCategory, setFilterCategory] = useState<"all" | KindCategory>("all");
   const [filterKind, setFilterKind] = useState<string>("");
   const [filterTime, setFilterTime] = useState<string>("24h");
   const [searchAuthors, setSearchAuthors] = useState("");
   const [blockTarget, setBlockTarget] = useState<{ pubkey: string } | null>(null);
   const [blockPending, setBlockPending] = useState(false);
+
+  const kindOptions = useMemo(() => {
+    const unique = [...new Set(events.map((e) => e.kind))].sort((a, b) => a - b);
+    if (filterCategory === "all") return unique;
+    return unique.filter((k) => getKindInfo(k).category === filterCategory);
+  }, [events, filterCategory]);
+
+  useEffect(() => {
+    if (filterKind && !kindOptions.includes(Number(filterKind))) {
+      setFilterKind("");
+    }
+  }, [filterKind, kindOptions]);
+
+  const filteredEvents = useMemo(() => {
+    return events.filter((event) => {
+      const info = getKindInfo(event.kind);
+      const matchesCategory =
+        filterCategory === "all" || info.category === filterCategory;
+      const matchesKind =
+        filterKind === "" || event.kind === Number(filterKind);
+      return matchesCategory && matchesKind;
+    });
+  }, [events, filterCategory, filterKind]);
 
   useEffect(() => {
     if (!selectedId) {
@@ -79,7 +113,6 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     });
     const params = new URLSearchParams();
     params.set("limit", "50");
-    if (filterKind) params.set("kinds", filterKind);
     if (filterTime === "24h") {
       params.set("since", String(Math.floor(Date.now() / 1000 - 86400)));
     } else if (filterTime === "7d") {
@@ -107,7 +140,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         setError(formatEventsError(err));
       })
       .finally(() => setLoading(false));
-  }, [selectedId, filterKind, filterTime, searchAuthors, refreshTrigger]);
+  }, [selectedId, filterTime, searchAuthors, refreshTrigger]);
 
   function handleDelete(id: string) {
     setEvents((prev) => prev.filter((e) => e.id !== id));
@@ -142,16 +175,33 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         <span className="text-[13px] font-medium text-[#ccc]">Eventos</span>
         <div className="ml-auto flex flex-wrap gap-2">
           <select
-            value={filterKind}
-            onChange={(e) => setFilterKind(e.target.value)}
+            value={filterCategory}
+            onChange={(e) =>
+              setFilterCategory(e.target.value as "all" | KindCategory)
+            }
             className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
           >
+            {CATEGORY_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterKind}
+            onChange={(e) => setFilterKind(e.target.value)}
+            className="min-w-[120px] rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
+          >
             <option value="">Todos os kinds</option>
-            <option value="1">Kind 1</option>
-            <option value="0">Kind 0</option>
-            <option value="3">Kind 3</option>
-            <option value="4">Kind 4</option>
-            <option value="6">Kind 6</option>
+            {kindOptions.map((k) => {
+              const info = getKindInfo(k);
+              return (
+                <option key={k} value={String(k)}>
+                  Kind {k}
+                  {info.name !== `Kind ${k}` ? ` — ${info.name}` : ""}
+                </option>
+              );
+            })}
           </select>
           <select
             value={filterTime}
@@ -205,7 +255,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </td>
               </tr>
             ) : (
-              events.map((e) => (
+              filteredEvents.map((e) => {
+                const info = getKindInfo(Number(e.kind));
+                return (
                 <tr
                   key={e.id}
                   className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
@@ -219,8 +271,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                       >
                         {e.kind}
                       </span>
-                      {Number(e.kind) >= 20000 && Number(e.kind) <= 29999 && (
-                        <span className="text-xs text-muted-foreground border border-border rounded px-1">
+                      {info.category === "ephemeral" && (
+                        <span className="text-[10px] text-muted-foreground border border-border/50 rounded px-1 ml-1">
                           ephemeral
                         </span>
                       )}
@@ -254,7 +306,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     </button>
                   </td>
                 </tr>
-              ))
+              );
+              })
             )}
           </tbody>
         </table>
@@ -262,6 +315,11 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       {!loading && events.length === 0 && !error && (
         <p className="py-8 text-center text-[12px] text-[#666]">
           Nenhum evento. Ajuste os filtros ou aguarde novos eventos.
+        </p>
+      )}
+      {!loading && events.length > 0 && filteredEvents.length === 0 && !error && (
+        <p className="py-8 text-center text-[12px] text-[#666]">
+          Nenhum evento corresponde aos filtros de categoria/kind.
         </p>
       )}
 

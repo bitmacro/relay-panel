@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  CATEGORY_COLORS,
+  CATEGORY_LABELS,
+  CATEGORY_SUMMARY_ORDER,
+  getKindInfo,
+  type KindCategory,
+} from "@/lib/nostr-kinds";
 
 interface Relay {
   id: string;
@@ -170,6 +177,22 @@ export function DashboardContent({
     }
   }, [selectedRelay?.id, loading, refreshTrigger, fetchKindActivity]);
 
+  const categorySummary = useMemo(() => {
+    const totals: Record<KindCategory, number> = {
+      content: 0,
+      dms: 0,
+      ephemeral: 0,
+      replaceable: 0,
+      system: 0,
+    };
+    for (const row of kindActivity) {
+      const cat = getKindInfo(row.kind).category;
+      totals[cat] += row.events;
+    }
+    const total = Object.values(totals).reduce((a, b) => a + b, 0);
+    return { totals, total };
+  }, [kindActivity]);
+
   return (
     <div className="space-y-4">
       {/* Metrics */}
@@ -208,6 +231,63 @@ export function DashboardContent({
           </div>
           <div className="mt-0.5 text-[11px] text-[#444]">na blacklist</div>
         </div>
+      </div>
+
+      {/* Resumo por categoria */}
+      <div>
+        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
+          Resumo por categoria
+        </div>
+        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-3">
+          {kindLoading ? (
+            <p className="text-[12px] text-[#666]">A carregar…</p>
+          ) : kindError ? (
+            <p className="text-[12px] text-[#f87171]">{kindError}</p>
+          ) : categorySummary.total === 0 ? (
+            <p className="text-[12px] text-[#555]">
+              Sem dados. Seleciona um relay com eventos.
+            </p>
+          ) : (
+            <ul className="space-y-2.5">
+              {CATEGORY_SUMMARY_ORDER.map((cat) => {
+                const n = categorySummary.totals[cat];
+                const pct =
+                  categorySummary.total > 0
+                    ? (n / categorySummary.total) * 100
+                    : 0;
+                return (
+                  <li
+                    key={cat}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px]"
+                  >
+                    <span
+                      className={`w-[100px] shrink-0 font-medium ${CATEGORY_COLORS[cat]}`}
+                    >
+                      {CATEGORY_LABELS[cat]}
+                    </span>
+                    <span className="w-12 shrink-0 text-right tabular-nums text-[#ccc]">
+                      {n.toLocaleString("pt-PT")}
+                    </span>
+                    <span className="w-12 shrink-0 text-right tabular-nums text-[#555]">
+                      {pct.toFixed(1)}%
+                    </span>
+                    <div className="h-2 min-w-[120px] flex-1 overflow-hidden rounded bg-[#252525]">
+                      <div
+                        className="h-full rounded bg-[#3a3a3a]"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+        <p className="mt-1.5 text-[11px] text-[#555]">
+          {kindActivity.length > 0
+            ? `Baseado na mesma amostra de ${categorySummary.total.toLocaleString("pt-PT")} eventos.`
+            : "Amostra dos eventos mais recentes do relay."}
+        </p>
       </div>
 
       {/* Atividade por kind */}
