@@ -10,7 +10,7 @@ export function OpenSource() {
             Open Source at the core
           </h2>
         </ScrollReveal>
-        <div className="grid sm:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <ScrollReveal delay={0}>
             <div className="p-6 glass-card rounded-2xl border border-border elevation-1 card-hover-lift">
               <h3 className="text-[16px] font-semibold text-foreground mb-4">
@@ -59,10 +59,34 @@ export function OpenSource() {
               </Link>
             </div>
           </ScrollReveal>
+          <ScrollReveal delay={200}>
+            <div className="p-6 glass-card rounded-2xl border border-border elevation-1 card-hover-lift sm:col-span-2 lg:col-span-1">
+              <h3 className="text-[16px] font-semibold text-foreground mb-4">
+                @bitmacro/relay-connect
+              </h3>
+              <div className="text-[12px] font-mono text-muted-foreground mb-2">
+                MIT License
+              </div>
+              <code className="text-[12px] font-mono text-foreground block mb-4 break-all">
+                npm install @bitmacro/relay-connect
+              </code>
+              <p className="text-[12px] text-muted-foreground mb-4">
+                SDK NIP-46 / NIP-07
+              </p>
+              <Link
+                href="https://github.com/bitmacro/relay-connect"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[13px] text-[#f7931a] hover:underline"
+              >
+                GitHub →
+              </Link>
+            </div>
+          </ScrollReveal>
         </div>
         <ScrollReveal delay={150}>
           <p className="text-center text-[13px] text-muted-foreground max-w-2xl mx-auto">
-            relay-agent is MIT — install it, fork it, contribute. relay-panel
+            relay-agent and relay-connect are MIT — install, fork, contribute. relay-panel
             source is visible under BSL 1.1.
           </p>
         </ScrollReveal>

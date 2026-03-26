@@ -27,13 +27,21 @@ export function LandingFooter() {
             v0.2.2
           </span>
         </div>
-        <div className="flex items-center gap-4 text-[12px] text-muted-foreground">
+        <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] text-muted-foreground">
           <Link
             href="https://bitmacro.io"
             className="hover:text-foreground transition-colors"
           >
             BitMacro — Bitcoin, Lightning & Nostr tools ↗
           </Link>
+          <a
+            href="https://bitmacro.io/relay-manager"
+            target="_blank"
+            rel="noreferrer"
+            className="footer-link"
+          >
+            BitMacro Relay Manager ecosystem overview →
+          </a>
           <Link
             href="https://github.com/bitmacro/relay-panel"
             target="_blank"

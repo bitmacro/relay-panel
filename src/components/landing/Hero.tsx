@@ -9,9 +9,14 @@ export function Hero() {
         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16">
           <div className="flex-1">
             <ScrollReveal>
-              <p className="text-[12px] font-mono text-muted-foreground mb-4 uppercase tracking-wider">
-                relay-agent v0.2.0 · MIT · Open Source
-              </p>
+              <div className="mb-4 space-y-1.5">
+                <p className="text-[12px] font-mono text-muted-foreground uppercase tracking-wider">
+                  relay-agent v0.2.0 · MIT · Open Source
+                </p>
+                <p className="text-[11px] font-mono text-muted-foreground/75 uppercase tracking-wider">
+                  5-module ecosystem · relay-agent · relay-panel · relay-connect
+                </p>
+              </div>
             </ScrollReveal>
             <ScrollReveal delay={80}>
               <h1 className="text-[28px] md:text-[36px] lg:text-[42px] font-bold tracking-tight text-foreground leading-tight mb-4">

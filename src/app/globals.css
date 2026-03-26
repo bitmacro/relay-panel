@@ -82,6 +82,12 @@
   }
 }
 
+@layer components {
+  .footer-link {
+    @apply text-[12px] text-muted-foreground hover:text-foreground transition-colors;
+  }
+}
+
 /* ===== LANDING PREMIUM (bitmacro-id inspired) ===== */
 .bg-landing-premium {
   position: relative;
