@@ -1,3 +1,4 @@
+import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -48,6 +49,16 @@ export function LandingFooter() {
             className="hover:text-foreground transition-colors"
           >
             relay-agent ↗
+          </Link>
+          <Link
+            href="https://github.com/bitmacro/relay-connect"
+            target="_blank"
+            rel="noreferrer"
+            title="@bitmacro/relay-connect (BitMacro Connect SDK)"
+            className="inline-flex items-center gap-1 font-mono hover:text-foreground transition-colors"
+          >
+            <Github className="size-3.5 shrink-0 opacity-80" aria-hidden />
+            <span>@bitmacro/relay-connect</span>
           </Link>
           <span>© 2026 BitMacro</span>
         </div>
