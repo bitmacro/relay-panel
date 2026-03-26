@@ -1,10 +1,18 @@
 # BitMacro Relay Manager — relay-panel
 
 [![CI](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml)
-[![version](https://img.shields.io/badge/version-0.2.2-blue)](https://github.com/bitmacro/relay-panel/releases)
+[![version](https://img.shields.io/badge/version-0.2.3-blue)](https://github.com/bitmacro/relay-panel/releases)
 [![License](https://img.shields.io/badge/license-BSL_1.1-orange)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC?logo=tailwind-css)](https://tailwindcss.com/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](https://nodejs.org/)
+[![NextAuth](https://img.shields.io/badge/NextAuth-v5-1DA1F2?logo=next.js)](https://authjs.dev/)
+[![nostr-tools](https://img.shields.io/badge/nostr--tools-2-8C6DAE)](https://github.com/nbd-wtf/nostr-tools)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://vercel.com/)
+[![SDK](https://img.shields.io/npm/v/@bitmacro/relay-connect?label=%40bitmacro%2Frelay-connect)](https://www.npmjs.com/package/@bitmacro/relay-connect)
+[![relay-agent](https://img.shields.io/npm/v/@bitmacro/relay-agent?label=%40bitmacro%2Frelay-agent)](https://www.npmjs.com/package/@bitmacro/relay-agent)
 
 **[→ Web UI: relay-panel.bitmacro.io](https://relay-panel.bitmacro.io)**  
 **[→ BitMacro Ecosystem: bitmacro.io](https://bitmacro.io)**
@@ -104,6 +112,8 @@ Nostr relay (strfry)
 | Project | Description | License |
 |---------|-------------|---------|
 | [relay-agent](https://github.com/bitmacro/relay-agent) | REST API agent for strfry | MIT |
+| [@bitmacro/relay-connect](https://github.com/bitmacro/relay-connect) | BitMacro Connect SDK | MIT |
+| [relay-connect-web](https://github.com/bitmacro/relay-connect-web) | Connect UI (NIP-46 / NIP-07) | MIT |
 | [relay-api](https://github.com/bitmacro/relay-api) | Central hub (Supabase, proxy) | Private |
 | **relay-panel** | This repo — frontend | BSL 1.1 |
 
