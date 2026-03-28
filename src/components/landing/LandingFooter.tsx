@@ -40,7 +40,15 @@ export function LandingFooter() {
             rel="noreferrer"
             className="footer-link"
           >
-            BitMacro Relay Manager ecosystem overview →
+            Ecosystem overview →
+          </a>
+          <a
+            href="https://bitmacro.io/relay-manager/docs"
+            target="_blank"
+            rel="noreferrer"
+            className="footer-link"
+          >
+            Technical docs (NIP-07 · NIP-46) ↗
           </a>
           <Link
             href="https://github.com/bitmacro/relay-panel"

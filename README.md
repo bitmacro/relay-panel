@@ -105,6 +105,10 @@ relay-agent (runs on your server)
 Nostr relay (strfry)
 ```
 
+That diagram is the path for **this repository**: the panel only talks to **relay-api**, which proxies to **relay-agent**.
+
+For the **full BitMacro Relay Manager topology** (marketing site → relay-connect-web → relay-api → relay-agent), including **NIP-07** and **NIP-46** authentication flows, see **[bitmacro.io/relay-manager/docs](https://bitmacro.io/relay-manager/docs)**.
+
 ---
 
 ## Ecosystem
@@ -127,6 +131,7 @@ Nostr relay (strfry)
 
 ## Related
 
+- **[Technical documentation (full stack)](https://bitmacro.io/relay-manager/docs)** — ecosystem from bitmacro.io to relay-agent; **NIP-07** and **NIP-46**
 - [relay-panel](https://relay-panel.bitmacro.io) — Web UI for relay operators (BSL 1.1)
 - [relay-api](https://github.com/bitmacro/relay-api) — Central API hub (private)
 - [BitMacro](https://bitmacro.io) — Bitcoin, Lightning & Nostr ecosystem

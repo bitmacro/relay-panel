@@ -84,6 +84,43 @@ export function OpenSource() {
             </div>
           </ScrollReveal>
         </div>
+        <ScrollReveal delay={120}>
+          <div className="glass-card rounded-2xl border border-border elevation-1 p-6 mb-8 max-w-3xl mx-auto">
+            <h3 className="text-[15px] font-semibold text-foreground mb-3 text-center">
+              Documentation
+            </h3>
+            <ul className="text-[13px] text-muted-foreground space-y-3 leading-relaxed">
+              <li>
+                <span className="text-foreground font-medium">Panel → agent — </span>
+                How this UI reaches your relays (via relay-api) is documented in the{" "}
+                <Link
+                  href="https://github.com/bitmacro/relay-panel#architecture"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#f7931a] hover:underline underline-offset-2"
+                >
+                  relay-panel README
+                </Link>
+                .
+              </li>
+              <li>
+                <span className="text-foreground font-medium">Web → agent — </span>
+                End-to-end ecosystem reference on{" "}
+                <Link
+                  href="https://bitmacro.io/relay-manager/docs"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#f7931a] hover:underline underline-offset-2"
+                >
+                  bitmacro.io/relay-manager/docs
+                </Link>
+                , from the marketing site through connect, API, and agent, including{" "}
+                <span className="text-foreground">NIP-07</span> and{" "}
+                <span className="text-foreground">NIP-46</span>.
+              </li>
+            </ul>
+          </div>
+        </ScrollReveal>
         <ScrollReveal delay={150}>
           <p className="text-center text-[13px] text-muted-foreground max-w-2xl mx-auto">
             relay-agent and relay-connect are MIT — install, fork, contribute. relay-panel

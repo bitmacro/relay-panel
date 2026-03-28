@@ -46,6 +46,19 @@ export function Hero() {
                   View on GitHub
                 </Link>
               </div>
+              <p className="mt-4 text-[12px] text-muted-foreground max-w-xl leading-relaxed">
+                <Link
+                  href="https://bitmacro.io/relay-manager/docs"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#f7931a] hover:underline underline-offset-2"
+                >
+                  Full-stack technical documentation
+                </Link>
+                {" — "}
+                bitmacro.io through relay-agent, with NIP-07 and NIP-46 authentication
+                (complements the panel → relay-api → agent path in this repo’s README).
+              </p>
             </ScrollReveal>
           </div>
 

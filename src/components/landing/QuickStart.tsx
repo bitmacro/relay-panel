@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ScrollReveal } from "./ScrollReveal";
 
 export function QuickStart() {
@@ -48,6 +49,44 @@ docker pull ghcr.io/bitmacro/relay-agent`}
               </div>
               <p className="text-[13px] text-muted-foreground">
                 Create a relay in the panel, paste your agent URL and token. Done.
+              </p>
+            </div>
+          </ScrollReveal>
+
+          <ScrollReveal delay={220}>
+            <div className="rounded-2xl border border-border/80 bg-secondary/30 p-6">
+              <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                Going deeper
+              </p>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                This quick path matches{" "}
+                <strong className="text-foreground font-medium">
+                  panel → relay-api → relay-agent
+                </strong>{" "}
+                (see the{" "}
+                <Link
+                  href="https://github.com/bitmacro/relay-panel#architecture"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#f7931a] hover:underline underline-offset-2"
+                >
+                  relay-panel README
+                </Link>
+                ). For the full BitMacro Relay Manager story — marketing site, connect
+                UI, central API, and agent — including{" "}
+                <strong className="text-foreground font-medium">
+                  NIP-07 and NIP-46
+                </strong>{" "}
+                signing flows, use the{" "}
+                <Link
+                  href="https://bitmacro.io/relay-manager/docs"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#f7931a] hover:underline underline-offset-2"
+                >
+                  technical documentation on bitmacro.io
+                </Link>
+                .
               </p>
             </div>
           </ScrollReveal>

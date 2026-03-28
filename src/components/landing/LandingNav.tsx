@@ -30,8 +30,17 @@ export function LandingNav() {
             href="/#quickstart"
             className="px-3 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
-            Docs
+            Quick start
           </Link>
+          <span className="text-border">·</span>
+          <a
+            href="https://bitmacro.io/relay-manager/docs"
+            target="_blank"
+            rel="noreferrer"
+            className="px-3 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Stack docs ↗
+          </a>
           <span className="text-border">·</span>
           <Link
             href="https://github.com/bitmacro/relay-panel"
