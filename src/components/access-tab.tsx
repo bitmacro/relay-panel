@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { Copy, ExternalLink } from "lucide-react";
 import {
   authorFilterToHex,
@@ -14,7 +20,66 @@ import {
 
 type PolicyEntry = { pubkey: string; status: "allowed" | "blocked" };
 
-type ProfileMeta = { name: string; picture?: string };
+type ProfileMeta = {
+  name: string;
+  picture?: string;
+  nip05?: string;
+  lud16?: string;
+  lud06?: string;
+};
+
+function parseKind0ProfileExtended(content: string): ProfileMeta {
+  const base = parseKind0Profile(content);
+  try {
+    const j = JSON.parse(content) as Record<string, unknown>;
+    const nip05 =
+      typeof j.nip05 === "string" && j.nip05.trim() ? j.nip05.trim() : undefined;
+    const lud16 =
+      typeof j.lud16 === "string" && j.lud16.trim() ? j.lud16.trim() : undefined;
+    const lud06 =
+      typeof j.lud06 === "string" && j.lud06.trim() ? j.lud06.trim() : undefined;
+    let picture: string | undefined;
+    if (typeof j.picture === "string" && j.picture.trim()) {
+      picture = j.picture.trim();
+    }
+    return { name: base.name, picture, nip05, lud16, lud06 };
+  } catch {
+    return { name: base.name };
+  }
+}
+
+function AccessProfileAvatar({
+  pubkey,
+  picture,
+  displayName,
+}: {
+  pubkey: string;
+  picture?: string;
+  displayName?: string;
+}) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImage = Boolean(picture && !imgFailed);
+
+  return (
+    <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full">
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={picture}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        <div
+          className={`flex h-full w-full items-center justify-center text-[11px] font-semibold ${pubkeyAvatarClasses(pubkey)}`}
+        >
+          {displayInitials(displayName, pubkey)}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface AccessTabProps {
   selectedId: string | null;
@@ -69,6 +134,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       const meta = profileCacheRef.current.get(e.pubkey);
       const name = (meta?.name ?? "").toLowerCase();
       if (name.includes(q)) return true;
+      if ((meta?.nip05 ?? "").toLowerCase().includes(q)) return true;
+      if ((meta?.lud16 ?? "").toLowerCase().includes(q)) return true;
       return false;
     });
   }, [entries, q, hexFromSearch, profileBump]);
@@ -183,18 +250,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           if (!Array.isArray(arr)) continue;
           for (const ev of arr) {
             if (ev.kind !== 0 || !ev.pubkey) continue;
-            let picture: string | undefined;
-            try {
-              const j = JSON.parse(ev.content) as Record<string, unknown>;
-              picture =
-                typeof j.picture === "string" && j.picture.trim()
-                  ? j.picture.trim()
-                  : undefined;
-            } catch {
-              /* ignore */
-            }
-            const { name } = parseKind0Profile(ev.content);
-            profileCacheRef.current.set(ev.pubkey, { name, picture });
+            const parsed = parseKind0ProfileExtended(ev.content);
+            profileCacheRef.current.set(ev.pubkey, parsed);
           }
           profileBump((t) => t + 1);
         } catch {
@@ -297,30 +354,25 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     const profileName = meta?.name?.trim() ?? "";
     const primaryLabel = profileName || npubTrunc;
     const profileUrl = `https://njump.me/${npubFull}`;
+    const hasExtras =
+      Boolean(meta?.nip05) ||
+      Boolean(meta?.lud16) ||
+      Boolean(meta?.lud06);
+    const secondLineNeeded = Boolean(profileName) || hasExtras;
 
     return (
       <div
         key={`${e.pubkey}-${e.source}`}
         className="flex items-center gap-3 border-b border-[#222] px-3 py-2.5 text-[12px] last:border-b-0"
       >
-        <div className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full">
-          {meta?.picture ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={meta.picture}
-              alt=""
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div
-              className={`flex h-full w-full items-center justify-center text-[11px] font-semibold ${pubkeyAvatarClasses(e.pubkey)}`}
-            >
-              {displayInitials(meta?.name, e.pubkey)}
-            </div>
-          )}
-        </div>
+        <AccessProfileAvatar
+          key={`${e.pubkey}:${meta?.picture ?? ""}`}
+          pubkey={e.pubkey}
+          picture={meta?.picture}
+          displayName={meta?.name}
+        />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1">
+          <div className="flex min-w-0 items-center gap-1">
             <span className="truncate font-medium text-[#ddd]">
               {primaryLabel}
             </span>
@@ -335,8 +387,42 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               <ExternalLink className="size-3.5 opacity-70" strokeWidth={1.5} />
             </a>
           </div>
-          {profileName ? (
-            <div className="truncate text-[11px] text-[#666]">{npubTrunc}</div>
+          {secondLineNeeded ? (
+            <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+              {profileName ? (
+                <span className="max-w-full truncate text-[11px] text-[#666]">
+                  {npubTrunc}
+                </span>
+              ) : null}
+              {meta?.nip05 ? (
+                <span
+                  title="Identificador NIP-05 (não verificado em tempo real)"
+                  className="inline-flex max-w-[min(100%,12rem)] shrink-0 items-center gap-0.5 rounded border border-sky-500/35 bg-sky-500/10 px-1.5 py-px text-[10px] text-sky-200/90"
+                >
+                  <span aria-hidden className="shrink-0 opacity-90">
+                    🛡️
+                  </span>
+                  <span className="min-w-0 truncate">{meta.nip05}</span>
+                </span>
+              ) : null}
+              {meta?.lud16 ? (
+                <span
+                  title={meta.lud16}
+                  className="inline-flex max-w-[min(100%,11rem)] shrink-0 items-center gap-0.5 text-[11px] text-[#888]"
+                >
+                  <span aria-hidden>⚡</span>
+                  <span className="min-w-0 truncate">{meta.lud16}</span>
+                </span>
+              ) : meta?.lud06 ? (
+                <span
+                  title={meta.lud06}
+                  className="inline-flex shrink-0 items-center gap-0.5 text-[11px] text-[#888]"
+                >
+                  <span aria-hidden>⚡</span>
+                  <span>LNURL</span>
+                </span>
+              ) : null}
+            </div>
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
