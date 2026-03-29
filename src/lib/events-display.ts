@@ -230,27 +230,26 @@ export function dashboardKindLongDescription(kind: number): string {
   return `Kind ${kind} — tipo desconhecido.`;
 }
 
-export type KindRemovalPolicy = "can_delete" | "do_not_delete" | "unknown";
+/** Referência NIP principal para o operador (não exaustivo). */
+export function kindNipReference(kind: number): string {
+  if (kind === 0 || kind === 1) return "NIP-01";
+  if (kind === 3) return "NIP-02";
+  if (kind === 6) return "NIP-18";
+  if (kind === 7) return "NIP-25";
+  if (kind === 1059) return "NIP-59";
+  if (kind === 10002) return "NIP-65";
+  return "—";
+}
 
-export function kindRemovalPolicy(kind: number): KindRemovalPolicy {
-  if (
-    kind === 1 ||
-    kind === 6 ||
-    kind === 7 ||
-    kind === 1059 ||
-    (kind >= 20000 && kind <= 29999)
-  ) {
-    return "can_delete";
-  }
-  if (
-    kind === 0 ||
-    kind === 3 ||
-    kind === 10002 ||
-    (kind >= 30000 && kind <= 39999)
-  ) {
-    return "do_not_delete";
-  }
-  return "unknown";
+/** Mensagem para AlertDialog ao ocultar perfil / follows / relay list. */
+export function ocultarSensitiveKindDescription(kind: number): string | null {
+  if (kind === 0)
+    return "Este evento é o perfil do utilizador. Removê-lo apaga o nome, bio e avatar deste utilizador no relay.";
+  if (kind === 3)
+    return "Este evento contém a lista de contactos do utilizador. Removê-lo apaga os seus follows neste relay.";
+  if (kind === 10002)
+    return "Este evento é a configuração de relays do utilizador. Removê-lo pode desligar o cliente deste relay.";
+  return null;
 }
 
 /** Tooltip de uma frase ao hover da linha no dashboard. */

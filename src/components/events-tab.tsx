@@ -17,6 +17,7 @@ import {
   parseKind0Profile,
   EVENTS_VIEW_MODE_KEY,
   type EventsViewMode,
+  ocultarSensitiveKindDescription,
 } from "@/lib/events-display";
 import { EventFeedCard } from "@/components/events-feed-card";
 import {
@@ -124,6 +125,10 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     null
   );
   const [blockPending, setBlockPending] = useState(false);
+  const [ocultarConfirm, setOcultarConfirm] = useState<{
+    id: string;
+    kind: number;
+  } | null>(null);
   const [detailEvent, setDetailEvent] = useState<NostrEventRow | null>(null);
   const [pubkeyFilterHint, setPubkeyFilterHint] = useState<string | null>(
     null
@@ -277,6 +282,21 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
   function handleDelete(id: string) {
     setEvents((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  function requestOcultar(id: string, kind: number) {
+    if (ocultarSensitiveKindDescription(kind)) {
+      setOcultarConfirm({ id, kind });
+    } else {
+      handleDelete(id);
+    }
+  }
+
+  function confirmOcultarAnyway() {
+    if (ocultarConfirm) {
+      handleDelete(ocultarConfirm.id);
+      setOcultarConfirm(null);
+    }
   }
 
   async function handleBlockConfirm() {
@@ -486,19 +506,21 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           <table className="w-full table-fixed border-collapse text-[12px]">
             <thead>
               <tr>
-                <th className="w-[110px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[100px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                   Kind
                 </th>
-                <th className="w-[140px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[120px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                   Pubkey
                 </th>
-                <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                   Data
                 </th>
                 <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                   Conteúdo
                 </th>
-                <th className="min-w-[148px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]"></th>
+                <th className="w-[200px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -529,16 +551,11 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                       className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-pointer"
                     >
                       <td className="px-2.5 py-2 align-middle">
-                        <div className="flex flex-col gap-0.5 items-start">
-                          <span
-                            className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
-                          >
-                            {meta.label}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground font-mono">
-                            {e.kind}
-                          </span>
-                        </div>
+                        <span
+                          className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
+                        >
+                          {meta.label}
+                        </span>
                       </td>
                       <td
                         className="overflow-hidden px-2.5 py-2 text-[11px] text-[#555] text-ellipsis whitespace-nowrap"
@@ -552,15 +569,15 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                       <td className="overflow-hidden px-2.5 py-2 text-[11px] text-[#666] text-ellipsis whitespace-nowrap">
                         {getContentPreview(e)}
                       </td>
-                      <td className="px-2.5 py-2">
-                        <div className="flex flex-wrap items-center gap-1.5">
+                      <td className="px-2.5 py-2 align-middle">
+                        <div className="flex justify-end gap-2">
                           <button
                             type="button"
                             onClick={(ev) => {
                               ev.stopPropagation();
-                              handleDelete(e.id);
+                              requestOcultar(e.id, e.kind);
                             }}
-                            className="h-8 rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
+                            className="h-8 shrink-0 rounded-md border border-border/50 bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
                             title="Oculta o evento desta vista (lista local)"
                           >
                             Ocultar
@@ -571,7 +588,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                               ev.stopPropagation();
                               setBlockTarget({ pubkey: e.pubkey });
                             }}
-                            className="h-8 rounded-md border border-amber-500/35 bg-amber-500/10 px-2 text-[11px] font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
+                            className="h-8 shrink-0 rounded-md border border-amber-500/35 bg-amber-500/10 px-2.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
                             title="Marcar pubkey como spam (confirmação)"
                           >
                             Marcar como spam
@@ -613,7 +630,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                   formatAgo={formatAgo}
                   resolvePubkeyLabel={resolveDisplayPubkey}
                   onOpenDetail={() => setDetailEvent(e)}
-                  onDelete={() => handleDelete(e.id)}
+                  onDelete={() => requestOcultar(e.id, e.kind)}
                   onBlock={() => setBlockTarget({ pubkey: e.pubkey })}
                 />
               );
@@ -761,6 +778,36 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           )}
         </SheetContent>
       </Sheet>
+
+      <AlertDialog
+        open={ocultarConfirm !== null}
+        onOpenChange={(open) => {
+          if (!open) setOcultarConfirm(null);
+        }}
+      >
+        <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#e5e5e5]">Atenção</AlertDialogTitle>
+            <AlertDialogDescription className="text-[#999]">
+              {ocultarConfirm
+                ? ocultarSensitiveKindDescription(ocultarConfirm.kind)
+                : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]">
+              Cancelar
+            </AlertDialogCancel>
+            <button
+              type="button"
+              onClick={() => confirmOcultarAnyway()}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-red-600/45 bg-red-600/15 px-4 text-sm font-medium text-red-200 hover:bg-red-600/25"
+            >
+              Remover mesmo assim
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog
         open={blockTarget !== null}

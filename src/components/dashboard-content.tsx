@@ -11,8 +11,8 @@ import {
 import {
   kindBadgeMeta,
   dashboardKindLongDescription,
-  kindRemovalPolicy,
   dashboardKindRowTooltip,
+  kindNipReference,
 } from "@/lib/events-display";
 import {
   Tooltip,
@@ -20,6 +20,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface Relay {
   id: string;
@@ -94,28 +100,6 @@ function formatNumber(n?: number): string {
 
 type KindRow = { kind: number; events: number; pct: string };
 
-function removalPolicyLabelPt(policy: ReturnType<typeof kindRemovalPolicy>): string {
-  switch (policy) {
-    case "can_delete":
-      return "pode apagar";
-    case "do_not_delete":
-      return "não apagar";
-    default:
-      return "desconhecido";
-  }
-}
-
-function removalPolicyClass(policy: ReturnType<typeof kindRemovalPolicy>): string {
-  switch (policy) {
-    case "can_delete":
-      return "text-emerald-400";
-    case "do_not_delete":
-      return "text-sky-400";
-    default:
-      return "text-zinc-500";
-  }
-}
-
 function formatEventsError(err: unknown): string {
   const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
   if (msg.includes("relay unavailable"))
@@ -142,6 +126,7 @@ export function DashboardContent({
   const [pubkeySampleCount, setPubkeySampleCount] = useState<number | null>(null);
   const [blockedPolicyCount, setBlockedPolicyCount] = useState<number | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
+  const [kindSheetKind, setKindSheetKind] = useState<number | null>(null);
 
   const fetchKindActivity = useCallback(async (relayId: string) => {
     setKindLoading(true);
@@ -378,8 +363,8 @@ export function DashboardContent({
                   <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                     Descrição
                   </th>
-                  <th className="w-[100px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                    Remoção
+                  <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                    NIP
                   </th>
                   <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
                     Eventos
@@ -417,30 +402,28 @@ export function DashboardContent({
                 ) : (
                   kindActivity.map((row) => {
                     const meta = kindBadgeMeta(row.kind);
-                    const policy = kindRemovalPolicy(row.kind);
                     return (
                       <Tooltip key={row.kind}>
                         <TooltipTrigger asChild>
                           <tr className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-help">
                             <td className="px-2.5 py-2 align-top">
-                              <div className="flex flex-col gap-0.5 items-start">
-                                <span
-                                  className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
-                                >
-                                  {meta.label}
-                                </span>
-                                <span className="text-[10px] text-muted-foreground font-mono">
-                                  {row.kind}
-                                </span>
-                              </div>
+                              <button
+                                type="button"
+                                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold cursor-pointer transition-opacity hover:opacity-90 ${meta.badgeClass}`}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setKindSheetKind(row.kind);
+                                }}
+                              >
+                                {meta.label}
+                              </button>
                             </td>
                             <td className="px-2.5 py-2 text-[#ccc] align-top leading-snug">
                               {dashboardKindLongDescription(row.kind)}
                             </td>
-                            <td
-                              className={`px-2.5 py-2 align-top text-[11px] font-medium ${removalPolicyClass(policy)}`}
-                            >
-                              {removalPolicyLabelPt(policy)}
+                            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">
+                              {kindNipReference(row.kind)}
                             </td>
                             <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
                               {row.events.toLocaleString("pt-PT")}
@@ -467,6 +450,58 @@ export function DashboardContent({
             : "Amostra dos eventos mais recentes do relay."}
         </p>
       </div>
+
+      <Sheet
+        open={kindSheetKind !== null}
+        onOpenChange={(open) => {
+          if (!open) setKindSheetKind(null);
+        }}
+      >
+        <SheetContent side="right" className="max-h-full overflow-y-auto">
+          {kindSheetKind !== null && (
+            <>
+              <SheetHeader>
+                <SheetTitle className="text-foreground">
+                  {kindBadgeMeta(kindSheetKind).label}
+                </SheetTitle>
+                <p className="text-[11px] font-mono text-muted-foreground">
+                  kind {kindSheetKind}
+                </p>
+              </SheetHeader>
+              <div className="space-y-4 px-6 pb-8 text-[13px] text-foreground">
+                <div>
+                  <div className="text-[10px] uppercase text-muted-foreground mb-1">
+                    Kind (número)
+                  </div>
+                  <div className="font-mono text-xl tabular-nums">{kindSheetKind}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase text-muted-foreground mb-1">
+                    NIP
+                  </div>
+                  <div className="font-mono">{kindNipReference(kindSheetKind)}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase text-muted-foreground mb-1">
+                    Descrição
+                  </div>
+                  <p className="text-muted-foreground leading-snug">
+                    {dashboardKindLongDescription(kindSheetKind)}
+                  </p>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase text-muted-foreground mb-1">
+                    Nota
+                  </div>
+                  <p className="text-muted-foreground text-[12px] leading-snug">
+                    {dashboardKindRowTooltip(kindSheetKind)}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Estado da ligação */}
       <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
