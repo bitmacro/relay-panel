@@ -206,3 +206,72 @@ export function truncateAbout(s: string, max: number): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max)}…`;
 }
+
+/** Uma linha para a coluna «Descrição» no dashboard (Atividade por kind). */
+export function dashboardKindLongDescription(kind: number): string {
+  if (kind === 0)
+    return "Perfil de utilizador — nome, bio, avatar. Não apagar.";
+  if (kind === 1)
+    return "Post / nota de texto — conteúdo principal do feed.";
+  if (kind === 3)
+    return "Lista de contactos — follows do utilizador. Não apagar.";
+  if (kind === 6)
+    return "Repost — partilha de um kind 1. Pode apagar.";
+  if (kind === 7)
+    return "Reação / curtida — emoji em resposta a nota. Pode apagar.";
+  if (kind === 1059)
+    return "DM encriptada (NIP-59) — ilegível pelo operador. Normal em relay privado.";
+  if (kind === 10002)
+    return "Lista de relays do utilizador — configuração do cliente. Não apagar.";
+  if (kind >= 20000 && kind <= 29999)
+    return "Evento efémero — desaparece automaticamente.";
+  if (kind >= 30000 && kind <= 39999)
+    return "Conteúdo addressable — artigos, listas nomeadas.";
+  return `Kind ${kind} — tipo desconhecido.`;
+}
+
+export type KindRemovalPolicy = "can_delete" | "do_not_delete" | "unknown";
+
+export function kindRemovalPolicy(kind: number): KindRemovalPolicy {
+  if (
+    kind === 1 ||
+    kind === 6 ||
+    kind === 7 ||
+    kind === 1059 ||
+    (kind >= 20000 && kind <= 29999)
+  ) {
+    return "can_delete";
+  }
+  if (
+    kind === 0 ||
+    kind === 3 ||
+    kind === 10002 ||
+    (kind >= 30000 && kind <= 39999)
+  ) {
+    return "do_not_delete";
+  }
+  return "unknown";
+}
+
+/** Tooltip de uma frase ao hover da linha no dashboard. */
+export function dashboardKindRowTooltip(kind: number): string {
+  if (kind === 0)
+    return "O kind 0 expõe nome e bio públicos; remover só em caso de abuso claro.";
+  if (kind === 1)
+    return "Nota de texto pública — uso típico para moderar spam ou conteúdo ilícito.";
+  if (kind === 3)
+    return "Grafo de follows; apagar pode deixar o estado incoerente para clientes Nostr.";
+  if (kind === 6)
+    return "Republica outro evento; pode remover sem quebrar o perfil do autor.";
+  if (kind === 7)
+    return "Emoji de reação; em geral seguro apagar em limpezas de abuso.";
+  if (kind === 1059)
+    return "Mensagem cifrada — o operador não vê o texto; apagar só por pedido ou política.";
+  if (kind === 10002)
+    return "Preferências de relay; evite apagar para não desconfigurar utilizadores.";
+  if (kind >= 20000 && kind <= 29999)
+    return "Efémero, pouco persistente; impacto da remoção costuma ser baixo.";
+  if (kind >= 30000 && kind <= 39999)
+    return "Dados substituíveis por d-tag; avalie antes de apagar listas ou artigos.";
+  return "Tipo menos comum neste painel; confira a NIP antes de remover.";
+}

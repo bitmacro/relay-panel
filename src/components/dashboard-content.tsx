@@ -8,6 +8,18 @@ import {
   getKindInfo,
   type KindCategory,
 } from "@/lib/nostr-kinds";
+import {
+  kindBadgeMeta,
+  dashboardKindLongDescription,
+  kindRemovalPolicy,
+  dashboardKindRowTooltip,
+} from "@/lib/events-display";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Relay {
   id: string;
@@ -65,21 +77,6 @@ interface DashboardContentProps {
   refreshTrigger?: number;
 }
 
-const KIND_DESC: Record<number, string> = {
-  0: "Perfil de utilizador",
-  1: "Notas de texto",
-  2: "Recomendação de relay",
-  3: "Listas de contactos",
-  4: "DMs encriptados",
-  5: "Eliminação de eventos",
-  6: "Reposts",
-  7: "Reação",
-  8: "Badge",
-  9: "Generic repost",
-  10: "Unknown",
-  11: "Lista de definições",
-};
-
 function formatUptime(seconds?: number): string {
   if (seconds == null) return "—";
   const d = Math.floor(seconds / 86400);
@@ -95,15 +92,29 @@ function formatNumber(n?: number): string {
   return n.toLocaleString("pt-PT");
 }
 
-const KIND_STYLES: Record<number, string> = {
-  0: "bg-[#2a1a4a] text-[#a78bfa]",
-  1: "bg-[#0c2a4a] text-[#60a5fa]",
-  3: "bg-[#0a2a1a] text-[#4ade80]",
-  4: "bg-[#2a1a0a] text-[#fb923c]",
-  6: "bg-[#2a0a0a] text-[#f87171]",
-};
+type KindRow = { kind: number; events: number; pct: string };
 
-type KindRow = { kind: number; desc: string; events: number; pct: string };
+function removalPolicyLabelPt(policy: ReturnType<typeof kindRemovalPolicy>): string {
+  switch (policy) {
+    case "can_delete":
+      return "pode apagar";
+    case "do_not_delete":
+      return "não apagar";
+    default:
+      return "desconhecido";
+  }
+}
+
+function removalPolicyClass(policy: ReturnType<typeof kindRemovalPolicy>): string {
+  switch (policy) {
+    case "can_delete":
+      return "text-emerald-400";
+    case "do_not_delete":
+      return "text-sky-400";
+    default:
+      return "text-zinc-500";
+  }
+}
 
 function formatEventsError(err: unknown): string {
   const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
@@ -157,7 +168,6 @@ export function DashboardContent({
       const rows: KindRow[] = Object.entries(counts)
         .map(([k, n]) => ({
           kind: parseInt(k, 10),
-          desc: KIND_DESC[parseInt(k, 10)] ?? `Kind ${k}`,
           events: n,
           pct: total > 0 ? `${((n / total) * 100).toFixed(1)}%` : "0%",
         }))
@@ -358,71 +368,98 @@ export function DashboardContent({
           Atividade por kind
         </div>
         <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
-          <table className="w-full table-fixed border-collapse text-[12px]">
-            <thead>
-              <tr>
-                <th className="w-[60px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Kind
-                </th>
-                <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Descrição
-                </th>
-                <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
-                  Eventos
-                </th>
-                <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
-                  %
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {kindLoading ? (
+          <TooltipProvider delayDuration={300}>
+            <table className="w-full border-collapse text-[12px]">
+              <thead>
                 <tr>
-                  <td colSpan={4} className="px-2.5 py-6 text-center text-[12px] text-[#666]">
-                    A carregar…
-                  </td>
+                  <th className="w-[104px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                    Kind
+                  </th>
+                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                    Descrição
+                  </th>
+                  <th className="w-[100px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                    Remoção
+                  </th>
+                  <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                    Eventos
+                  </th>
+                  <th className="w-16 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                    %
+                  </th>
                 </tr>
-              ) : kindError ? (
-                <tr>
-                  <td colSpan={4} className="px-2.5 py-6 text-center">
-                    <p className="text-[12px] text-[#f87171]">{kindError}</p>
-                  </td>
-                </tr>
-              ) : kindActivity.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-2.5 py-6 text-center text-[12px] text-[#555]">
-                    Sem dados. Seleciona um relay com eventos.
-                  </td>
-                </tr>
-              ) : (
-                kindActivity.map((row) => (
-                  <tr
-                    key={row.kind}
-                    className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f]"
-                  >
-                    <td className="px-2.5 py-2">
-                      <span
-                        className={`inline-block rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                          KIND_STYLES[row.kind] ?? "bg-[#252525] text-[#888]"
-                        }`}
-                      >
-                        {row.kind}
-                      </span>
-                    </td>
-                    <td className="overflow-hidden px-2.5 py-2 text-[#ccc] text-ellipsis whitespace-nowrap">
-                      {row.desc}
-                    </td>
-                    <td className="px-2.5 py-2 text-right text-[#ccc]">
-                      {row.events.toLocaleString("pt-PT")}
-                    </td>
-                    <td className="px-2.5 py-2 text-right text-[#ccc]">
-                      {row.pct}
+              </thead>
+              <tbody>
+                {kindLoading ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-2.5 py-6 text-center text-[12px] text-[#666]"
+                    >
+                      A carregar…
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : kindError ? (
+                  <tr>
+                    <td colSpan={5} className="px-2.5 py-6 text-center">
+                      <p className="text-[12px] text-[#f87171]">{kindError}</p>
+                    </td>
+                  </tr>
+                ) : kindActivity.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-2.5 py-6 text-center text-[12px] text-[#555]"
+                    >
+                      Sem dados. Seleciona um relay com eventos.
+                    </td>
+                  </tr>
+                ) : (
+                  kindActivity.map((row) => {
+                    const meta = kindBadgeMeta(row.kind);
+                    const policy = kindRemovalPolicy(row.kind);
+                    return (
+                      <Tooltip key={row.kind}>
+                        <TooltipTrigger asChild>
+                          <tr className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-help">
+                            <td className="px-2.5 py-2 align-top">
+                              <div className="flex flex-col gap-0.5 items-start">
+                                <span
+                                  className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
+                                >
+                                  {meta.label}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground font-mono">
+                                  {row.kind}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-2.5 py-2 text-[#ccc] align-top leading-snug">
+                              {dashboardKindLongDescription(row.kind)}
+                            </td>
+                            <td
+                              className={`px-2.5 py-2 align-top text-[11px] font-medium ${removalPolicyClass(policy)}`}
+                            >
+                              {removalPolicyLabelPt(policy)}
+                            </td>
+                            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+                              {row.events.toLocaleString("pt-PT")}
+                            </td>
+                            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+                              {row.pct}
+                            </td>
+                          </tr>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-[280px] text-left leading-snug">
+                          {dashboardKindRowTooltip(row.kind)}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </TooltipProvider>
         </div>
         <p className="mt-1.5 text-[11px] text-[#555]">
           {kindActivity.length > 0
