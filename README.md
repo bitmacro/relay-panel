@@ -85,6 +85,18 @@ npm run dev
 | `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret |
 | `RELAY_API_KEY` | API key shared with relay-api |
+| `RELAY_API_URL` | (Optional) Server-side relay-api base URL; defaults to `NEXT_PUBLIC_API_URL`. Use if PATCH/config timeouts suggest a different Vercel region than the browser URL |
+
+---
+
+## Repository layout
+
+| Path | Role |
+|------|------|
+| `src/app/api/` | Next.js routes that proxy to relay-api (`X-API-Key`, `X-Provider-User-Id`) |
+| `src/components/` | UI (dashboard, relay tabs, landing, layout) |
+| `src/lib/api.ts` | `apiUrl()` — builds relay-api paths from env |
+| `src/lib/auth.ts` | NextAuth; `session.user.id` = GitHub provider id |
 
 ---
 
