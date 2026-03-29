@@ -14,7 +14,11 @@ import {
   truncateNpub,
   kindBadgeMeta,
   getContentPreview,
+  parseKind0Profile,
+  EVENTS_VIEW_MODE_KEY,
+  type EventsViewMode,
 } from "@/lib/events-display";
+import { EventFeedCard } from "@/components/events-feed-card";
 import {
   Sheet,
   SheetContent,
@@ -117,6 +121,17 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   );
   const [, setProfileBump] = useState(0);
   const profileCacheRef = useRef<Map<string, string>>(new Map());
+  const [viewMode, setViewMode] = useState<EventsViewMode>("table");
+
+  useEffect(() => {
+    const v = localStorage.getItem(EVENTS_VIEW_MODE_KEY);
+    if (v === "feed" || v === "table") setViewMode(v);
+  }, []);
+
+  function setViewModePersist(next: EventsViewMode) {
+    setViewMode(next);
+    localStorage.setItem(EVENTS_VIEW_MODE_KEY, next);
+  }
 
   const authorHexForApi = useMemo(
     () => authorFilterToHex(authorFilterInput),
@@ -330,6 +345,34 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[13px] font-medium text-[#ccc]">Eventos</span>
+        <div
+          className="inline-flex rounded-md border border-[#333] bg-[#1a1a1a] p-0.5 text-[11px]"
+          role="group"
+          aria-label="Vista de eventos"
+        >
+          <button
+            type="button"
+            onClick={() => setViewModePersist("table")}
+            className={`rounded px-2 py-1 transition-colors ${
+              viewMode === "table"
+                ? "bg-[#333] text-[#eee]"
+                : "text-[#888] hover:text-[#ccc]"
+            }`}
+          >
+            Vista tabela
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewModePersist("feed")}
+            className={`rounded px-2 py-1 transition-colors ${
+              viewMode === "feed"
+                ? "bg-[#333] text-[#eee]"
+                : "text-[#888] hover:text-[#ccc]"
+            }`}
+          >
+            Vista feed
+          </button>
+        </div>
         <div className="ml-auto flex flex-wrap gap-2 items-center">
           <select
             value={filterCategory}
@@ -429,7 +472,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             Ver todos os eventos
           </button>
         </div>
-      ) : (
+      ) : viewMode === "table" ? (
         <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
           <table className="w-full table-fixed border-collapse text-[12px]">
             <thead>
@@ -530,6 +573,41 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
               )}
             </tbody>
           </table>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {loading ? (
+            <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-4 py-10 text-center text-[12px] text-[#666]">
+              A carregar…
+            </div>
+          ) : (
+            filteredEvents.map((e) => {
+              const parsed0 =
+                e.kind === 0 ? parseKind0Profile(e.content) : null;
+              const nameFromEvent = parsed0?.name?.trim() ?? "";
+              const cachedName = profileCacheRef.current.get(e.pubkey);
+              const authorLabel =
+                nameFromEvent || cachedName || resolveDisplayPubkey(e.pubkey);
+              const authorHasProfileName = !!(nameFromEvent || cachedName);
+              const profileDisplayNameForInitials =
+                nameFromEvent || cachedName || null;
+
+              return (
+                <EventFeedCard
+                  key={e.id}
+                  event={e}
+                  authorLabel={authorLabel}
+                  authorHasProfileName={authorHasProfileName}
+                  profileDisplayNameForInitials={profileDisplayNameForInitials}
+                  formatAgo={formatAgo}
+                  resolvePubkeyLabel={resolveDisplayPubkey}
+                  onOpenDetail={() => setDetailEvent(e)}
+                  onDelete={() => handleDelete(e.id)}
+                  onBlock={() => setBlockTarget({ pubkey: e.pubkey })}
+                />
+              );
+            })
+          )}
         </div>
       )}
 

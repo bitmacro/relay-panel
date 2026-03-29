@@ -119,3 +119,90 @@ function truncateRaw(s: string, max: number): string {
   if (s.length <= max) return s;
   return `${s.slice(0, max)}…`;
 }
+
+/** Persist feed vs table in Eventos tab */
+export const EVENTS_VIEW_MODE_KEY = "relay-panel:events-view-mode";
+export type EventsViewMode = "table" | "feed";
+
+const AVATAR_PALETTE = [
+  "bg-[#f7931a] text-black",
+  "bg-blue-600 text-white",
+  "bg-emerald-600 text-white",
+  "bg-violet-600 text-white",
+  "bg-rose-600 text-white",
+];
+
+/** Deterministic colour from first hex char of pubkey (5 fixed palettes) */
+export function pubkeyAvatarClasses(pubkey: string): string {
+  const c = pubkey.charAt(0).toLowerCase();
+  const i = parseInt(c, 16);
+  const idx = Number.isNaN(i) ? 0 : i % AVATAR_PALETTE.length;
+  return AVATAR_PALETTE[idx];
+}
+
+export function displayInitials(displayName: string | null | undefined, pubkey: string): string {
+  const n = (displayName ?? "").trim();
+  if (n) {
+    const parts = n.split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase().slice(0, 2);
+    return n.slice(0, 2).toUpperCase();
+  }
+  return pubkey.slice(0, 2).toUpperCase();
+}
+
+export function firstTagValue(
+  tags: string[][] | undefined,
+  key: string
+): string | undefined {
+  const row = tags?.find((t) => t[0] === key);
+  return row?.[1];
+}
+
+export function truncateEventId(id: string): string {
+  if (id.length <= 12) return id;
+  return `${id.slice(0, 8)}…${id.slice(-6)}`;
+}
+
+export function parseKind0Profile(content: string): { name: string; about: string } {
+  try {
+    const j = JSON.parse(content) as Record<string, unknown>;
+    const name =
+      (typeof j.display_name === "string" && j.display_name) ||
+      (typeof j.displayName === "string" && j.displayName) ||
+      (typeof j.name === "string" && j.name) ||
+      "";
+    const about = typeof j.about === "string" ? j.about : "";
+    return { name, about };
+  } catch {
+    return { name: "", about: "" };
+  }
+}
+
+/** Image URL only if it appears as a raw URL in content (not parsed from tags) */
+export function extractNoteImageUrl(content: string): string | null {
+  if (!content?.trim()) return null;
+  const direct =
+    /https?:\/\/[^\s<>[\]()'"]+\.(?:jpg|jpeg|png|gif|webp)(?:\?[^\s<>[\]()'"]*)?/i.exec(
+      content
+    );
+  if (direct) return direct[0];
+  const cdn =
+    /https?:\/\/[^\s<>[\]()'"]*(?:nostr\.build|cdn\.nostr\.build|void\.cat)\/[^\s<>[\]()'"]*/i.exec(
+      content
+    );
+  if (cdn) return cdn[0];
+  return null;
+}
+
+export function feedOtherContentPreview(event: NostrEventRow): string {
+  const t = event.content?.trim();
+  if (!t) return "— sem conteúdo —";
+  if (t.length <= 140) return t;
+  return `${t.slice(0, 140)}…`;
+}
+
+export function truncateAbout(s: string, max: number): string {
+  if (!s.trim()) return "";
+  if (s.length <= max) return s;
+  return `${s.slice(0, max)}…`;
+}
