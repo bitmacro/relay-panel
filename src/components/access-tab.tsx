@@ -85,7 +85,7 @@ interface AccessTabProps {
   selectedId: string | null;
 }
 
-type DisplayEntry = PolicyEntry & { source: "whitelist" | "users" };
+type DisplayEntry = PolicyEntry & { source: "whitelist" | "users" | "blocked" };
 
 const PAGE_SIZE = 20;
 const PROFILE_CHUNK = 50;
@@ -97,11 +97,13 @@ function truncateHex(hex: string): string {
 
 export function AccessTab({ selectedId }: AccessTabProps) {
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
+  const [blockedPubkeys, setBlockedPubkeys] = useState<string[]>([]);
   const [addValue, setAddValue] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [pageWhitelist, setPageWhitelist] = useState(1);
   const [pageUsers, setPageUsers] = useState(1);
+  const [pageBlocked, setPageBlocked] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [policyFailed, setPolicyFailed] = useState(false);
@@ -149,12 +151,46 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     [filtered]
   );
 
+  const blockedEntries = useMemo(
+    () =>
+      blockedPubkeys.map((pk) => ({
+        pubkey: pk,
+        status: "blocked" as const,
+        source: "blocked" as const,
+      })),
+    [blockedPubkeys]
+  );
+
+  const filteredBlocked = useMemo(() => {
+    void profileBump;
+    return blockedEntries.filter((e) => {
+      if (!q && !hexFromSearch) return true;
+      const hex = e.pubkey.toLowerCase();
+      if (hex.includes(q)) return true;
+      if (hexFromSearch && hex === hexFromSearch) return true;
+      const fullNpub = hexToNpubDisplay(e.pubkey).toLowerCase();
+      if (fullNpub.includes(q)) return true;
+      if (truncateNpub(hexToNpubDisplay(e.pubkey)).toLowerCase().includes(q))
+        return true;
+      const meta = profileCacheRef.current.get(e.pubkey);
+      const name = (meta?.name ?? "").toLowerCase();
+      if (name.includes(q)) return true;
+      if ((meta?.nip05 ?? "").toLowerCase().includes(q)) return true;
+      if ((meta?.lud16 ?? "").toLowerCase().includes(q)) return true;
+      return false;
+    });
+  }, [blockedEntries, q, hexFromSearch, profileBump]);
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const totalPagesWl = Math.max(
     1,
     Math.ceil(filteredWhitelist.length / PAGE_SIZE)
   );
   const totalPagesUs = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+  const totalPagesBlocked = Math.max(
+    1,
+    Math.ceil(filteredBlocked.length / PAGE_SIZE)
+  );
 
   const paginated = splitSections
     ? null
@@ -169,28 +205,44 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   const paginatedUs = splitSections
     ? filteredUsers.slice((pageUsers - 1) * PAGE_SIZE, pageUsers * PAGE_SIZE)
     : null;
+  const paginatedBlocked = splitSections
+    ? filteredBlocked.slice(
+        (pageBlocked - 1) * PAGE_SIZE,
+        pageBlocked * PAGE_SIZE
+      )
+    : null;
+  const paginatedBlockedUnified = !splitSections
+    ? filteredBlocked.slice(
+        (pageBlocked - 1) * PAGE_SIZE,
+        pageBlocked * PAGE_SIZE
+      )
+    : null;
 
   const fetchData = useCallback(async () => {
     if (!selectedId) {
       setEntries([]);
+      setBlockedPubkeys([]);
       return;
     }
     setLoading(true);
     setError(null);
     setPolicyFailed(false);
     try {
-      const [policyRes, usersRes] = await Promise.all([
+      const [policyRes, usersRes, blockedRes] = await Promise.all([
         fetch(`/api/relay/${selectedId}/policy`, { cache: "no-store" }),
         fetch(`/api/relay/${selectedId}/users?limit=200`, { cache: "no-store" }),
+        fetch(`/api/relay/${selectedId}/policy/blocked`, { cache: "no-store" }),
       ]);
       const policyJson = await policyRes.json().catch(() => ({}));
       const usersJson = await usersRes.json().catch(() => ({}));
+      const blockedJson = await blockedRes.json().catch(() => ({}));
       if (!policyRes.ok) {
         setPolicyFailed(true);
         setError(
           policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy"
         );
         setEntries([]);
+        setBlockedPubkeys([]);
         return;
       }
       const policyEntries = (policyJson?.entries ?? []) as PolicyEntry[];
@@ -198,7 +250,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       const policyMap = new Map(policyEntries.map((e) => [e.pubkey, e.status]));
       const merged: DisplayEntry[] = [];
       for (const e of policyEntries) {
-        merged.push({ ...e, source: "whitelist" });
+        if (e.status === "allowed") {
+          merged.push({ ...e, source: "whitelist" });
+        }
       }
       for (const pubkey of users) {
         if (!policyMap.has(pubkey)) {
@@ -206,10 +260,15 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         }
       }
       setEntries(merged);
+      const blockedList = Array.isArray(blockedJson?.blocked)
+        ? (blockedJson.blocked as string[])
+        : [];
+      setBlockedPubkeys(blockedRes.ok ? blockedList : []);
     } catch (err) {
       setPolicyFailed(true);
       setError(err instanceof Error ? err.message : "Erro de rede");
       setEntries([]);
+      setBlockedPubkeys([]);
     } finally {
       setLoading(false);
     }
@@ -223,11 +282,16 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     setPage(1);
     setPageWhitelist(1);
     setPageUsers(1);
+    setPageBlocked(1);
   }, [search, selectedId]);
 
   useEffect(() => {
-    if (!selectedId || entries.length === 0) return;
-    const pubkeys = [...new Set(entries.map((e) => e.pubkey))];
+    if (!selectedId) return;
+    const pkSet = new Set<string>();
+    for (const e of entries) pkSet.add(e.pubkey);
+    for (const pk of blockedPubkeys) pkSet.add(pk);
+    const pubkeys = [...pkSet];
+    if (pubkeys.length === 0) return;
     const need = pubkeys.filter((pk) => !profileCacheRef.current.has(pk));
     if (need.length === 0) return;
 
@@ -263,38 +327,55 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, entries]);
+  }, [selectedId, entries, blockedPubkeys]);
 
+  /** Whitelist: toggle off removes plain allow line (does not POST block). */
   async function toggleAccess(entry: DisplayEntry) {
     if (!selectedId || actionPending) return;
-    const newStatus = entry.status === "allowed" ? "blocked" : "allowed";
-    const path = newStatus === "blocked" ? "block" : "allow";
+    if (entry.source !== "whitelist" || entry.status !== "allowed") return;
     setActionPending(entry.pubkey);
+    setError(null);
     try {
-      const res = await fetch(`/api/relay/${selectedId}/policy/${path}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pubkey: entry.pubkey }),
-      });
-      const json = await res.json();
+      const res = await fetch(
+        `/api/relay/${selectedId}/policy/allow/${entry.pubkey}`,
+        { method: "DELETE" }
+      );
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(json?.error ?? json?.detail ?? `Erro ao ${path}`);
+        setError(
+          (json as { detail?: string; error?: string })?.detail ??
+            (json as { error?: string })?.error ??
+            "Erro ao remover da whitelist"
+        );
         return;
       }
-      setEntries((prev) =>
-        prev.some((e) => e.pubkey === entry.pubkey)
-          ? prev.map((e) =>
-              e.pubkey === entry.pubkey ? { ...e, status: newStatus } : e
-            )
-          : [
-              ...prev,
-              {
-                ...entry,
-                status: newStatus,
-                source: "whitelist" as const,
-              },
-            ]
+      await fetchData();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro de rede");
+    } finally {
+      setActionPending(null);
+    }
+  }
+
+  async function unblockPublisher(pubkey: string) {
+    if (!selectedId || actionPending) return;
+    setActionPending(pubkey);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/relay/${selectedId}/policy/block/${pubkey}`,
+        { method: "DELETE" }
       );
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(
+          (json as { detail?: string; error?: string })?.detail ??
+            (json as { error?: string })?.error ??
+            "Erro ao desbloquear"
+        );
+        return;
+      }
+      await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro de rede");
     } finally {
@@ -303,7 +384,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   }
 
   function canToggle(entry: DisplayEntry) {
-    return entry.source === "whitelist";
+    return entry.source === "whitelist" && entry.status === "allowed";
   }
 
   async function handleAdd() {
@@ -447,13 +528,23 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         >
           {e.status === "allowed" ? "permitido" : "bloqueado"}
         </span>
-        <div className="w-[52px] shrink-0 text-right">
-          {canToggle(e) ? (
+        <div className="min-w-[5.5rem] shrink-0 text-right">
+          {e.source === "blocked" ? (
             <button
               type="button"
-              onClick={() => toggleAccess(e)}
+              onClick={() => void unblockPublisher(e.pubkey)}
               disabled={actionPending !== null}
-              className={`relative h-4 w-7 shrink-0 cursor-pointer rounded-full border transition-colors disabled:opacity-50 ${
+              className="rounded-md border border-[#333] px-2 py-1 text-[10px] text-[#ccc] transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
+            >
+              Desbloquear
+            </button>
+          ) : canToggle(e) ? (
+            <button
+              type="button"
+              onClick={() => void toggleAccess(e)}
+              disabled={actionPending !== null}
+              title="Remover da whitelist"
+              className={`relative ml-auto block h-4 w-7 shrink-0 cursor-pointer rounded-full border transition-colors disabled:opacity-50 ${
                 e.status === "allowed"
                   ? "border-[#f7931a] bg-[#f7931a]"
                   : "border-[#333] bg-[#252525]"
@@ -596,7 +687,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             <span className="min-w-0 flex-1">Identidade</span>
             <span className="w-[120px] shrink-0 text-right">Pubkey</span>
             <span className="w-[72px] shrink-0 text-center">Estado</span>
-            <span className="w-[52px] shrink-0 text-center">Acesso</span>
+            <span className="min-w-[5.5rem] shrink-0 text-center">Acesso</span>
           </div>
           {loading ? (
             <div className="px-3 py-6 text-center text-[12px] text-[#666]">
@@ -638,6 +729,23 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 filteredUsers.length,
                 totalPagesUs
               )}
+
+              {renderSectionHeader("Bloqueados", filteredBlocked.length)}
+              {filteredBlocked.length === 0 ? (
+                <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                  {blockedPubkeys.length === 0
+                    ? "Ninguém bloqueado."
+                    : "Nenhum resultado na pesquisa."}
+                </div>
+              ) : (
+                paginatedBlocked!.map(renderRow)
+              )}
+              {renderPagination(
+                pageBlocked,
+                setPageBlocked,
+                filteredBlocked.length,
+                totalPagesBlocked
+              )}
             </>
           ) : (
             <>
@@ -653,6 +761,25 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 paginated!.map(renderRow)
               )}
               {renderPagination(page, setPage, filtered.length, totalPages)}
+
+              {filteredBlocked.length > 0 || blockedPubkeys.length > 0 ? (
+                <>
+                  {renderSectionHeader("Bloqueados", filteredBlocked.length)}
+                  {filteredBlocked.length === 0 ? (
+                    <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                      Nenhum resultado na pesquisa.
+                    </div>
+                  ) : (
+                    paginatedBlockedUnified!.map(renderRow)
+                  )}
+                  {renderPagination(
+                    pageBlocked,
+                    setPageBlocked,
+                    filteredBlocked.length,
+                    totalPagesBlocked
+                  )}
+                </>
+              ) : null}
             </>
           )}
         </div>
