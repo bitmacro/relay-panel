@@ -38,7 +38,7 @@ Web UI for the [BitMacro Relay Manager](https://relay-panel.bitmacro.io) ecosyst
 | Feature | Description |
 |---------|-------------|
 | **Visual Dashboard** | Events, DB size, uptime, activity by kind |
-| **Access Control** | Whitelist/blocklist with toggle, no SSH needed |
+| **Access Control** | Whitelist (toggle off → `DELETE` allow), event publishers, **Blocked** list (`GET policy/blocked`, **Unblock** → `DELETE` block); kind 0 profiles (name, avatar, NIP-05, lud16/LNURL), search & pagination |
 | **Lightning Payments** | Automatic access after payment, LNbits webhook |
 | **Multi-relay** | Manage N relays from one agent instance |
 | **GitHub Auth** | NextAuth.js v5, no passwords |
@@ -97,6 +97,22 @@ npm run dev
 | `src/components/` | UI (dashboard, relay tabs, landing, layout) |
 | `src/lib/api.ts` | `apiUrl()` — builds relay-api paths from env |
 | `src/lib/auth.ts` | NextAuth; `session.user.id` = GitHub provider id |
+| `src/lib/relay-pubkey.ts` | 64-char hex validation for `policy/*/ [pubkey]` routes |
+
+### Policy API routes (`/api/relay/[id]/policy/*`)
+
+Proxied to relay-api with the same headers as other `/api/relay/*` routes.
+
+| Panel route | Method | Upstream |
+|-------------|--------|----------|
+| `/api/relay/[id]/policy` | GET | `GET /relay/:id/policy` |
+| `/api/relay/[id]/policy/blocked` | GET | `GET /relay/:id/policy/blocked` |
+| `/api/relay/[id]/policy/allow` | POST | `POST /relay/:id/policy/allow` |
+| `/api/relay/[id]/policy/allow/[pubkey]` | DELETE | `DELETE /relay/:id/policy/allow/:pubkey` (invalid pubkey → **400** from panel) |
+| `/api/relay/[id]/policy/block` | POST | `POST /relay/:id/policy/block` |
+| `/api/relay/[id]/policy/block/[pubkey]` | DELETE | `DELETE /relay/:id/policy/block/:pubkey` |
+
+HTTP status from relay-api is forwarded (including **404** on DELETE).
 
 ---
 
