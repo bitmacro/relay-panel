@@ -197,14 +197,11 @@ export function EventFeedCard({
               {formatAgo(e.created_at)}
             </span>
           </div>
-          <div className="mt-1 flex items-center gap-2">
+          <div className="mt-1">
             <span
               className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
             >
               {meta.label}
-            </span>
-            <span className="text-[10px] font-mono text-muted-foreground">
-              {e.kind}
             </span>
           </div>
         </div>
@@ -219,18 +216,18 @@ export function EventFeedCard({
         <button
           type="button"
           onClick={onDelete}
-          className="text-[12px] font-medium text-red-400 hover:text-red-300 hover:underline underline-offset-2"
-          title="Remove da lista (não apaga no relay)"
+          className="h-8 rounded-md border border-border/50 bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
+          title="Oculta o evento desta vista (lista local)"
         >
-          Remover
+          Ocultar
         </button>
         <button
           type="button"
           onClick={onBlock}
-          className="rounded border border-[#7f1d1d] bg-[#7f1d1d] px-2 py-0.5 text-[10px] text-white transition-colors hover:bg-[#991b1b]"
-          title="Bloquear pubkey no relay"
+          className="h-8 rounded-md border border-amber-500/35 bg-amber-500/10 px-2.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
+          title="Marcar pubkey como spam (confirmação)"
         >
-          Block
+          Marcar como spam
         </button>
       </div>
     </article>

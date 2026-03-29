@@ -25,6 +25,15 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function formatAgo(ts: number): string {
   const diff = Math.floor(Date.now() / 1000 - ts);
@@ -489,7 +498,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                   Conteúdo
                 </th>
-                <th className="w-[110px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]"></th>
+                <th className="min-w-[148px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]"></th>
               </tr>
             </thead>
             <tbody>
@@ -544,28 +553,30 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                         {getContentPreview(e)}
                       </td>
                       <td className="px-2.5 py-2">
-                        <button
-                          type="button"
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            handleDelete(e.id);
-                          }}
-                          className="rounded border border-[#444] px-2 py-0.5 text-[10px] text-[#888] transition-colors hover:bg-[#252525]"
-                          title="Remove da lista (não apaga no relay)"
-                        >
-                          Remover
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            setBlockTarget({ pubkey: e.pubkey });
-                          }}
-                          className="ml-1 rounded border border-[#7f1d1d] bg-[#7f1d1d] px-2 py-0.5 text-[10px] text-white transition-colors hover:bg-[#991b1b]"
-                          title="Bloquear pubkey no relay"
-                        >
-                          Block
-                        </button>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              handleDelete(e.id);
+                            }}
+                            className="h-8 rounded-md border border-border/50 bg-transparent px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
+                            title="Oculta o evento desta vista (lista local)"
+                          >
+                            Ocultar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              setBlockTarget({ pubkey: e.pubkey });
+                            }}
+                            className="h-8 rounded-md border border-amber-500/35 bg-amber-500/10 px-2 text-[11px] font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
+                            title="Marcar pubkey como spam (confirmação)"
+                          >
+                            Marcar como spam
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -751,45 +762,40 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         </SheetContent>
       </Sheet>
 
-      {blockTarget && (
-        <div
-          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="block-dialog-title"
-        >
-          <div className="mx-4 w-full max-w-sm rounded-lg border border-[#333] bg-[#1a1a1a] p-4 shadow-xl">
-            <h2
-              id="block-dialog-title"
-              className="text-[13px] font-medium text-[#ccc]"
+      <AlertDialog
+        open={blockTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setBlockTarget(null);
+        }}
+      >
+        <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#e5e5e5]">
+              Marcar como spam?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-[#999]">
+              Remove todos os eventos desta pubkey do relay e impede publicações
+              futuras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel
+              disabled={blockPending}
+              className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]"
             >
-              Bloquear pubkey?
-            </h2>
-            <p className="mt-2 text-[12px] text-[#666]">
-              A pubkey será adicionada à blacklist. Eventos futuros desta pubkey
-              serão rejeitados pelo relay.
-            </p>
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setBlockTarget(null)}
-                disabled={blockPending}
-                className="rounded border border-[#444] px-3 py-1.5 text-[12px] text-[#888] hover:bg-[#252525] disabled:opacity-50"
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={handleBlockConfirm}
-                disabled={blockPending}
-                className="rounded border border-[#7f1d1d] bg-[#7f1d1d] px-3 py-1.5 text-[12px] text-white hover:bg-[#991b1b] disabled:opacity-50"
-              >
-                {blockPending ? "A bloquear…" : "Block"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              Cancelar
+            </AlertDialogCancel>
+            <button
+              type="button"
+              disabled={blockPending}
+              onClick={() => void handleBlockConfirm()}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-amber-500/40 bg-amber-500/15 px-4 text-sm font-medium text-amber-800 hover:bg-amber-500/25 disabled:opacity-50 dark:text-amber-200"
+            >
+              {blockPending ? "A processar…" : "Confirmar"}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
