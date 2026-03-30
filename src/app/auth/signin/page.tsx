@@ -2,8 +2,13 @@
 
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function SignInPage() {
+function SignInForm() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl")?.trim() || "/";
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-[380px]">
@@ -31,7 +36,7 @@ export default function SignInPage() {
 
           <button
             type="button"
-            onClick={() => signIn("github", { callbackUrl: "/relays" })}
+            onClick={() => signIn("github", { callbackUrl })}
             className="w-full flex items-center justify-center gap-2.5 bg-foreground text-background px-4 py-2.5 rounded-md text-[14px] font-medium hover:opacity-90 transition-opacity"
           >
             <svg
@@ -52,5 +57,19 @@ export default function SignInPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground text-sm">
+          …
+        </div>
+      }
+    >
+      <SignInForm />
+    </Suspense>
   );
 }

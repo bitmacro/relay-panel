@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { LOCALE_COOKIE_NAME, parseLocaleCookie } from "@/lib/local-preferences";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -41,19 +43,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLocale = parseLocaleCookie(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+
   return (
     <html
-      lang="pt"
+      lang={initialLocale}
       className={`dark ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-dvh">
-        <Providers>{children}</Providers>
+        <Providers initialLocale={initialLocale}>{children}</Providers>
       </body>
     </html>
   );

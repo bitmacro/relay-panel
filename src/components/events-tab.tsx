@@ -19,6 +19,7 @@ import {
   type EventsViewMode,
   ocultarSensitiveKindDescription,
 } from "@/lib/events-display";
+import { legacyStorageKeyForPubkey, MY_NOSTR_PUBKEY_KEY } from "@/lib/local-preferences";
 import { EventFeedCard } from "@/components/events-feed-card";
 import {
   Sheet,
@@ -92,8 +93,18 @@ function filterPeriodPhrase(filterTime: string): string {
   return "na amostra carregada";
 }
 
-function storageKeyForPubkey(userId: string) {
-  return `relay-panel:events-my-pubkey-hex:${userId}`;
+function readStoredPubkeyHex(userId: string | null): string | null {
+  if (typeof window === "undefined") return null;
+  const g = window.localStorage.getItem(MY_NOSTR_PUBKEY_KEY);
+  if (g && /^[0-9a-f]{64}$/i.test(g)) return g.toLowerCase();
+  if (userId) {
+    const leg = window.localStorage.getItem(legacyStorageKeyForPubkey(userId));
+    if (leg && /^[0-9a-f]{64}$/i.test(leg)) {
+      window.localStorage.setItem(MY_NOSTR_PUBKEY_KEY, leg.toLowerCase());
+      return leg.toLowerCase();
+    }
+  }
+  return null;
 }
 
 interface EventsTabProps {
@@ -330,11 +341,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         ? sessionNostrHex.toLowerCase()
         : null;
     let hex = fromSession;
-    if (!hex && userId && typeof window !== "undefined") {
-      const stored = localStorage.getItem(storageKeyForPubkey(userId));
-      if (stored && /^[0-9a-f]{64}$/i.test(stored)) {
-        hex = stored.toLowerCase();
-      }
+    if (!hex) {
+      const stored = readStoredPubkeyHex(userId);
+      if (stored) hex = stored;
     }
     if (hex) {
       setAuthorFilterInput(hexToNpubDisplay(hex));
@@ -355,7 +364,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       setPubkeyFilterHint("Introduz um npub ou hex válido (64 caracteres).");
       return;
     }
-    localStorage.setItem(storageKeyForPubkey(userId), hex);
+    localStorage.setItem(MY_NOSTR_PUBKEY_KEY, hex);
     setPubkeyFilterHint(null);
     setAuthorFilterInput(hexToNpubDisplay(hex));
   }

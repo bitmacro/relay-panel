@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { RELAY_COLOR_PRESETS } from "@/components/relay-color-picker";
 
 interface NewRelayModalProps {
@@ -9,6 +10,8 @@ interface NewRelayModalProps {
 }
 
 export function NewRelayModal({ onClose }: NewRelayModalProps) {
+  const tr = useTranslations("newRelay");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [form, setForm] = useState({
     name: "",
@@ -23,14 +26,14 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
   const handleSubmit = async () => {
     const n = form.name.trim();
     const e = form.endpoint.trim();
-    const t = form.token.trim();
+    const tok = form.token.trim();
 
-    if (!n || !e || !t) {
-      setError("Preencha nome, URL do agente e token");
+    if (!n || !e || !tok) {
+      setError(tr("errRequired"));
       return;
     }
-    if (t.length < 8) {
-      setError("Token deve ter pelo menos 8 caracteres");
+    if (tok.length < 8) {
+      setError(tr("errTokenLen"));
       return;
     }
 
@@ -40,7 +43,7 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
       const body: Record<string, string | null> = {
         name: n,
         endpoint: e.replace(/\/$/, ""),
-        token: t,
+        token: tok,
         color: form.color || null,
       };
       if (form.agent_relay_id.trim()) body.agent_relay_id = form.agent_relay_id.trim();
@@ -51,11 +54,11 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
         body: JSON.stringify(body),
       });
       const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao criar");
+      if (!r.ok) throw new Error(json.error ?? json.detail ?? tr("errCreate"));
       onClose();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao criar");
+      setError(err instanceof Error ? err.message : tr("errCreate"));
     } finally {
       setSaving(false);
     }
@@ -67,57 +70,57 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="bg-card border border-border/80 rounded-xl w-full max-w-[460px] p-6 shadow-2xl">
-        <div className="text-[16px] font-semibold mb-4">Novo relay</div>
+        <div className="text-[16px] font-semibold mb-4">{tr("title")}</div>
 
         <div className="space-y-3.5">
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
-              Nome de display
+              {tr("displayName")}
             </label>
             <input
               type="text"
               value={form.name}
               onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-              placeholder="ex: relay.meudominio.com"
+              placeholder={tr("displayPlaceholder")}
               className="w-full bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
             />
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
-              URL do agente
+              {tr("agentUrl")}
             </label>
             <input
               type="text"
               value={form.endpoint}
               onChange={(e) => setForm((p) => ({ ...p, endpoint: e.target.value }))}
-              placeholder="https://agent.meudominio.com"
+              placeholder={tr("agentPlaceholder")}
               className="w-full bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] font-mono outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
             />
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
-              Bearer token
+              {tr("token")}
             </label>
             <input
               type="password"
               value={form.token}
               onChange={(e) => setForm((p) => ({ ...p, token: e.target.value }))}
-              placeholder="RELAY_AGENT_TOKEN"
+              placeholder={tr("tokenPlaceholder")}
               className="w-full bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] font-mono outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
             />
           </div>
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
-              Agent Relay ID{" "}
+              {tr("agentRelayId")}{" "}
               <span className="text-muted-foreground/40 normal-case text-[10px] tracking-normal font-normal">
-                (opcional — deixar vazio para agente dedicado)
+                {tr("agentRelayIdHint")}
               </span>
             </label>
             <input
               type="text"
               value={form.agent_relay_id}
               onChange={(e) => setForm((p) => ({ ...p, agent_relay_id: e.target.value }))}
-              placeholder="ex: public"
+              placeholder={tr("agentRelayPlaceholder")}
               className="w-full bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] font-mono outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
             />
           </div>
@@ -131,7 +134,7 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
             onClick={onClose}
             className="px-4 py-1.5 text-[13px] border border-border rounded-md text-muted-foreground hover:text-foreground hover:border-muted-foreground/30 transition-colors"
           >
-            Cancelar
+            {tc("cancel")}
           </button>
           <button
             type="button"
@@ -139,7 +142,7 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
             disabled={saving}
             className="px-4 py-1.5 text-[13px] bg-[#f7931a] text-black font-semibold rounded-md hover:bg-[#e07b10] disabled:opacity-50 transition-colors"
           >
-            {saving ? "A criar…" : "Adicionar relay"}
+            {saving ? tr("submitting") : tr("submit")}
           </button>
         </div>
       </div>

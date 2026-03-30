@@ -13,10 +13,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
-    jwt({ token, account }) {
+    jwt({ token, account, profile }) {
       // Use GitHub numeric ID (providerAccountId) for API auth; token.sub is internal UUID
       if (account?.providerAccountId) {
         token.providerUserId = account.providerAccountId;
+      }
+      if (profile && typeof profile === "object" && "login" in profile) {
+        const login = (profile as { login?: string }).login;
+        if (typeof login === "string") token.githubLogin = login;
       }
       return token;
     },
@@ -24,6 +28,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (session.user) {
         (session.user as { id?: string }).id =
           (token.providerUserId as string) ?? token.sub ?? undefined;
+        const gl = token.githubLogin;
+        if (typeof gl === "string") {
+          (session.user as { githubLogin?: string }).githubLogin = gl;
+        }
       }
       return session;
     },

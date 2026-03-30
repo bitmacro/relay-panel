@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import {
   CATEGORY_COLORS,
-  CATEGORY_LABELS,
   CATEGORY_SUMMARY_ORDER,
   getKindInfo,
   type KindCategory,
@@ -54,27 +54,6 @@ interface RelayHealth {
   _ok?: boolean;
 }
 
-function formatHealthError(health: RelayHealth | null): string {
-  if (!health) return "—";
-  const status = health._status;
-  const err = health.error ?? health.detail;
-  const suffix = status != null ? ` (${status})` : "";
-  if (err === "agent_unavailable")
-    return `Agente indisponível${suffix}. O relay-agent não responde; verifica se está a correr e se o proxy encaminha corretamente.`;
-  if (err === "agent_timeout")
-    return `Agente não respondeu a tempo${suffix}. O relay-agent demorou demasiado.`;
-  if (err === "gateway_timeout" || err === "supabase_timeout")
-    return `Tempo limite excedido${suffix}. Tenta novamente.`;
-  if (err === "relay not found")
-    return `Relay não encontrado${suffix}.`;
-  if (status === 502)
-    return `Proxy 502 Bad Gateway${suffix}. O relay-agent pode estar offline ou o proxy não encaminha corretamente.`;
-  if (status === 503)
-    return `Serviço indisponível (503)${suffix}. O relay-agent pode estar offline ou em estado unhealthy.`;
-  if (err) return `${err}${suffix}`;
-  return `Erro${suffix}`;
-}
-
 interface DashboardContentProps {
   stats: RelayStats | null;
   health: RelayHealth | null;
@@ -93,25 +72,7 @@ function formatUptime(seconds?: number): string {
   return `${m}m`;
 }
 
-function formatNumber(n?: number): string {
-  if (n == null) return "—";
-  return n.toLocaleString("pt-PT");
-}
-
 type KindRow = { kind: number; events: number; pct: string };
-
-function formatEventsError(err: unknown): string {
-  const msg = typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
-  if (msg.includes("relay unavailable"))
-    return "Relay indisponível (LMDB). O strfry pode estar bloqueado ou maxreaders é insuficiente. Verifica strfry.conf no servidor e aumenta maxreaders.";
-  if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
-    return "O agente não respondeu. Pode estar ocupado ou o pedido demorou demasiado. Tenta atualizar.";
-  if (msg.includes("timeout") || msg.includes("agent_timeout"))
-    return "O pedido demorou demasiado. O relay pode ter muitos eventos. Tenta atualizar.";
-  if (msg.includes("502") || msg.includes("503"))
-    return "Proxy ou agente indisponível. Verifica a ligação ao relay-agent.";
-  return msg || "Erro ao carregar eventos.";
-}
 
 export function DashboardContent({
   stats,
@@ -120,6 +81,48 @@ export function DashboardContent({
   loading,
   refreshTrigger,
 }: DashboardContentProps) {
+  const locale = useLocale();
+  const t = useTranslations("dashboard");
+  const tErr = useTranslations("errors");
+  const tc = useTranslations("common");
+
+  const nfLocale = locale === "en" ? "en-US" : "pt-PT";
+  const formatNumber = (n?: number | null) =>
+    n == null ? "—" : n.toLocaleString(nfLocale);
+
+  const formatHealthError = useCallback(
+    (health: RelayHealth | null): string => {
+      if (!health) return tErr("health.dash");
+      const status = health._status;
+      const err = health.error ?? health.detail;
+      const suffix = status != null ? ` (${status})` : "";
+      if (err === "agent_unavailable") return tErr("health.agentUnavailable", { suffix });
+      if (err === "agent_timeout") return tErr("health.agentTimeout", { suffix });
+      if (err === "gateway_timeout" || err === "supabase_timeout")
+        return tErr("health.gatewayTimeout", { suffix });
+      if (err === "relay not found") return tErr("health.relayNotFound", { suffix });
+      if (status === 502) return tErr("health.badGateway502", { suffix });
+      if (status === 503) return tErr("health.serviceUnavailable503", { suffix });
+      if (err) return `${err}${suffix}`;
+      return tErr("health.genericError", { suffix });
+    },
+    [tErr]
+  );
+
+  const formatEventsError = useCallback(
+    (err: unknown): string => {
+      const msg =
+        typeof err === "string" ? err : err instanceof Error ? err.message : String(err);
+      if (msg.includes("relay unavailable")) return tErr("events.relayLmdb");
+      if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
+        return tErr("events.agentNoResponse");
+      if (msg.includes("timeout") || msg.includes("agent_timeout")) return tErr("events.timeout");
+      if (msg.includes("502") || msg.includes("503")) return tErr("events.badGateway");
+      return msg || tErr("events.genericLoad");
+    },
+    [tErr]
+  );
+
   const [kindActivity, setKindActivity] = useState<KindRow[]>([]);
   const [kindLoading, setKindLoading] = useState(false);
   const [kindError, setKindError] = useState<string | null>(null);
@@ -164,7 +167,7 @@ export function DashboardContent({
     } finally {
       setKindLoading(false);
     }
-  }, []);
+  }, [formatEventsError]);
 
   const fetchDashboardMetrics = useCallback(async (relayId: string) => {
     setMetricsLoading(true);
@@ -243,14 +246,14 @@ export function DashboardContent({
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-          <div className="text-[11px] text-[#555]">Total eventos</div>
+          <div className="text-[11px] text-[#555]">{t("metrics.totalEvents")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
             {loading ? "…" : formatNumber(stats?.total_events)}
           </div>
           <div className="mt-0.5 text-[11px] text-[#444]">strfry</div>
         </div>
         <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-          <div className="text-[11px] text-[#555]">DB size</div>
+          <div className="text-[11px] text-[#555]">{t("metrics.dbSize")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
             {loading ? "…" : stats?.db_size ?? "—"}
           </div>
@@ -258,9 +261,9 @@ export function DashboardContent({
         </div>
         <div
           className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
-          title="Contagem de pubkeys únicas a partir de uma amostra strfry (kinds 0, 1 e 3; limite de eventos no agent)."
+          title={t("metrics.uniquePubkeysTitle")}
         >
-          <div className="text-[11px] text-[#555]">Pubkeys únicas</div>
+          <div className="text-[11px] text-[#555]">{t("metrics.uniquePubkeys")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
             {loading || metricsLoading
               ? "…"
@@ -268,15 +271,13 @@ export function DashboardContent({
                 ? formatNumber(pubkeySampleCount)
                 : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">
-            Amostra kinds 0·1·3 (máx. 10k eventos)
-          </div>
+          <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.uniquePubkeysHint")}</div>
         </div>
         <div
           className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
-          title="Linhas !pubkey na whitelist (bloqueados)."
+          title={t("metrics.blockedTitle")}
         >
-          <div className="text-[11px] text-[#555]">Bloqueados</div>
+          <div className="text-[11px] text-[#555]">{t("metrics.blocked")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
             {loading || metricsLoading
               ? "…"
@@ -284,24 +285,22 @@ export function DashboardContent({
                 ? formatNumber(blockedPolicyCount)
                 : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">Whitelist (!)</div>
+          <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.whitelistHint")}</div>
         </div>
       </div>
 
       {/* Resumo por categoria */}
       <div>
         <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
-          Resumo por categoria
+          {t("categorySummary")}
         </div>
         <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-3">
           {kindLoading ? (
-            <p className="text-[12px] text-[#666]">A carregar…</p>
+            <p className="text-[12px] text-[#666]">{tc("loading")}</p>
           ) : kindError ? (
             <p className="text-[12px] text-[#f87171]">{kindError}</p>
           ) : categorySummary.total === 0 ? (
-            <p className="text-[12px] text-[#555]">
-              Sem dados. Seleciona um relay com eventos.
-            </p>
+            <p className="text-[12px] text-[#555]">{t("noDataSelect")}</p>
           ) : (
             <ul className="space-y-2.5">
               {CATEGORY_SUMMARY_ORDER.map((cat) => {
@@ -320,10 +319,10 @@ export function DashboardContent({
                     <span
                       className={`w-[100px] shrink-0 font-medium ${CATEGORY_COLORS[cat]}`}
                     >
-                      {CATEGORY_LABELS[cat]}
+                      {t(`category.${cat}`)}
                     </span>
                     <span className="w-12 shrink-0 text-right tabular-nums text-[#ccc]">
-                      {n.toLocaleString("pt-PT")}
+                      {n.toLocaleString(nfLocale)}
                     </span>
                     <span className="w-12 shrink-0 text-right tabular-nums text-[#555]">
                       {pct.toFixed(1)}%
@@ -342,35 +341,35 @@ export function DashboardContent({
         </div>
         <p className="mt-1.5 text-[11px] text-[#555]">
           {kindActivity.length > 0
-            ? `Baseado na mesma amostra de ${categorySummary.total.toLocaleString("pt-PT")} eventos.`
-            : "Amostra dos eventos mais recentes do relay."}
+            ? t("sampleFooter", {
+                count: categorySummary.total.toLocaleString(nfLocale),
+              })
+            : t("sampleHint")}
         </p>
       </div>
 
       {/* Atividade por kind */}
       <div>
-        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
-          Atividade por kind
-        </div>
+        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">{t("kindActivity")}</div>
         <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
           <TooltipProvider delayDuration={300}>
             <table className="w-full border-collapse text-[12px]">
               <thead>
                 <tr>
                   <th className="w-[104px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                    Kind
+                    {t("colKind")}
                   </th>
                   <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                    Descrição
+                    {t("colDescription")}
                   </th>
                   <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                    NIP
+                    {t("colNip")}
                   </th>
                   <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
-                    Eventos
+                    {t("colEvents")}
                   </th>
                   <th className="w-16 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
-                    %
+                    {t("colPct")}
                   </th>
                 </tr>
               </thead>
@@ -381,7 +380,7 @@ export function DashboardContent({
                       colSpan={5}
                       className="px-2.5 py-6 text-center text-[12px] text-[#666]"
                     >
-                      A carregar…
+                      {tc("loading")}
                     </td>
                   </tr>
                 ) : kindError ? (
@@ -396,7 +395,7 @@ export function DashboardContent({
                       colSpan={5}
                       className="px-2.5 py-6 text-center text-[12px] text-[#555]"
                     >
-                      Sem dados. Seleciona um relay com eventos.
+                      {t("noDataSelect")}
                     </td>
                   </tr>
                 ) : (
@@ -426,7 +425,7 @@ export function DashboardContent({
                               {kindNipReference(row.kind)}
                             </td>
                             <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
-                              {row.events.toLocaleString("pt-PT")}
+                              {row.events.toLocaleString(nfLocale)}
                             </td>
                             <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
                               {row.pct}
@@ -446,8 +445,10 @@ export function DashboardContent({
         </div>
         <p className="mt-1.5 text-[11px] text-[#555]">
           {kindActivity.length > 0
-            ? `Baseado em amostra de ${kindActivity.reduce((s, r) => s + r.events, 0).toLocaleString("pt-PT")} eventos.`
-            : "Amostra dos eventos mais recentes do relay."}
+            ? t("sampleFooterKinds", {
+                count: kindActivity.reduce((s, r) => s + r.events, 0).toLocaleString(nfLocale),
+              })
+            : t("sampleHint")}
         </p>
       </div>
 
@@ -471,19 +472,19 @@ export function DashboardContent({
               <div className="space-y-4 px-6 pb-8 text-[13px] text-foreground">
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Kind (número)
+                    {t("sheetKindNumber")}
                   </div>
                   <div className="font-mono text-xl tabular-nums">{kindSheetKind}</div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    NIP
+                    {t("sheetNip")}
                   </div>
                   <div className="font-mono">{kindNipReference(kindSheetKind)}</div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Descrição
+                    {t("sheetDescription")}
                   </div>
                   <p className="text-muted-foreground leading-snug">
                     {dashboardKindLongDescription(kindSheetKind)}
@@ -491,7 +492,7 @@ export function DashboardContent({
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Nota
+                    {t("sheetNote")}
                   </div>
                   <p className="text-muted-foreground text-[12px] leading-snug">
                     {dashboardKindRowTooltip(kindSheetKind)}
@@ -505,24 +506,22 @@ export function DashboardContent({
 
       {/* Estado da ligação */}
       <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-        <div className="mb-3 text-[13px] font-medium text-[#ddd]">
-          Estado da ligação
-        </div>
+        <div className="mb-3 text-[13px] font-medium text-[#ddd]">{t("connection")}</div>
         <div className="flex flex-wrap gap-5 text-sm">
           <div>
-            <span className="text-[#555]">Versão strfry: </span>
+            <span className="text-[#555]">{t("strfryVersion")} </span>
             <strong className="text-[#ccc]">
               {loading ? "…" : stats?.version ?? "—"}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">Uptime: </span>
+            <span className="text-[#555]">{t("uptime")} </span>
             <strong className="text-[#ccc]">
               {loading ? "…" : formatUptime(stats?.uptime)}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">relay-agent: </span>
+            <span className="text-[#555]">{t("relayAgent")} </span>
             <strong
               className={
                 health?.status === "ok"
@@ -541,7 +540,7 @@ export function DashboardContent({
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">Endpoint: </span>
+            <span className="text-[#555]">{t("endpoint")} </span>
             <strong className="font-mono text-[11px] text-[#666]">
               {selectedRelay?.endpoint ?? "—"}
             </strong>

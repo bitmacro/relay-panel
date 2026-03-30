@@ -1,6 +1,6 @@
 import { AuthenticatedAppShell } from "@/components/layout/AuthenticatedAppShell";
 
-export default function RelaysLayout({
+export default function OnboardingLayout({
   children,
 }: {
   children: React.ReactNode;

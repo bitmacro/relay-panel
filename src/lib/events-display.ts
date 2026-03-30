@@ -1,5 +1,8 @@
 import { nip19 } from "nostr-tools";
 
+/** Kinds shown in Help “quick reference” (labels/descriptions from kindBadgeMeta + dashboardKindLongDescription). */
+export const HELP_REFERENCE_KINDS = [0, 1, 3, 6, 7, 10002, 1059] as const;
+
 export interface NostrEventRow {
   id: string;
   pubkey: string;

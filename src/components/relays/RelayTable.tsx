@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { RelayStatusBadge } from "./RelayStatusBadge";
 import { NewRelayModal } from "./NewRelayModal";
 
@@ -26,12 +27,14 @@ interface RelayTableProps {
   relays: RelayInput[];
 }
 
-function formatNumber(n?: number | null): string {
+function formatNumber(n: number | null | undefined, locale: string): string {
   if (n == null) return "—";
-  return n.toLocaleString("pt-PT");
+  return n.toLocaleString(locale === "en" ? "en-US" : "pt-PT");
 }
 
 export function RelayTable({ relays: initialRelays }: RelayTableProps) {
+  const t = useTranslations("relayTable");
+  const locale = useLocale();
   const router = useRouter();
   const [rows, setRows] = useState<RelayRow[]>(
     initialRelays.map((r) => ({ ...r, status: "loading" as const }))
@@ -97,9 +100,9 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
         {/* Page header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-[18px] font-semibold tracking-tight">Relay Hosts</h1>
+            <h1 className="text-[18px] font-semibold tracking-tight">{t("title")}</h1>
             <div className="text-[12px] text-muted-foreground font-mono mt-0.5">
-              {rows.length} relay{rows.length !== 1 ? "s" : ""} configurado{rows.length !== 1 ? "s" : ""}
+              {t("configured", { count: rows.length })}
             </div>
           </div>
           <button
@@ -110,7 +113,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
               <path d="M5 5V1h2v4h4v2H7v4H5V7H1V5h4z" />
             </svg>
-            Novo relay
+            {t("newRelay")}
           </button>
         </div>
 
@@ -120,7 +123,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Filtrar por nome ou URL…"
+            placeholder={t("filterPlaceholder")}
             className="w-60 bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] outline-none focus:border-muted-foreground/30 placeholder:text-muted-foreground/40"
           />
         </div>
@@ -131,22 +134,22 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
             <thead>
               <tr className="bg-secondary border-b border-border">
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  Relay
+                  {t("colRelay")}
                 </th>
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  Endpoint do agente
+                  {t("colAgent")}
                 </th>
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  Agent Relay ID
+                  {t("colAgentRelayId")}
                 </th>
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  Status
+                  {t("colStatus")}
                 </th>
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  Eventos
+                  {t("colEvents")}
                 </th>
                 <th className="px-4 py-2.5 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.07em]">
-                  DB size
+                  {t("colDbSize")}
                 </th>
                 <th className="px-4 py-2.5" />
               </tr>
@@ -158,9 +161,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
                     colSpan={7}
                     className="px-4 py-12 text-center text-[13px] text-muted-foreground"
                   >
-                    {search
-                      ? "Nenhum relay encontrado."
-                      : "Adicione o seu primeiro relay."}
+                    {search ? t("emptySearch") : t("empty")}
                   </td>
                 </tr>
               ) : (
@@ -213,7 +214,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
                         <RelayStatusBadge status={relay.status} />
                       </td>
                       <td className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono">
-                        {formatNumber(relay.total_events)}
+                        {formatNumber(relay.total_events, locale)}
                       </td>
                       <td className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono">
                         {relay.db_size ?? "—"}
@@ -224,7 +225,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
                             href={`/relays/${relay.id}`}
                             onClick={(e) => e.stopPropagation()}
                             className="w-7 h-7 flex items-center justify-center border border-border rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors text-[14px]"
-                            title="Gerir"
+                            title={t("manage")}
                           >
                             ⚙
                           </Link>

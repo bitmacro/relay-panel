@@ -33,8 +33,12 @@ export default async function RelaysPage() {
         relays = body.relays ?? [];
       }
     } catch {
-      /* ignore, show empty table */
+      /* ignore */
     }
+  }
+
+  if (relays.length === 0) {
+    redirect("/onboarding");
   }
 
   return <RelayTable key={relays.map((r) => r.id).sort().join(",")} relays={relays} />;

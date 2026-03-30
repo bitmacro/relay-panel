@@ -3,6 +3,7 @@
 import { Github } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 
 interface FooterProps {
@@ -15,6 +16,8 @@ interface FooterProps {
 type AgentHealthOk = { status: string; version?: string };
 
 export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
+  const t = useTranslations("footer");
+  const tNav = useTranslations("nav");
   const pathname = usePathname();
   const [agentVersion, setAgentVersion] = useState<string | null>(null);
   const [agentLoading, setAgentLoading] = useState(false);
@@ -84,25 +87,25 @@ export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
               height={18}
               className="w-[18px] h-[18px] object-contain"
             />
-            <span>BitMacro Relay Manager</span>
+            <span>{t("brand")}</span>
           </a>
         </div>
         <span className="text-border">·</span>
         <span
           className="font-mono text-[10px] bg-secondary border border-border px-1.5 py-0.5 rounded"
-          title="relay-panel (este site)"
+            title={t("panelTitle")}
         >
-          {`panel v${panelVersion}`}
+          {t("panelVersion", { version: panelVersion })}
         </span>
         <span className="text-border">·</span>
         <span
           className="font-mono text-[10px] bg-secondary border border-border px-1.5 py-0.5 rounded"
-          title="relay-agent via GET /health (relay selecionado ou primeiro relay)"
+          title={t("agentTitle")}
         >
-          {`agent ${agentLabel}`}
+          {t("agent", { label: agentLabel })}
         </span>
         <span className="text-border">·</span>
-        <span>relay-panel.bitmacro.io</span>
+        <span>{tNav("domain")}</span>
       </div>
       <div className="flex items-center gap-3.5 text-[11px] text-muted-foreground">
         <a
@@ -111,7 +114,7 @@ export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
           rel="noopener noreferrer"
           className="hover:text-foreground transition-colors"
         >
-          BitMacro Ecosystem ↗
+          {t("ecosystem")}
         </a>
         <a
           href="https://github.com/bitmacro/relay-panel"
@@ -119,7 +122,7 @@ export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
           rel="noreferrer"
           className="hover:text-foreground transition-colors"
         >
-          relay-panel ↗
+          {t("repoPanel")}
         </a>
         <a
           href="https://github.com/bitmacro/relay-agent"
@@ -127,7 +130,7 @@ export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
           rel="noreferrer"
           className="hover:text-foreground transition-colors"
         >
-          relay-agent ↗
+          {t("repoAgent")}
         </a>
         <a
           href="https://github.com/bitmacro/relay-connect"
@@ -137,10 +140,10 @@ export function Footer({ panelVersion, defaultRelayId }: FooterProps) {
           className="inline-flex items-center gap-1 font-mono hover:text-foreground transition-colors"
         >
           <Github className="size-3.5 shrink-0 opacity-80" aria-hidden />
-          <span>@bitmacro/relay-connect</span>
+          <span>{t("repoConnect")}</span>
         </a>
         <span className="text-border">·</span>
-        <span>© 2026 BitMacro</span>
+        <span>{t("copyright")}</span>
       </div>
     </footer>
   );

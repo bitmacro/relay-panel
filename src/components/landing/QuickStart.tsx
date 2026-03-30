@@ -1,13 +1,18 @@
+"use client";
+
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ScrollReveal } from "./ScrollReveal";
 
 export function QuickStart() {
+  const t = useTranslations("landing.quickstart");
+
   return (
     <section id="quickstart" className="py-20 md:py-28 px-6 scroll-mt-20 section-glow-divider relative">
       <div className="mx-auto max-w-4xl">
         <ScrollReveal>
           <h2 className="text-[22px] md:text-[26px] font-bold text-foreground mb-12 text-center">
-            Up and running in 3 steps
+            {t("title")}
           </h2>
         </ScrollReveal>
 
@@ -15,7 +20,7 @@ export function QuickStart() {
           <ScrollReveal delay={0}>
             <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Step 1 — Install the agent
+                {t("s1")}
               </div>
               <pre className="p-4 rounded-lg bg-secondary/80 border border-border overflow-x-auto text-[13px] font-mono text-foreground">
 {`npx @bitmacro/relay-agent
@@ -28,7 +33,7 @@ docker pull ghcr.io/bitmacro/relay-agent`}
           <ScrollReveal delay={80}>
             <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Step 2 — Configure RELAY_INSTANCES
+                {t("s2")}
               </div>
               <pre className="p-4 rounded-lg bg-secondary/80 border border-border overflow-x-auto text-[13px] font-mono text-foreground">
 {`[
@@ -41,52 +46,41 @@ docker pull ghcr.io/bitmacro/relay-agent`}
           <ScrollReveal delay={160}>
             <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Step 3 — Sign in at{" "}
-                <span className="text-foreground font-mono">
-                  relay-panel.bitmacro.io
-                </span>{" "}
-                and add your relay endpoint
+                {t("s3a")}{" "}
+                <span className="text-foreground font-mono">relay-panel.bitmacro.io</span>{" "}
+                {t("s3b")}
               </div>
-              <p className="text-[13px] text-muted-foreground">
-                Create a relay in the panel, paste your agent URL and token. Done.
-              </p>
+              <p className="text-[13px] text-muted-foreground">{t("s3body")}</p>
             </div>
           </ScrollReveal>
 
           <ScrollReveal delay={220}>
             <div className="rounded-2xl border border-border/80 bg-secondary/30 p-6">
               <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                Going deeper
+                {t("deeper")}
               </p>
               <p className="text-[13px] text-muted-foreground leading-relaxed">
-                This quick path matches{" "}
-                <strong className="text-foreground font-medium">
-                  panel → relay-api → relay-agent
-                </strong>{" "}
-                (see the{" "}
+                {t("deeperBodyA")}{" "}
+                <strong className="text-foreground font-medium">{t("deeperBold")}</strong>{" "}
+                {t("deeperBodyB")}{" "}
                 <Link
                   href="https://github.com/bitmacro/relay-panel#architecture"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[#f7931a] hover:underline underline-offset-2"
                 >
-                  relay-panel README
+                  {t("deeperLinkReadme")}
                 </Link>
-                ). For the full BitMacro Relay Manager story — marketing site, connect
-                UI, central API, and agent — including{" "}
-                <strong className="text-foreground font-medium">
-                  NIP-07 and NIP-46
-                </strong>{" "}
-                signing flows, use the{" "}
+                {t("deeperBodyC")}{" "}
                 <Link
                   href="https://bitmacro.io/relay-manager/docs"
                   target="_blank"
                   rel="noreferrer"
                   className="text-[#f7931a] hover:underline underline-offset-2"
                 >
-                  technical documentation on bitmacro.io
+                  {t("deeperLinkDocs")}
                 </Link>
-                .
+                {t("deeperEnd")}
               </p>
             </div>
           </ScrollReveal>

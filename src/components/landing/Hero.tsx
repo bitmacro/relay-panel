@@ -1,8 +1,16 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { ScrollReveal } from "./ScrollReveal";
 
 export function Hero() {
+  const { data: session } = useSession();
+  const t = useTranslations("landing.hero");
+  const primaryHref = session?.user ? "/relays" : "/auth/signin";
+
   return (
     <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6">
       <div className="mx-auto max-w-6xl">
@@ -11,31 +19,30 @@ export function Hero() {
             <ScrollReveal>
               <div className="mb-4 space-y-1.5">
                 <p className="text-[12px] font-mono text-muted-foreground uppercase tracking-wider">
-                  relay-agent v0.2.0 · MIT · Open Source
+                  {t("kickerA")}
                 </p>
                 <p className="text-[11px] font-mono text-muted-foreground/75 uppercase tracking-wider">
-                  5-module ecosystem · relay-agent · relay-panel · relay-connect
+                  {t("kickerB")}
                 </p>
               </div>
             </ScrollReveal>
             <ScrollReveal delay={80}>
               <h1 className="text-[28px] md:text-[36px] lg:text-[42px] font-bold tracking-tight text-foreground leading-tight mb-4">
-                Manage your Nostr relay without touching the terminal
+                {t("title")}
               </h1>
             </ScrollReveal>
             <ScrollReveal delay={160}>
               <p className="text-[15px] md:text-[16px] text-muted-foreground mb-8 max-w-xl leading-relaxed">
-                Visual dashboard for relay operators — moderation, access control,
-                Lightning payments and multi-relay management in one panel.
+                {t("subtitle")}
               </p>
             </ScrollReveal>
             <ScrollReveal delay={240}>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  href="/auth/signin"
+                  href={primaryHref}
                   className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#f7931a] text-black text-[14px] font-semibold rounded-lg glow-orange hover:glow-orange-strong transition-all duration-300 hover:scale-[1.02]"
                 >
-                  Start managing →
+                  {t("ctaPrimary")}
                 </Link>
                 <Link
                   href="https://github.com/bitmacro/relay-panel"
@@ -43,7 +50,7 @@ export function Hero() {
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-[14px] font-medium rounded-lg hover:bg-secondary/50 transition-colors"
                 >
-                  View on GitHub
+                  {t("ctaGithub")}
                 </Link>
               </div>
               <p className="mt-4 text-[12px] text-muted-foreground max-w-xl leading-relaxed">
@@ -53,11 +60,9 @@ export function Hero() {
                   rel="noreferrer"
                   className="text-[#f7931a] hover:underline underline-offset-2"
                 >
-                  Full-stack technical documentation
+                  {t("docsLead")}
                 </Link>
-                {" — "}
-                bitmacro.io through relay-agent, with NIP-07 and NIP-46 authentication
-                (complements the panel → relay-api → agent path in this repo’s README).
+                {t("docsTrail")}
               </p>
             </ScrollReveal>
           </div>
@@ -67,7 +72,7 @@ export function Hero() {
               <div className="aspect-[2/1] relative bg-secondary/50">
                 <Image
                   src="/panel.png"
-                  alt="BitMacro Relay Manager — Dashboard with relay table, sidebar and status badges"
+                  alt={t("imageAlt")}
                   fill
                   className="object-contain object-top"
                   sizes="(max-width: 1024px) 100vw, 50vw"

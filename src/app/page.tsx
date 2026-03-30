@@ -1,6 +1,4 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
-import { auth } from "@/lib/auth";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { Hero } from "@/components/landing/Hero";
 import { ProblemSection } from "@/components/landing/ProblemSection";
@@ -44,10 +42,7 @@ const JSON_LD = {
   ],
 };
 
-export default async function LandingPage() {
-  const session = await auth();
-  if (session?.user) redirect("/relays");
-
+export default function LandingPage() {
   return (
     <>
       <script

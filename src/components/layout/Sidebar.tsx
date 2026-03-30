@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { NewRelayModal } from "@/components/relays/NewRelayModal";
 
@@ -17,9 +18,10 @@ interface SidebarProps {
 
 export function Sidebar({ relays }: SidebarProps) {
   const pathname = usePathname();
+  const t = useTranslations("sidebar");
   const [showModal, setShowModal] = useState(false);
 
-  const isRelaysActive = pathname === "/relays";
+  const isRelaysActive = pathname === "/relays" || pathname === "/onboarding";
 
   return (
     <>
@@ -27,7 +29,7 @@ export function Sidebar({ relays }: SidebarProps) {
         {/* Geral section */}
         <div className="px-3 mb-1">
           <div className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.08em] px-2 mb-1.5">
-            Geral
+            {t("general")}
           </div>
           <Link
             href="/relays"
@@ -44,7 +46,7 @@ export function Sidebar({ relays }: SidebarProps) {
             >
               <path d="M2 3h12v2H2V3zm0 4h12v2H2V7zm0 4h12v2H2v-2z" />
             </svg>
-            Relays
+            {t("relays")}
           </Link>
         </div>
 
@@ -53,7 +55,7 @@ export function Sidebar({ relays }: SidebarProps) {
         {/* Relays ativos */}
         <div className="px-3 flex-1 min-h-0 overflow-y-auto">
           <div className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-[0.08em] px-2 mb-2">
-            Relays ativos
+            {t("activeRelays")}
           </div>
           <div className="space-y-0.5">
             {relays.map((relay) => {
@@ -82,7 +84,7 @@ export function Sidebar({ relays }: SidebarProps) {
             })}
             {relays.length === 0 && (
               <div className="px-2 py-2 text-[12px] text-muted-foreground/40">
-                Nenhum relay
+                {t("none")}
               </div>
             )}
           </div>
@@ -104,7 +106,7 @@ export function Sidebar({ relays }: SidebarProps) {
             >
               <path d="M7 7V2h2v5h5v2H9v5H7V9H2V7h5z" />
             </svg>
-            Novo relay
+            {t("newRelay")}
           </button>
         </div>
       </aside>

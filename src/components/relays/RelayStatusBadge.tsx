@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 type Status = "online" | "unhealthy" | "offline" | "loading";
 
 interface RelayStatusBadgeProps {
@@ -5,6 +9,8 @@ interface RelayStatusBadgeProps {
 }
 
 export function RelayStatusBadge({ status }: RelayStatusBadgeProps) {
+  const t = useTranslations("relayStatus");
+
   if (status === "loading") {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
@@ -17,7 +23,7 @@ export function RelayStatusBadge({ status }: RelayStatusBadgeProps) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-[#22c55e1a] text-[#22c55e]">
         <span className="w-[5px] h-[5px] rounded-full bg-current" />
-        Online
+        {t("online")}
       </span>
     );
   }
@@ -25,14 +31,14 @@ export function RelayStatusBadge({ status }: RelayStatusBadgeProps) {
     return (
       <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-[#eab3081a] text-[#eab308]">
         <span className="w-[5px] h-[5px] rounded-full bg-current" />
-        Unhealthy
+        {t("unhealthy")}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-[#ef44441a] text-[#ef4444]">
       <span className="w-[5px] h-[5px] rounded-full bg-current" />
-      Offline
+      {t("offline")}
     </span>
   );
 }

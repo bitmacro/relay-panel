@@ -1,8 +1,13 @@
+"use client";
+
 import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export function LandingFooter() {
+  const t = useTranslations("landing.footer");
+
   return (
     <footer className="border-t border-border bg-card px-6 py-8">
       <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -14,13 +19,13 @@ export function LandingFooter() {
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
             <Image
-            src="/bitmacro-logo.png"
-            alt="BitMacro"
-            width={24}
-            height={24}
-            className="w-6 h-6 object-contain"
-              />
-            <span className="text-[13px] font-medium">Relay Manager</span>
+              src="/bitmacro-logo.png"
+              alt="BitMacro"
+              width={24}
+              height={24}
+              className="w-6 h-6 object-contain"
+            />
+            <span className="text-[13px] font-medium">{t("brand")}</span>
           </a>
           <span className="text-border">·</span>
           <span className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded">
@@ -32,7 +37,7 @@ export function LandingFooter() {
             href="https://bitmacro.io"
             className="hover:text-foreground transition-colors"
           >
-            BitMacro — Bitcoin, Lightning & Nostr tools ↗
+            {t("bitmacro")}
           </Link>
           <a
             href="https://bitmacro.io/relay-manager"
@@ -40,7 +45,7 @@ export function LandingFooter() {
             rel="noreferrer"
             className="footer-link"
           >
-            Ecosystem overview →
+            {t("ecosystem")}
           </a>
           <a
             href="https://bitmacro.io/relay-manager/docs"
@@ -48,7 +53,7 @@ export function LandingFooter() {
             rel="noreferrer"
             className="footer-link"
           >
-            Technical docs (NIP-07 · NIP-46) ↗
+            {t("techDocs")}
           </a>
           <Link
             href="https://github.com/bitmacro/relay-panel"
@@ -76,7 +81,7 @@ export function LandingFooter() {
             <Github className="size-3.5 shrink-0 opacity-80" aria-hidden />
             <span>@bitmacro/relay-connect</span>
           </Link>
-          <span>© 2026 BitMacro</span>
+          <span>{t("copyright")}</span>
         </div>
       </div>
     </footer>
