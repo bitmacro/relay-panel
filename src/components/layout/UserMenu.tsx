@@ -9,6 +9,9 @@ import { useAppLocale } from "@/components/intl-client-provider";
 import type { AppLocale } from "@/lib/local-preferences";
 import { ProfileSheet } from "@/components/layout/ProfileSheet";
 import { HelpSheet } from "@/components/layout/HelpSheet";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { hexToNpubDisplay, truncateNpub } from "@/lib/events-display";
+import { useNostrPrefs } from "@/lib/use-nostr-prefs";
 
 interface UserMenuProps {
   user: User;
@@ -20,6 +23,7 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
   const t = useTranslations("userMenu");
   const router = useRouter();
   const { locale, setLocale } = useAppLocale();
+  const { hex: nostrHex } = useNostrPrefs();
   const langLabel = locale.toUpperCase();
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -50,27 +54,50 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
         .toUpperCase()
     : "?";
 
+  const nostrNpub =
+    nostrHex && /^[0-9a-f]{64}$/i.test(nostrHex)
+      ? truncateNpub(hexToNpubDisplay(nostrHex.toLowerCase()))
+      : null;
+
   return (
     <>
-      <div className="relative" ref={ref}>
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="flex items-center gap-2 bg-secondary border border-border rounded-full pl-1 pr-2.5 py-1 hover:border-muted-foreground/30 transition-colors"
-        >
-          <div className="w-[26px] h-[26px] rounded-full bg-[#f7931a] text-black flex items-center justify-center text-[11px] font-bold font-mono overflow-hidden">
-            {user.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.image} alt="" className="w-full h-full object-cover" />
-            ) : (
-              initials
-            )}
-          </div>
-          <span className="text-[12px] font-medium text-muted-foreground">
-            {user.name?.split(" ")[0] ?? "user"}
-          </span>
-          <span className="text-[9px] text-muted-foreground/60">▾</span>
-        </button>
+      <TooltipProvider delayDuration={300}>
+        <div className="relative" ref={ref}>
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="flex items-center gap-2 bg-secondary border border-border rounded-full pl-1 pr-2.5 py-1 hover:border-muted-foreground/30 transition-colors"
+          >
+            <div className="flex items-center gap-1">
+              {nostrNpub ? (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className="text-[13px] leading-none select-none cursor-default"
+                      aria-label={t("nostrBadgeAria")}
+                    >
+                      ⚡
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="font-mono text-[11px]">
+                    {t("nostrTooltip", { npub: nostrNpub })}
+                  </TooltipContent>
+                </Tooltip>
+              ) : null}
+              <div className="w-[26px] h-[26px] rounded-full bg-[#f7931a] text-black flex items-center justify-center text-[11px] font-bold font-mono overflow-hidden">
+                {user.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={user.image} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  initials
+                )}
+              </div>
+            </div>
+            <span className="text-[12px] font-medium text-muted-foreground">
+              {user.name?.split(" ")[0] ?? "user"}
+            </span>
+            <span className="text-[9px] text-muted-foreground/60">▾</span>
+          </button>
 
         {open && (
           <div className="absolute right-0 top-[calc(100%+8px)] w-52 bg-card border border-border rounded-lg shadow-2xl overflow-hidden z-50">
@@ -156,7 +183,8 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </TooltipProvider>
 
       <ProfileSheet open={profileOpen} onOpenChange={setProfileOpen} user={user} />
       <HelpSheet open={helpOpen} onOpenChange={setHelpOpen} />

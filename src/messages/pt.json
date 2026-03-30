@@ -20,7 +20,9 @@
     "help": "Ajuda & Docs",
     "darkTheme": "Tema escuro",
     "language": "Idioma",
-    "signOut": "Terminar sessão"
+    "signOut": "Terminar sessão",
+    "nostrTooltip": "Nostr: {npub}",
+    "nostrBadgeAria": "Identidade Nostr ligada"
   },
   "sidebar": {
     "general": "Geral",
@@ -147,7 +149,31 @@
     "saved": "Preferências guardadas.",
     "githubProfile": "Perfil no GitHub ↗",
     "invalidPubkey": "Pubkey inválida (usa hex 64 chars ou npub).",
-    "githubFallback": "https://github.com"
+    "githubFallback": "https://github.com",
+    "connectNip07": "Ligar via extensão (NIP-07)",
+    "connectNip46": "Ligar via NIP-46 (signer remoto)",
+    "badgeNip07": "NIP-07 activo",
+    "badgeNip46": "NIP-46 activo",
+    "badgeManual": "Pubkey manual",
+    "nip07Connected": "Pubkey da extensão guardada.",
+    "nip07Failed": "Não foi possível ler a pubkey na extensão.",
+    "nip07InvalidResponse": "A extensão não devolveu um hex de pubkey válido.",
+    "nip46Saved": "Pubkey do signer remoto guardada.",
+    "nip46Title": "Signer remoto (NIP-46)",
+    "nip46WaitHint": "Escaneia o QR ou abre a ligação na app signer remota e aprova a ligação.",
+    "nip46Waiting": "À espera do signer…",
+    "nip46CopyUri": "Copiar ligação nostrconnect",
+    "nip46ManualFinish": "Já aprovaste — concluir",
+    "nip46Finishing": "A concluir…",
+    "nip46Retry": "Tentar de novo",
+    "nip46ConfigError": "Não foi possível carregar a configuração do signer.",
+    "nip46NoRelays": "Não há relays na tua conta. Cria um relay primeiro.",
+    "nip46BridgeError": "Não foi possível resolver o WebSocket de bridge NIP-46. Define NEXT_PUBLIC_RELAY_BRIDGE_WSS se necessário.",
+    "nip46ConnectFailed": "Não foi possível iniciar a sessão NIP-46.",
+    "nip46RemotePubkeyMissing": "A sessão está activa mas a pubkey do signer não foi recebida. Aprova primeiro na app signer e tenta de novo.",
+    "nip46GenericError": "Ocorreu um erro.",
+    "nip46Timeout": "Tempo esgotado à espera do signer remoto.",
+    "nip46Revoked": "Esta sessão foi revogada."
   },
   "help": {
     "title": "Ajuda & Docs",

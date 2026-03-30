@@ -19,7 +19,12 @@ import {
   type EventsViewMode,
   ocultarSensitiveKindDescription,
 } from "@/lib/events-display";
-import { legacyStorageKeyForPubkey, MY_NOSTR_PUBKEY_KEY } from "@/lib/local-preferences";
+import {
+  legacyStorageKeyForPubkey,
+  MY_NOSTR_PUBKEY_KEY,
+  MY_NOSTR_SOURCE_KEY,
+  notifyNostrPrefsChanged,
+} from "@/lib/local-preferences";
 import { EventFeedCard } from "@/components/events-feed-card";
 import {
   Sheet,
@@ -365,6 +370,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       return;
     }
     localStorage.setItem(MY_NOSTR_PUBKEY_KEY, hex);
+    localStorage.setItem(MY_NOSTR_SOURCE_KEY, "manual");
+    notifyNostrPrefsChanged();
     setPubkeyFilterHint(null);
     setAuthorFilterInput(hexToNpubDisplay(hex));
   }

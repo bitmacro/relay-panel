@@ -20,7 +20,9 @@
     "help": "Help & docs",
     "darkTheme": "Dark theme",
     "language": "Language",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "nostrTooltip": "Nostr: {npub}",
+    "nostrBadgeAria": "Nostr identity connected"
   },
   "sidebar": {
     "general": "General",
@@ -147,7 +149,31 @@
     "saved": "Preferences saved.",
     "githubProfile": "GitHub profile ↗",
     "invalidPubkey": "Invalid pubkey (use 64-char hex or npub).",
-    "githubFallback": "https://github.com"
+    "githubFallback": "https://github.com",
+    "connectNip07": "Connect via extension (NIP-07)",
+    "connectNip46": "Connect via NIP-46 (remote signer)",
+    "badgeNip07": "NIP-07 active",
+    "badgeNip46": "NIP-46 active",
+    "badgeManual": "Manual pubkey",
+    "nip07Connected": "Extension pubkey saved.",
+    "nip07Failed": "Could not read pubkey from the extension.",
+    "nip07InvalidResponse": "The extension did not return a valid hex pubkey.",
+    "nip46Saved": "Remote signer pubkey saved.",
+    "nip46Title": "Remote signer (NIP-46)",
+    "nip46WaitHint": "Scan the QR code or open the link in your remote signer app, then approve the connection.",
+    "nip46Waiting": "Waiting for signer…",
+    "nip46CopyUri": "Copy nostrconnect link",
+    "nip46ManualFinish": "I already approved — finish",
+    "nip46Finishing": "Finishing…",
+    "nip46Retry": "Try again",
+    "nip46ConfigError": "Could not load signer configuration.",
+    "nip46NoRelays": "No relays for your account. Create a relay first.",
+    "nip46BridgeError": "Could not resolve the NIP-46 bridge WebSocket. Set NEXT_PUBLIC_RELAY_BRIDGE_WSS if needed.",
+    "nip46ConnectFailed": "Could not start the NIP-46 session.",
+    "nip46RemotePubkeyMissing": "Session is active but the signer public key was not received. Approve in the signer app first, then try again.",
+    "nip46GenericError": "Something went wrong.",
+    "nip46Timeout": "Timed out waiting for the remote signer.",
+    "nip46Revoked": "This session was revoked."
   },
   "help": {
     "title": "Help & docs",
