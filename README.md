@@ -1,7 +1,7 @@
 # BitMacro Relay Manager — relay-panel
 
 [![CI](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml)
-[![version](https://img.shields.io/badge/version-0.2.3-blue)](https://github.com/bitmacro/relay-panel/releases)
+[![version](https://img.shields.io/badge/version-0.2.4-blue)](https://github.com/bitmacro/relay-panel/releases)
 [![License](https://img.shields.io/badge/license-BSL_1.1-orange)](LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react)](https://react.dev/)
