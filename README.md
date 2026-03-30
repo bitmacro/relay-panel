@@ -1,5 +1,7 @@
 # BitMacro Relay Manager — relay-panel
 
+![BitMacro relay-panel](https://raw.githubusercontent.com/bitmacro/relay-panel/main/.github/social-preview.png)
+
 [![CI](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml/badge.svg)](https://github.com/bitmacro/relay-panel/actions/workflows/ci.yml)
 [![version](https://img.shields.io/badge/version-0.2.4-blue)](https://github.com/bitmacro/relay-panel/releases)
 [![License](https://img.shields.io/badge/license-BSL_1.1-orange)](LICENSE)
