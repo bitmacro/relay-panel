@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { NostrEventRow } from "@/lib/events-display";
 import {
   kindBadgeMeta,
@@ -36,7 +37,9 @@ export function EventFeedCard({
   onDelete,
   onBlock,
 }: EventFeedCardProps) {
+  const t = useTranslations("EventsTab");
   const meta = kindBadgeMeta(e.kind);
+  
   const initials = displayInitials(
     authorHasProfileName ? profileDisplayNameForInitials : null,
     e.pubkey
@@ -65,7 +68,7 @@ export function EventFeedCard({
               </p>
             ) : (
               <p className="text-[12px] text-muted-foreground/70 italic">
-                Sem descrição
+                {t("feed.noDescription")}
               </p>
             )}
           </div>
@@ -99,10 +102,10 @@ export function EventFeedCard({
       const refPk = firstTagValue(e.tags, "p");
       const innerText =
         (e.content?.trim() && e.content.slice(0, 160)) ||
-        (eid ? `Evento ${truncateEventId(eid)}` : "Repost");
+        (eid ? t("feed.repostEvent", { id: truncateEventId(eid) }) : t("feed.repost"));
       return (
         <div className="space-y-2">
-          <p className="text-[12px] text-muted-foreground">repostou</p>
+          <p className="text-[12px] text-muted-foreground">{t("feed.reposted")}</p>
           <div className="rounded-lg border border-border/80 bg-secondary/30 px-3 py-2.5">
             <p className="text-[13px] text-foreground/90 line-clamp-4 whitespace-pre-wrap break-words">
               {innerText}
@@ -114,7 +117,7 @@ export function EventFeedCard({
             )}
             {refPk && (
               <p className="mt-1 text-[11px] text-muted-foreground">
-                autor:{" "}
+                {t("feed.author")}:{" "}
                 <span className="font-mono">{resolvePubkeyLabel(refPk)}</span>
               </p>
             )}
@@ -132,7 +135,7 @@ export function EventFeedCard({
           </div>
           {eid && (
             <p className="text-[12px] text-muted-foreground">
-              em resposta a{" "}
+              {t("feed.inResponseTo")}{" "}
               <span className="font-mono text-foreground/80">
                 {truncateEventId(eid)}
               </span>
@@ -145,10 +148,8 @@ export function EventFeedCard({
     if (e.kind === 1059) {
       return (
         <div className="flex items-center gap-2 text-[13px] text-muted-foreground">
-          <span className="text-lg" aria-hidden>
-            🔒
-          </span>
-          Mensagem encriptada
+          <span className="text-lg" aria-hidden>🔒</span>
+          {t("feed.encrypted")}
         </div>
       );
     }
@@ -157,7 +158,7 @@ export function EventFeedCard({
       const n = (e.tags ?? []).filter((t) => t[0] === "r").length;
       return (
         <p className="text-[13px] text-foreground">
-          Actualizou lista de relays — {n} relays
+          {t("feed.relayListUpdate", { count: n })}
         </p>
       );
     }
@@ -217,17 +218,17 @@ export function EventFeedCard({
           type="button"
           onClick={onDelete}
           className="h-8 rounded-md border border-border/50 bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
-          title="Oculta o evento desta vista (lista local)"
+          title={t("feed.btnHideHint")}
         >
-          Ocultar
+          {t("feed.btnHide")}
         </button>
         <button
           type="button"
           onClick={onBlock}
           className="h-8 rounded-md border border-amber-500/35 bg-amber-500/10 px-2.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
-          title="Marcar pubkey como spam (confirmação)"
+          title={t("feed.btnSpamHint")}
         >
-          Marcar como spam
+          {t("feed.btnSpam")}
         </button>
       </div>
     </article>
