@@ -18,8 +18,23 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://relay-panel.bitmacro.io"),
   title: "Relay Panel | BitMacro",
   description: "Manage Nostr relays via relay-api",
+  openGraph: {
+    title: "Relay Panel | BitMacro",
+    description: "Manage Nostr relays via relay-api",
+    url: "https://relay-panel.bitmacro.io",
+    siteName: "BitMacro Relay Panel",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Relay Panel | BitMacro",
+    description: "Manage Nostr relays via relay-api",
+    images: ["/og-image.png"],
+  },
   icons: {
     icon: [
       {
