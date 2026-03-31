@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import {
-  CATEGORY_LABELS,
   getKindInfo,
   type KindCategory,
 } from "@/lib/nostr-kinds";
@@ -42,60 +42,21 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-function formatAgo(ts: number): string {
-  const diff = Math.floor(Date.now() / 1000 - ts);
-  if (diff < 60) return "agora";
-  if (diff < 3600) return `há ${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `há ${Math.floor(diff / 3600)} h`;
-  if (diff < 604800) return `há ${Math.floor(diff / 86400)} dias`;
-  return new Date(ts * 1000).toLocaleDateString("pt-PT");
-}
-
-function formatEventsError(err: unknown): string {
-  const msg =
-    typeof err === "string"
-      ? err
-      : err instanceof Error
-        ? err.message
-        : String(err);
-  if (msg.includes("relay unavailable"))
-    return "Relay indisponível (LMDB). O strfry pode estar bloqueado ou maxreaders é insuficiente. Verifica strfry.conf no servidor e aumenta maxreaders.";
-  if (msg.includes("agent unavailable") || msg.includes("agent_unavailable"))
-    return "O agente não respondeu. Pode estar ocupado ou o pedido demorou demasiado. Tenta atualizar.";
-  if (msg.includes("timeout") || msg.includes("agent_timeout"))
-    return "O pedido demorou demasiado. Tenta atualizar.";
-  if (msg.includes("502") || msg.includes("503"))
-    return "Proxy ou agente indisponível. Verifica a ligação ao relay-agent.";
-  return msg || "Erro ao carregar eventos.";
-}
-
 /** Categoria no filtro: inclui modos especiais além de KindCategory */
 type CategoryFilterValue = "all" | "no_ephemeral" | KindCategory;
 
-const CATEGORY_OPTIONS: { value: CategoryFilterValue; label: string }[] = [
-  { value: "all", label: "Todas as categorias" },
-  { value: "no_ephemeral", label: "Sem ephemeral" },
-  { value: "content", label: "Conteúdo (kind 1, 6, 7…)" },
-  { value: "dms", label: "DMs (kind 4, 1059)" },
-  { value: "ephemeral", label: "Ephemeral (20000–29999)" },
-  { value: "replaceable", label: "Replaceable (10000–39999)" },
-  { value: "system", label: "Sistema (kind 0, 3, 5…)" },
+const CATEGORY_OPTIONS: { value: CategoryFilterValue; key: string }[] = [
+  { value: "all", key: "categories.all" },
+  { value: "no_ephemeral", key: "categories.no_ephemeral" },
+  { value: "content", key: "categories.content" },
+  { value: "dms", key: "categories.dms" },
+  { value: "ephemeral", key: "categories.ephemeral" },
+  { value: "replaceable", key: "categories.replaceable" },
+  { value: "system", key: "categories.system" },
 ];
 
 function isEphemeralKind(kind: number): boolean {
   return kind >= 20000 && kind <= 29999;
-}
-
-function categoryFilterLabel(v: CategoryFilterValue): string {
-  if (v === "all") return "Todas as categorias";
-  if (v === "no_ephemeral") return "Sem ephemeral";
-  return CATEGORY_LABELS[v as KindCategory];
-}
-
-function filterPeriodPhrase(filterTime: string): string {
-  if (filterTime === "24h") return "nas últimas 24 horas";
-  if (filterTime === "7d") return "na última semana";
-  return "na amostra carregada";
 }
 
 function readStoredPubkeyHex(userId: string | null): string | null {
@@ -118,7 +79,9 @@ interface EventsTabProps {
 }
 
 export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
+  const t = useTranslations("EventsTab");
   const { data: session } = useSession();
+  
   const userId =
     session?.user &&
     "id" in session.user &&
@@ -157,6 +120,29 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     const v = localStorage.getItem(EVENTS_VIEW_MODE_KEY);
     if (v === "feed" || v === "table") setViewMode(v);
   }, []);
+
+  const formatAgo = useCallback((ts: number): string => {
+    const diff = Math.floor(Date.now() / 1000 - ts);
+    if (diff < 60) return t("time.now");
+    if (diff < 3600) return t("time.minutesAgo", { count: Math.floor(diff / 60) });
+    if (diff < 86400) return t("time.hoursAgo", { count: Math.floor(diff / 3600) });
+    if (diff < 604800) return t("time.daysAgo", { count: Math.floor(diff / 86400) });
+    return new Date(ts * 1000).toLocaleDateString(undefined);
+  }, [t]);
+
+  const formatEventsError = useCallback((err: unknown): string => {
+    const msg =
+      typeof err === "string"
+        ? err
+        : err instanceof Error
+          ? err.message
+          : String(err);
+    if (msg.includes("relay unavailable")) return t("errors.relayUnavailable");
+    if (msg.includes("agent unavailable") || msg.includes("agent_unavailable")) return t("errors.agentUnavailable");
+    if (msg.includes("timeout") || msg.includes("agent_timeout")) return t("errors.timeout");
+    if (msg.includes("502") || msg.includes("503")) return t("errors.proxyError");
+    return msg || t("errors.default");
+  }, [t]);
 
   function setViewModePersist(next: EventsViewMode) {
     setViewMode(next);
@@ -233,7 +219,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         setError(formatEventsError(err));
       })
       .finally(() => setLoading(false));
-  }, [selectedId, filterTime, authorHexForApi, refreshTrigger]);
+  }, [selectedId, filterTime, authorHexForApi, refreshTrigger, formatEventsError]);
 
   const resolveDisplayPubkey = useCallback((hex: string) => {
     const name = profileCacheRef.current.get(hex);
@@ -326,12 +312,12 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json?.error ?? json?.detail ?? "Erro ao bloquear");
+        setError(json?.error ?? json?.detail ?? t("errors.blockError"));
         return;
       }
       setEvents((prev) => prev.filter((e) => e.pubkey !== blockTarget.pubkey));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro de rede");
+      setError(err instanceof Error ? err.message : t("errors.networkError"));
     } finally {
       setBlockTarget(null);
       setBlockPending(false);
@@ -353,20 +339,18 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     if (hex) {
       setAuthorFilterInput(hexToNpubDisplay(hex));
     } else {
-      setPubkeyFilterHint(
-        "Cola o teu npub no campo, depois usa «Memorizar filtro» para o guardar neste browser (ligado à tua conta)."
-      );
+      setPubkeyFilterHint(t("hints.howToStore"));
     }
   }
 
   function memorizeAuthorFilter() {
     if (!userId) {
-      setPubkeyFilterHint("Inicia sessão para memorizar a pubkey.");
+      setPubkeyFilterHint(t("hints.loginToMemorize"));
       return;
     }
     const hex = authorHexForApi;
     if (!hex) {
-      setPubkeyFilterHint("Introduz um npub ou hex válido (64 caracteres).");
+      setPubkeyFilterHint(t("hints.invalidPubkey"));
       return;
     }
     localStorage.setItem(MY_NOSTR_PUBKEY_KEY, hex);
@@ -376,24 +360,24 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     setAuthorFilterInput(hexToNpubDisplay(hex));
   }
 
-  async function copyText(label: string, text: string) {
+  async function copyText(labelKey: string, text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      setPubkeyFilterHint(`Copiado: ${label}`);
+      setPubkeyFilterHint(t("hints.copied", { label: t(`detail.${labelKey}`) }));
       window.setTimeout(() => setPubkeyFilterHint(null), 2000);
     } catch {
-      setPubkeyFilterHint("Não foi possível copiar.");
+      setPubkeyFilterHint(t("hints.copyFailed"));
     }
   }
 
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[13px] font-medium text-[#ccc]">Eventos</span>
+        <span className="text-[13px] font-medium text-[#ccc]">{t("title")}</span>
         <div
           className="inline-flex rounded-md border border-[#333] bg-[#1a1a1a] p-0.5 text-[11px]"
           role="group"
-          aria-label="Vista de eventos"
+          aria-label={t("aria.viewToggle")}
         >
           <button
             type="button"
@@ -404,7 +388,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 : "text-[#888] hover:text-[#ccc]"
             }`}
           >
-            Vista tabela
+            {t("viewMode.table")}
           </button>
           <button
             type="button"
@@ -415,7 +399,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 : "text-[#888] hover:text-[#ccc]"
             }`}
           >
-            Vista feed
+            {t("viewMode.feed")}
           </button>
         </div>
         <div className="ml-auto flex flex-wrap gap-2 items-center">
@@ -428,7 +412,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           >
             {CATEGORY_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
-                {o.label}
+                {t(o.key)}
               </option>
             ))}
           </select>
@@ -437,12 +421,12 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onChange={(e) => setFilterKind(e.target.value)}
             className="min-w-[120px] rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
           >
-            <option value="">Todos os kinds</option>
+            <option value="">{t("filters.allKinds")}</option>
             {kindOptions.map((k) => {
               const info = getKindInfo(k);
               return (
                 <option key={k} value={String(k)}>
-                  Kind {k}
+                  {t("filters.kindLabel", { k })}
                   {info.name !== `Kind ${k}` ? ` — ${info.name}` : ""}
                 </option>
               );
@@ -453,32 +437,32 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onChange={(e) => setFilterTime(e.target.value)}
             className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
           >
-            <option value="24h">Últimas 24h</option>
-            <option value="7d">Última semana</option>
-            <option value="all">Tudo</option>
+            <option value="24h">{t("filters.time.24h")}</option>
+            <option value="7d">{t("filters.time.7d")}</option>
+            <option value="all">{t("filters.time.all")}</option>
           </select>
           <input
             type="text"
             value={authorFilterInput}
             onChange={(e) => setAuthorFilterInput(e.target.value)}
-            placeholder="npub1… ou hex (64 chars)"
+            placeholder={t("filters.authorPlaceholder")}
             className="w-[200px] rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888] placeholder:text-[#555]"
-            title="Mostra npub ou hex; o pedido à API usa sempre hex."
+            title={t("filters.authorTitle")}
           />
           <button
             type="button"
             onClick={loadMyEventsPubkey}
             className="rounded-md border border-[#444] bg-[#252525] px-2 py-1 text-[11px] text-[#ccc] hover:bg-[#333]"
           >
-            Meus eventos
+            {t("filters.myEvents")}
           </button>
           <button
             type="button"
             onClick={memorizeAuthorFilter}
             className="rounded-md border border-[#444] bg-[#252525] px-2 py-1 text-[11px] text-[#888] hover:bg-[#333]"
-            title="Guarda o filtro actual (hex) para «Meus eventos»"
+            title={t("filters.memorizeTitle")}
           >
-            Memorizar filtro
+            {t("filters.memorize")}
           </button>
         </div>
       </div>
@@ -496,15 +480,12 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       {!loading &&
       events.length > 0 &&
       filteredEvents.length === 0 &&
-      !error &&
-      filterCategory !== "all" ? (
+      !error ? (
         <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-12 text-center text-muted-foreground">
           <p className="text-[13px]">
-            Nenhum evento de categoria{" "}
-            <strong className="text-foreground">
-              {categoryFilterLabel(filterCategory)}
-            </strong>{" "}
-            {filterPeriodPhrase(filterTime)}.
+            {t("empty.noEventsInCategory", { 
+              category: t(CATEGORY_OPTIONS.find(o => o.value === filterCategory)?.key || "categories.all") 
+            })}
           </p>
           <button
             type="button"
@@ -514,7 +495,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             }}
             className="mt-3 text-sm text-[#f7931a] underline underline-offset-2 hover:text-[#e07b10]"
           >
-            Ver todos os eventos
+            {t("empty.viewAll")}
           </button>
         </div>
       ) : viewMode === "table" ? (
@@ -523,19 +504,19 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             <thead>
               <tr>
                 <th className="w-[100px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Kind
+                  {t("table.kind")}
                 </th>
                 <th className="w-[120px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Pubkey
+                  {t("table.pubkey")}
                 </th>
                 <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Data
+                  {t("table.date")}
                 </th>
                 <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
-                  Conteúdo
+                  {t("table.content")}
                 </th>
                 <th className="w-[200px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
-                  Ações
+                  {t("table.actions")}
                 </th>
               </tr>
             </thead>
@@ -546,7 +527,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     colSpan={5}
                     className="px-4 py-8 text-center text-[12px] text-[#666]"
                   >
-                    A carregar…
+                    {t("status.loading")}
                   </td>
                 </tr>
               ) : (
@@ -594,9 +575,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                               requestOcultar(e.id, e.kind);
                             }}
                             className="h-8 shrink-0 rounded-md border border-border/50 bg-transparent px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:border-border hover:bg-secondary/60"
-                            title="Oculta o evento desta vista (lista local)"
+                            title={t("actions.hideTitle")}
                           >
-                            Ocultar
+                            {t("actions.hide")}
                           </button>
                           <button
                             type="button"
@@ -605,9 +586,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                               setBlockTarget({ pubkey: e.pubkey });
                             }}
                             className="h-8 shrink-0 rounded-md border border-amber-500/35 bg-amber-500/10 px-2.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/15 dark:text-amber-300"
-                            title="Marcar pubkey como spam (confirmação)"
+                            title={t("actions.spamTitle")}
                           >
-                            Marcar como spam
+                            {t("actions.spam")}
                           </button>
                         </div>
                       </td>
@@ -622,7 +603,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         <div className="space-y-3">
           {loading ? (
             <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-4 py-10 text-center text-[12px] text-[#666]">
-              A carregar…
+              {t("status.loading")}
             </div>
           ) : (
             filteredEvents.map((e) => {
@@ -630,19 +611,17 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 e.kind === 0 ? parseKind0Profile(e.content) : null;
               const nameFromEvent = parsed0?.name?.trim() ?? "";
               const cachedName = profileCacheRef.current.get(e.pubkey);
-              const authorLabel =
-                nameFromEvent || cachedName || resolveDisplayPubkey(e.pubkey);
-              const authorHasProfileName = !!(nameFromEvent || cachedName);
-              const profileDisplayNameForInitials =
-                nameFromEvent || cachedName || null;
+              
+              // Correção aqui:
+              const displayNameForInitials = nameFromEvent || cachedName || null;
 
               return (
                 <EventFeedCard
                   key={e.id}
                   event={e}
-                  authorLabel={authorLabel}
-                  authorHasProfileName={authorHasProfileName}
-                  profileDisplayNameForInitials={profileDisplayNameForInitials}
+                  authorLabel={displayNameForInitials || resolveDisplayPubkey(e.pubkey)}
+                  authorHasProfileName={!!displayNameForInitials}
+                  profileDisplayNameForInitials={displayNameForInitials} // Prop obrigatória
                   formatAgo={formatAgo}
                   resolvePubkeyLabel={resolveDisplayPubkey}
                   onOpenDetail={() => setDetailEvent(e)}
@@ -657,23 +636,13 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
       {!loading && events.length === 0 && !error && (
         <p className="py-8 text-center text-[12px] text-[#666]">
-          Nenhum evento. Ajuste os filtros ou aguarde novos eventos.
+          {t("empty.noEvents")}
         </p>
       )}
-      {!loading &&
-        events.length > 0 &&
-        filteredEvents.length === 0 &&
-        !error &&
-        filterCategory === "all" &&
-        filterKind !== "" && (
-          <p className="py-8 text-center text-[12px] text-[#666]">
-            Nenhum evento corresponde ao kind selecionado.
-          </p>
-        )}
 
       <Sheet
         open={detailEvent !== null}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) setDetailEvent(null);
         }}
       >
@@ -681,7 +650,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           {detailEvent && (
             <>
               <SheetHeader>
-                <SheetTitle>Evento Nostr</SheetTitle>
+                <SheetTitle>{t("detail.title")}</SheetTitle>
                 <p className="text-[11px] text-muted-foreground font-mono break-all">
                   {detailEvent.id}
                 </p>
@@ -691,7 +660,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     onClick={() => copyText("id", detailEvent.id)}
                     className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
                   >
-                    Copiar ID
+                    {t("detail.copyId")}
                   </button>
                   <button
                     type="button"
@@ -700,14 +669,14 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     }
                     className="rounded border border-border px-2 py-1 text-[11px] hover:bg-secondary"
                   >
-                    Copiar JSON completo
+                    {t("detail.copyJson")}
                   </button>
                 </div>
               </SheetHeader>
               <div className="space-y-4 px-6 pb-8 text-[12px]">
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Pubkey (hex)
+                    {t("detail.pubkeyHex")}
                   </div>
                   <pre className="whitespace-pre-wrap break-all rounded border border-border bg-secondary/50 p-2 text-[11px] font-mono">
                     {detailEvent.pubkey}
@@ -715,7 +684,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Pubkey (npub)
+                    {t("detail.pubkeyNpub")}
                   </div>
                   <pre className="whitespace-pre-wrap break-all rounded border border-border bg-secondary/50 p-2 text-[11px] font-mono">
                     {hexToNpubDisplay(detailEvent.pubkey)}
@@ -723,18 +692,18 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Criado em
+                    {t("detail.createdAt")}
                   </div>
                   <div className="text-foreground">
                     {new Date(detailEvent.created_at * 1000).toLocaleString(
-                      "pt-PT",
+                      undefined,
                       { dateStyle: "full", timeStyle: "medium" }
                     )}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Kind
+                    {t("detail.kind")}
                   </div>
                   <div>
                     {kindBadgeMeta(detailEvent.kind).label} ({detailEvent.kind})
@@ -742,14 +711,14 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Tags
+                    {t("detail.tags")}
                   </div>
                   <div className="overflow-x-auto rounded border border-border max-h-48 overflow-y-auto">
                     <table className="w-full text-[11px]">
                       <thead>
                         <tr className="bg-secondary/80 text-left text-muted-foreground">
                           <th className="px-2 py-1 w-8">#</th>
-                          <th className="px-2 py-1">Valores</th>
+                          <th className="px-2 py-1">{t("detail.values")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -775,7 +744,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Conteúdo (raw)
+                    {t("detail.contentRaw")}
                   </div>
                   <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-words rounded border border-border bg-secondary/50 p-3 text-[11px] font-mono text-foreground">
                     {detailEvent.content || "—"}
@@ -783,7 +752,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase text-muted-foreground mb-1">
-                    Sig
+                    {t("detail.sig")}
                   </div>
                   <pre className="whitespace-pre-wrap break-all rounded border border-border bg-secondary/50 p-2 text-[11px] font-mono">
                     {detailEvent.sig ?? "—"}
@@ -797,13 +766,13 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
       <AlertDialog
         open={ocultarConfirm !== null}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) setOcultarConfirm(null);
         }}
       >
         <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#e5e5e5]">Atenção</AlertDialogTitle>
+            <AlertDialogTitle className="text-[#e5e5e5]">{t("confirmModal.attention")}</AlertDialogTitle>
             <AlertDialogDescription className="text-[#999]">
               {ocultarConfirm
                 ? ocultarSensitiveKindDescription(ocultarConfirm.kind)
@@ -812,14 +781,14 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]">
-              Cancelar
+              {t("confirmModal.cancel")}
             </AlertDialogCancel>
             <button
               type="button"
               onClick={() => confirmOcultarAnyway()}
               className="inline-flex h-9 items-center justify-center rounded-md border border-red-600/45 bg-red-600/15 px-4 text-sm font-medium text-red-200 hover:bg-red-600/25"
             >
-              Remover mesmo assim
+              {t("confirmModal.removeAnyway")}
             </button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -827,18 +796,17 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
       <AlertDialog
         open={blockTarget !== null}
-        onOpenChange={(open) => {
+        onOpenChange={(open: boolean) => {
           if (!open) setBlockTarget(null);
         }}
       >
         <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-[#e5e5e5]">
-              Marcar como spam?
+              {t("blockModal.title")}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-[#999]">
-              Remove todos os eventos desta pubkey do relay e impede publicações
-              futuras.
+              {t("blockModal.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
@@ -846,7 +814,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
               disabled={blockPending}
               className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]"
             >
-              Cancelar
+              {t("blockModal.cancel")}
             </AlertDialogCancel>
             <button
               type="button"
@@ -854,7 +822,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
               onClick={() => void handleBlockConfirm()}
               className="inline-flex h-9 items-center justify-center rounded-md border border-amber-500/40 bg-amber-500/15 px-4 text-sm font-medium text-amber-800 hover:bg-amber-500/25 disabled:opacity-50 dark:text-amber-200"
             >
-              {blockPending ? "A processar…" : "Confirmar"}
+              {blockPending ? t("blockModal.processing") : t("blockModal.confirm")}
             </button>
           </AlertDialogFooter>
         </AlertDialogContent>

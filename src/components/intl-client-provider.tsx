@@ -63,7 +63,11 @@ export function IntlClientProvider({
 
   return (
     <LocaleContext.Provider value={value}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <NextIntlClientProvider
+        locale={locale}
+        messages={messages}
+        timeZone="Europe/Lisbon"
+      >
         {children}
       </NextIntlClientProvider>
     </LocaleContext.Provider>

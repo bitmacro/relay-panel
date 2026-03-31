@@ -226,9 +226,9 @@
       "quickstart": "Quick start",
       "docs": "Stack docs ↗",
       "github": "GitHub",
-    "signIn": "Sign in",
-    "goToPanel": "Go to dashboard",
-    "locale": "Language"
+      "signIn": "Sign in",
+      "goToPanel": "Go to dashboard",
+      "locale": "Language"
     },
     "hero": {
       "kickerA": "relay-agent v0.2.0 · MIT · Open Source",
@@ -323,6 +323,96 @@
       "ecosystem": "Ecosystem overview →",
       "techDocs": "Technical docs (NIP-07 · NIP-46) ↗",
       "copyright": "© 2026 BitMacro"
+    }
+  },
+  "EventsTab": {
+    "title": "Events",
+    "viewMode": {
+      "table": "Table view",
+      "feed": "Feed view"
+    },
+    "categories": {
+      "all": "All categories",
+      "no_ephemeral": "No ephemeral",
+      "content": "Content",
+      "dms": "DMs",
+      "ephemeral": "Ephemeral",
+      "replaceable": "Replaceable",
+      "system": "System"
+    },
+    "filters": {
+      "allKinds": "All kinds",
+      "authorPlaceholder": "npub1… or hex (64 chars)",
+      "authorTitle": "Shows npub or hex; API requests always use hex.",
+      "myEvents": "My events",
+      "periods": {
+        "24h": "Last 24h",
+        "7d": "Last week",
+        "all": "All time"
+      }
+    },
+    "table": {
+      "kind": "Kind",
+      "pubkey": "Pubkey",
+      "date": "Date",
+      "content": "Content",
+      "actions": "Actions"
+    },
+    "actions": {
+      "hide": "Hide",
+      "spam": "Mark as spam",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "confirmHide": "Remove anyway"
+    },
+    "time": {
+      "now": "now",
+      "minutesAgo": "{count} min ago",
+      "hoursAgo": "{count} h ago",
+      "daysAgo": "{count} d ago"
+    },
+    "detail": {
+      "title": "Nostr Event",
+      "copyId": "Copy ID",
+      "copyJson": "Copy full JSON",
+      "labels": {
+        "id": "ID",
+        "json": "JSON"
+      }
+    },
+    "modals": {
+      "attention": "Attention",
+      "blockTitle": "Mark as spam?",
+      "blockDescription": "Removes all events from this pubkey and prevents future publications."
+    },
+    "states": {
+      "loading": "Loading...",
+      "processing": "Processing..."
+    },
+    "hints": {
+      "noPubkey": "Paste your npub in the field to filter.",
+      "copied": "Copied: {label}",
+      "copyError": "Could not copy."
+    },
+    "errors": {
+      "relayUnavailable": "Relay unavailable (LMDB).",
+      "agentUnavailable": "The agent did not respond.",
+      "timeout": "The request took too long.",
+      "proxyUnavailable": "Proxy unavailable.",
+      "default": "Error loading events."
+    },"feed": {
+      "noDescription": "No description",
+      "reposted": "reposted",
+      "repost": "Repost",
+      "repostEvent": "Event {id}",
+      "author": "author",
+      "inResponseTo": "in response to",
+      "encrypted": "Encrypted message",
+      "relayListUpdate": "Updated relay list — {count} relays",
+      "btnHide": "Hide",
+      "btnHideHint": "Hide the event from this view (local list)",
+      "btnSpam": "Mark as spam",
+      "btnSpamHint": "Mark pubkey as spam (confirmation)"
     }
   }
 }
