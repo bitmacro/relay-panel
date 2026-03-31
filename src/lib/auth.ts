@@ -13,6 +13,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn: "/auth/signin",
   },
   callbacks: {
+    redirect({ url, baseUrl }) {
+      const base = baseUrl.replace(/\/$/, "");
+      const isRootPath = (pathname: string) =>
+        pathname === "/" || pathname === "";
+
+      if (url.startsWith("/")) {
+        if (isRootPath(url)) return `${base}/relays`;
+        return `${base}${url}`;
+      }
+
+      try {
+        const next = new URL(url);
+        const home = new URL(base + "/");
+        if (next.origin !== home.origin) return `${base}/relays`;
+        if (isRootPath(next.pathname)) return `${base}/relays`;
+        return url;
+      } catch {
+        return `${base}/relays`;
+      }
+    },
     jwt({ token, account, profile }) {
       // Use GitHub numeric ID (providerAccountId) for API auth; token.sub is internal UUID
       if (account?.providerAccountId) {

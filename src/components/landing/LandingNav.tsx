@@ -52,14 +52,14 @@ export function LandingNav() {
             {t("docs")}
           </a>
           <span className="text-border">·</span>
-          <Link
+          <a
             href="https://github.com/bitmacro/relay-panel"
             target="_blank"
             rel="noreferrer"
             className="px-3 py-2 text-[13px] text-muted-foreground hover:text-foreground transition-colors"
           >
             {t("github")}
-          </Link>
+          </a>
           <button
             type="button"
             onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
@@ -72,7 +72,7 @@ export function LandingNav() {
             <LandingUserMenu user={session.user} />
           ) : (
             <Link
-              href="/auth/signin"
+              href="/auth/signin?callbackUrl=%2Frelays"
               className="ml-4 px-4 py-2 bg-[#f7931a] text-black text-[13px] font-semibold rounded-md hover:bg-[#e07b10] transition-colors"
             >
               {t("signIn")}

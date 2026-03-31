@@ -7,7 +7,7 @@ import { Suspense } from "react";
 
 function SignInForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl")?.trim() || "/";
+  const callbackUrl = searchParams.get("callbackUrl")?.trim() || "/relays";
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
