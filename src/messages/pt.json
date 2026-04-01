@@ -37,11 +37,11 @@
     "filterPlaceholder": "Filtrar por nome ou URL…",
     "newRelay": "Novo relay",
     "colRelay": "Relay",
-    "colAgent": "Endpoint do agente",
+    "colAgent": "URL do agente",
     "colAgentRelayId": "Agent Relay ID",
-    "colStatus": "Status",
+    "colStatus": "Situação",
     "colEvents": "Eventos",
-    "colDbSize": "DB size",
+    "colDbSize": "Tamanho Base",
     "emptySearch": "Nenhum relay encontrado.",
     "empty": "Adicione o seu primeiro relay.",
     "manage": "Gerir"
@@ -83,7 +83,7 @@
   "dashboard": {
     "metrics": {
       "totalEvents": "Total eventos",
-      "dbSize": "DB size",
+      "dbSize": "Tamanho Base",
       "uniquePubkeys": "Pubkeys únicas",
       "uniquePubkeysTitle": "Contagem de pubkeys únicas a partir de uma amostra strfry (kinds 0, 1 e 3; limite de eventos no agent).",
       "uniquePubkeysHint": "Amostra kinds 0·1·3 (máx. 10k eventos)",
@@ -114,8 +114,8 @@
     "category": {
       "content": "Conteúdo",
       "dms": "DMs",
-      "ephemeral": "Ephemeral",
-      "replaceable": "Replaceable",
+      "ephemeral": "Temporários",
+      "replaceable": "Substituíveis",
       "system": "Sistema"
     }
   },
@@ -239,7 +239,7 @@
       "ctaGithub": "Ver no GitHub",
       "docsLead": "Documentação técnica completa",
       "docsTrail": " — bitmacro.io através do relay-agent, com autenticação NIP-07 e NIP-46 (complementa o fluxo painel → relay-api → agente descrito no README).",
-      "imageAlt": "BitMacro Relay Manager — Dashboard com tabela de relays, sidebar e estados"
+      "imageAlt": "BitMacro Relay Manager — Painel com tabela de relays, sidebar e estados"
     },
     "problem": {
       "title": "Operar um relay Nostr hoje significa…",
@@ -267,7 +267,7 @@
     },
     "features": {
       "title": "Tudo o que precisas para operar um relay",
-      "f1t": "Dashboard visual",
+      "f1t": "Painel visual",
       "f1d": "Eventos, tamanho da DB, uptime, atividade por kind",
       "f2t": "Controlo de acesso",
       "f2d": "Lista branca / bloqueados com um clique, sem SSH",
@@ -430,7 +430,7 @@
     "table": {
       "identity": "Identidade",
       "pubkey": "Pubkey",
-      "status": "Estado",
+      "status": "Situação",
       "access": "Acesso"
     },
     "status": {
@@ -477,25 +477,25 @@
     },
     "btnRefresh": "Atualizar",
     "tabs": {
-      "dashboard": "Dashboard",
+      "dashboard": "Painel",
       "events": "Eventos",
       "access": "Acesso",
-      "config": "Config"
+      "config": "Configuração"
     }
   },
   "EventsTab": {
     "title": "Eventos",
     "viewMode": {
       "table": "Vista tabela",
-      "feed": "Vista feed"
+      "feed": "Vista eventos"
     },
     "categories": {
       "all": "Todas as categorias",
-      "no_ephemeral": "Sem ephemeral",
+      "no_ephemeral": "Sem temporários",
       "content": "Conteúdo",
       "dms": "DMs",
-      "ephemeral": "Ephemeral",
-      "replaceable": "Replaceable",
+      "ephemeral": "Temporários",
+      "replaceable": "Substituíveis",
       "system": "Sistema"
     },
     "filters": {
