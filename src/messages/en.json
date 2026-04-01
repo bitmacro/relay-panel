@@ -325,6 +325,164 @@
       "copyright": "© 2026 BitMacro"
     }
   },
+  "Dashboard": {
+    "title": "Relay Panel",
+    "signedInAs": "Signed in as {user}",
+    "fallbackUser": "user",
+    "btnSignOut": "Sign out",
+    "yourRelays": "Your relays",
+    "emptyDescriptionStart": "No relays configured yet. Add a row in Supabase",
+    "emptyDescriptionEnd": "with your GitHub user id.",
+    "githubUserIdLabel": "Your GitHub user id:"
+  },
+  "ConfigTab": {
+    "title": "relay-agent endpoint",
+    "loading": "Loading…",
+    "dash": "—",
+    "confirmDelete": "Delete this relay? This action cannot be undone.",
+    "form": {
+      "agentUrl": "Agent URL",
+      "bearerToken": "Bearer token",
+      "tokenPlaceholder": "Leave blank to keep current",
+      "displayName": "Display name",
+      "agentRelayId": "Agent Relay ID",
+      "agentRelayIdPlaceholder": "e.g. public (leave empty for dedicated agent)"
+    },
+    "connection": {
+      "title": "Connection status",
+      "strfryVersion": "strfry version:",
+      "uptime": "Uptime:",
+      "relayAgent": "relay-agent:",
+      "endpoint": "Endpoint:",
+      "online": "online",
+      "offline": "offline"
+    },
+    "btnSave": "Save",
+    "btnSaving": "Saving…",
+    "btnDeleteRelay": "Delete relay",
+    "btnDeleting": "Deleting…",
+    "btnProbeConnection": "Check connection",
+    "btnProbing": "Checking…",
+    "errors": {
+      "loadConfig": "Error loading",
+      "unknown": "Unknown error",
+      "timeoutColdStart": "Timeout exceeded. The API may be in cold start. Try again.",
+      "timeoutTryAgain": "Timeout exceeded. Try again.",
+      "invalidServerResponse": "Invalid server response.",
+      "save": "Error saving",
+      "delete": "Error deleting",
+      "relayNotFound": "Relay not found."
+    },
+    "probe": {
+      "ok": "Connection OK{elapsed}",
+      "handlerTimeout": "The API proxy took too long to respond{elapsed}. Check latency to relay-api.",
+      "relayNotFound": "Relay not found in database{elapsed}. Confirm the relay is configured in relay_configs.",
+      "networkError": "Network error{elapsed}: {detail}.",
+      "noDetails": "no details",
+      "status502": "Proxy returned 502 Bad Gateway{elapsed}. relay-agent may be offline or the reverse proxy (nginx/openresty) is not forwarding correctly. Check: 1) docker ps | grep relay-agent 2) curl http://localhost:7810/health 3) proxy upstream configuration.",
+      "status503": "Service unavailable (503){elapsed}. relay-agent may be starting, unhealthy, or the proxy cannot connect to upstream.",
+      "status401": "Invalid token (401){elapsed}. The Bearer token in Config does not match RELAY_INSTANCES in the agent.",
+      "status404": "Invalid Agent Relay ID (404){elapsed}. The value \"{detail}\" does not exist in RELAY_INSTANCES. Confirm the id in the agent.",
+      "genericError": "Error{elapsed}"
+    }
+  },
+  "CreateRelayTab": {
+    "title": "New relay",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Multi-relay PRIVATE",
+      "agentUrl": "Agent URL",
+      "agentUrlPlaceholder": "https://agent.example.com",
+      "bearerToken": "Bearer token",
+      "tokenPlaceholder": "RELAY_INSTANCES token",
+      "agentRelayId": "Agent Relay ID",
+      "agentRelayIdPlaceholder": "e.g. private (id in RELAY_INSTANCES)"
+    },
+    "btnCancel": "Cancel",
+    "btnCreate": "Create",
+    "btnCreating": "Creating…",
+    "errors": {
+      "requiredFields": "Fill name, agent URL and token",
+      "nameMaxLength": "Name must have at most 100 characters",
+      "invalidAgentUrl": "Invalid agent URL (e.g. https://agent.example.com)",
+      "tokenMinLength": "Token must have at least 8 characters",
+      "create": "Error creating"
+    }
+  },
+  "AccessTab": {
+    "title": "Access control",
+    "loading": "Loading…",
+    "dash": "—",
+    "btnAdd": "Add",
+    "btnUnblock": "Unblock",
+    "btnPrevious": "Previous",
+    "btnNext": "Next",
+    "btnTryAgain": "Try again",
+    "labels": {
+      "lnurl": "LNURL"
+    },
+    "titles": {
+      "viewProfile": "View profile on njump.me",
+      "nip05": "NIP-05 identifier (not verified in real time)",
+      "copyPubkeyHex": "Copy pubkey (hex)",
+      "removeWhitelist": "Remove from whitelist"
+    },
+    "table": {
+      "identity": "Identity",
+      "pubkey": "Pubkey",
+      "status": "Status",
+      "access": "Access"
+    },
+    "status": {
+      "allowed": "allowed",
+      "blocked": "blocked"
+    },
+    "section": {
+      "usersCount": "{count, plural, one {# user} other {# users}}"
+    },
+    "sections": {
+      "whitelist": "Whitelist",
+      "publishedEvents": "Published events",
+      "blocked": "Blocked",
+      "activeUsers": "Active users"
+    },
+    "pagination": {
+      "showing": "Showing {start}–{end} of {total} {total, plural, one {entry} other {entries}}"
+    },
+    "placeholders": {
+      "addWhitelist": "npub1... or hex (64 characters)",
+      "search": "Search by name, npub or hex..."
+    },
+    "empty": {
+      "selectRelay": "Select a relay.",
+      "whitelist": "Empty whitelist.",
+      "noSearchResults": "No search results.",
+      "noExtraUsers": "No extra users in this sample.",
+      "noBlockedUsers": "No blocked users.",
+      "noEntries": "No entries. No users in this sample.",
+      "noSearchResultsForQuery": "No results for this search."
+    },
+    "errors": {
+      "loadPolicy": "Error loading policy",
+      "network": "Network error",
+      "removeWhitelist": "Error removing from whitelist",
+      "unblock": "Error unblocking",
+      "invalidPubkey": "Invalid pubkey. Use hex (64 chars) or npub1...",
+      "add": "Error adding"
+    }
+  },
+  "RelayDetailShell": {
+    "breadcrumb": {
+      "backToRelays": "← Relays"
+    },
+    "btnRefresh": "Refresh",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "events": "Events",
+      "access": "Access",
+      "config": "Config"
+    }
+  },
   "EventsTab": {
     "title": "Events",
     "viewMode": {
@@ -345,6 +503,8 @@
       "authorPlaceholder": "npub1… or hex (64 chars)",
       "authorTitle": "Shows npub or hex; API requests always use hex.",
       "myEvents": "My events",
+      "memorize": "Memorize",
+      "memorizeTitle": "Save this filter as default",
       "periods": {
         "24h": "Last 24h",
         "7d": "Last week",
@@ -391,8 +551,12 @@
     },
     "hints": {
       "noPubkey": "Paste your npub in the field to filter.",
+      "howToStore": "Set your pubkey in profile to auto-fill this filter.",
+      "loginToMemorize": "Sign in to memorize this filter.",
+      "invalidPubkey": "Invalid pubkey. Use hex (64 chars) or npub1...",
       "copied": "Copied: {label}",
-      "copyError": "Could not copy."
+      "copyError": "Could not copy.",
+      "copyFailed": "Could not copy."
     },
     "errors": {
       "relayUnavailable": "Relay unavailable (LMDB).",

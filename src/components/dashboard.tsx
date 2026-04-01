@@ -2,6 +2,7 @@
 
 import { signOut } from "next-auth/react";
 import type { User } from "next-auth";
+import { useTranslations } from "next-intl";
 
 interface Relay {
   id: string;
@@ -18,13 +19,15 @@ export function Dashboard({
   relays: Relay[];
   providerUserId?: string | null;
 }) {
+  const t = useTranslations("Dashboard");
+
   return (
     <div className="mx-auto w-full max-w-2xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Relay Panel</h1>
+          <h1 className="text-2xl font-semibold">{t("title")}</h1>
           <p className="mt-1 text-muted-foreground">
-            Signed in as {user?.email ?? user?.name ?? "user"}
+            {t("signedInAs", { user: user?.email ?? user?.name ?? t("fallbackUser") })}
           </p>
         </div>
         <button
@@ -32,18 +35,23 @@ export function Dashboard({
           onClick={() => signOut({ callbackUrl: "/auth/signin" })}
           className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-muted"
         >
-          Sign out
+          {t("btnSignOut")}
         </button>
       </div>
 
       <section className="mt-8">
-        <h2 className="text-lg font-medium">Your relays</h2>
+        <h2 className="text-lg font-medium">{t("yourRelays")}</h2>
         {relays.length === 0 ? (
           <div className="mt-2 space-y-2 text-muted-foreground">
-            <p>No relays configured yet. Add a row in Supabase <code className="rounded bg-muted px-1.5 py-0.5 text-sm">relay.relay_configs</code> with your GitHub user id.</p>
+            <p>
+              {t("emptyDescriptionStart")}{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 text-sm">relay.relay_configs</code>{" "}
+              {t("emptyDescriptionEnd")}
+            </p>
             {providerUserId && (
               <p className="font-mono text-sm">
-                Your GitHub user id: <code className="rounded bg-muted px-1.5 py-0.5">{providerUserId}</code>
+                {t("githubUserIdLabel")}{" "}
+                <code className="rounded bg-muted px-1.5 py-0.5">{providerUserId}</code>
               </p>
             )}
           </div>

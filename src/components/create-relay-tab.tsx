@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { RelayColorPicker, RELAY_COLOR_PRESETS } from "./relay-color-picker";
 
 interface CreateRelayTabProps {
@@ -10,6 +11,7 @@ interface CreateRelayTabProps {
 
 export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
   const router = useRouter();
+  const t = useTranslations("CreateRelayTab");
   const [form, setForm] = useState({
     name: "",
     endpoint: "",
@@ -23,23 +25,23 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
   const handleSubmit = async () => {
     const n = form.name.trim();
     const e = form.endpoint.trim();
-    const t = form.token.trim();
+    const tokenTrim = form.token.trim();
     const aid = form.agent_relay_id.trim();
 
-    if (!n || !e || !t) {
-      setError("Preencha nome, URL do agente e token");
+    if (!n || !e || !tokenTrim) {
+      setError(t("errors.requiredFields"));
       return;
     }
     if (n.length > 100) {
-      setError("Nome deve ter no máximo 100 caracteres");
+      setError(t("errors.nameMaxLength"));
       return;
     }
     if (!/^https?:\/\//.test(e) && !e.includes(".")) {
-      setError("URL do agente inválida (ex.: https://agent.example.com)");
+      setError(t("errors.invalidAgentUrl"));
       return;
     }
-    if (t.length < 8) {
-      setError("Token deve ter pelo menos 8 caracteres");
+    if (tokenTrim.length < 8) {
+      setError(t("errors.tokenMinLength"));
       return;
     }
 
@@ -49,7 +51,7 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
       const body: Record<string, string | null> = {
         name: n,
         endpoint: e.replace(/\/$/, ""),
-        token: t,
+        token: tokenTrim,
         color: form.color || null,
       };
       if (aid) body.agent_relay_id = aid;
@@ -60,11 +62,11 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
         body: JSON.stringify(body),
       });
       const json = await r.json();
-      if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao criar");
+      if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.create"));
       onCancel();
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao criar");
+      setError(err instanceof Error ? err.message : t("errors.create"));
     } finally {
       setSaving(false);
     }
@@ -74,48 +76,48 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
     <div className="space-y-3">
       <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
         <div className="mb-3 text-[13px] font-medium text-[#ddd]">
-          Novo relay
+          {t("title")}
         </div>
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2.5">
             <div className="min-w-[200px] flex-1">
-              <div className="mb-1 text-[11px] text-[#555]">Nome</div>
+              <div className="mb-1 text-[11px] text-[#555]">{t("form.name")}</div>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-                placeholder="ex: Multi-relay PRIVATE"
+                placeholder={t("form.namePlaceholder")}
                 className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
               />
             </div>
             <div className="min-w-[200px] flex-1">
-              <div className="mb-1 text-[11px] text-[#555]">URL do agente</div>
+              <div className="mb-1 text-[11px] text-[#555]">{t("form.agentUrl")}</div>
               <input
                 type="text"
                 value={form.endpoint}
                 onChange={(e) => setForm((p) => ({ ...p, endpoint: e.target.value }))}
-                placeholder="https://agent.example.com"
+                placeholder={t("form.agentUrlPlaceholder")}
                 className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
               />
             </div>
           </div>
           <div>
-            <div className="mb-1 text-[11px] text-[#555]">Bearer token</div>
+            <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
             <input
               type="password"
               value={form.token}
               onChange={(e) => setForm((p) => ({ ...p, token: e.target.value }))}
-              placeholder="Token do RELAY_INSTANCES"
+              placeholder={t("form.tokenPlaceholder")}
               className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
             />
           </div>
           <div>
-            <div className="mb-1 text-[11px] text-[#555]">Agent Relay ID</div>
+            <div className="mb-1 text-[11px] text-[#555]">{t("form.agentRelayId")}</div>
             <input
               type="text"
               value={form.agent_relay_id}
               onChange={(e) => setForm((p) => ({ ...p, agent_relay_id: e.target.value }))}
-              placeholder="ex: private (id em RELAY_INSTANCES)"
+              placeholder={t("form.agentRelayIdPlaceholder")}
               className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
             />
           </div>
@@ -130,7 +132,7 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
               onClick={onCancel}
               className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
             >
-              Cancelar
+              {t("btnCancel")}
             </button>
             <button
               type="button"
@@ -138,7 +140,7 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
               disabled={saving}
               className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e] disabled:opacity-50"
             >
-              {saving ? "A criar…" : "Criar"}
+              {saving ? t("btnCreating") : t("btnCreate")}
             </button>
           </div>
         </div>

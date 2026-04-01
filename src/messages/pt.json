@@ -92,8 +92,8 @@
       "whitelistHint": "Whitelist (!)"
     },
     "categorySummary": "Resumo por categoria",
-    "kindActivity": "Atividade por kind",
-    "colKind": "Kind",
+    "kindActivity": "Atividade por tipo",
+    "colKind": "Tipo",
     "colDescription": "Descrição",
     "colNip": "NIP",
     "colEvents": "Eventos",
@@ -325,6 +325,164 @@
       "copyright": "© 2026 BitMacro"
     }
   },
+  "Dashboard": {
+    "title": "Relay Panel",
+    "signedInAs": "Sessão iniciada como {user}",
+    "fallbackUser": "utilizador",
+    "btnSignOut": "Terminar sessão",
+    "yourRelays": "Os teus relays",
+    "emptyDescriptionStart": "Ainda não existem relays configurados. Adiciona uma linha no Supabase",
+    "emptyDescriptionEnd": "com o teu id de utilizador GitHub.",
+    "githubUserIdLabel": "O teu id de utilizador GitHub:"
+  },
+  "ConfigTab": {
+    "title": "relay-agent endpoint",
+    "loading": "A carregar…",
+    "dash": "—",
+    "confirmDelete": "Apagar este relay? Esta ação não pode ser desfeita.",
+    "form": {
+      "agentUrl": "URL do agente",
+      "bearerToken": "Bearer token",
+      "tokenPlaceholder": "Deixar em branco para manter",
+      "displayName": "Nome de display",
+      "agentRelayId": "Agent Relay ID",
+      "agentRelayIdPlaceholder": "ex: public (deixar vazio para agente dedicado)"
+    },
+    "connection": {
+      "title": "Estado da ligação",
+      "strfryVersion": "Versão strfry:",
+      "uptime": "Uptime:",
+      "relayAgent": "relay-agent:",
+      "endpoint": "Endpoint:",
+      "online": "online",
+      "offline": "offline"
+    },
+    "btnSave": "Guardar",
+    "btnSaving": "A guardar…",
+    "btnDeleteRelay": "Apagar relay",
+    "btnDeleting": "A apagar…",
+    "btnProbeConnection": "Verificar conexão",
+    "btnProbing": "A verificar…",
+    "errors": {
+      "loadConfig": "Erro ao carregar",
+      "unknown": "Erro desconhecido",
+      "timeoutColdStart": "Tempo limite excedido. A API pode estar em cold start. Tenta novamente.",
+      "timeoutTryAgain": "Tempo limite excedido. Tenta novamente.",
+      "invalidServerResponse": "Resposta inválida do servidor.",
+      "save": "Erro ao guardar",
+      "delete": "Erro ao apagar",
+      "relayNotFound": "Relay não encontrado."
+    },
+    "probe": {
+      "ok": "Conexão OK{elapsed}",
+      "handlerTimeout": "O proxy da API demorou demasiado a responder{elapsed}. Verifica a latência até ao relay-api.",
+      "relayNotFound": "Relay não encontrado na base de dados{elapsed}. Confirma que o relay está configurado em relay_configs.",
+      "networkError": "Erro de rede{elapsed}: {detail}.",
+      "noDetails": "sem detalhes",
+      "status502": "Proxy retornou 502 Bad Gateway{elapsed}. O relay-agent pode estar offline ou o proxy reverso (nginx/openresty) não está a encaminhar corretamente para o agente. Verifica: 1) docker ps | grep relay-agent 2) curl http://localhost:7810/health 3) configuração do upstream no proxy.",
+      "status503": "Serviço indisponível (503){elapsed}. O relay-agent pode estar a arrancar, em unhealthy ou o proxy não consegue ligar ao upstream.",
+      "status401": "Token inválido (401){elapsed}. O Bearer token nas Config não corresponde ao configurado no RELAY_INSTANCES do agente.",
+      "status404": "Agent Relay ID inválido (404){elapsed}. O valor \"{detail}\" não existe em RELAY_INSTANCES. Confirma o id no agente.",
+      "genericError": "Erro{elapsed}"
+    }
+  },
+  "CreateRelayTab": {
+    "title": "Novo relay",
+    "form": {
+      "name": "Nome",
+      "namePlaceholder": "ex: Multi-relay PRIVATE",
+      "agentUrl": "URL do agente",
+      "agentUrlPlaceholder": "https://agent.example.com",
+      "bearerToken": "Bearer token",
+      "tokenPlaceholder": "Token do RELAY_INSTANCES",
+      "agentRelayId": "Agent Relay ID",
+      "agentRelayIdPlaceholder": "ex: private (id em RELAY_INSTANCES)"
+    },
+    "btnCancel": "Cancelar",
+    "btnCreate": "Criar",
+    "btnCreating": "A criar…",
+    "errors": {
+      "requiredFields": "Preencha nome, URL do agente e token",
+      "nameMaxLength": "Nome deve ter no máximo 100 caracteres",
+      "invalidAgentUrl": "URL do agente inválida (ex.: https://agent.example.com)",
+      "tokenMinLength": "Token deve ter pelo menos 8 caracteres",
+      "create": "Erro ao criar"
+    }
+  },
+  "AccessTab": {
+    "title": "Controlo de acesso",
+    "loading": "A carregar…",
+    "dash": "—",
+    "btnAdd": "Adicionar",
+    "btnUnblock": "Desbloquear",
+    "btnPrevious": "Anterior",
+    "btnNext": "Seguinte",
+    "btnTryAgain": "Tentar novamente",
+    "labels": {
+      "lnurl": "LNURL"
+    },
+    "titles": {
+      "viewProfile": "Ver perfil em njump.me",
+      "nip05": "Identificador NIP-05 (não verificado em tempo real)",
+      "copyPubkeyHex": "Copiar pubkey (hex)",
+      "removeWhitelist": "Remover da whitelist"
+    },
+    "table": {
+      "identity": "Identidade",
+      "pubkey": "Pubkey",
+      "status": "Estado",
+      "access": "Acesso"
+    },
+    "status": {
+      "allowed": "permitido",
+      "blocked": "bloqueado"
+    },
+    "section": {
+      "usersCount": "{count, plural, one {# utilizador} other {# utilizadores}}"
+    },
+    "sections": {
+      "whitelist": "Whitelist",
+      "publishedEvents": "Publicaram eventos",
+      "blocked": "Bloqueados",
+      "activeUsers": "Utilizadores ativos"
+    },
+    "pagination": {
+      "showing": "Mostrando {start}–{end} de {total} {total, plural, one {entrada} other {entradas}}"
+    },
+    "placeholders": {
+      "addWhitelist": "npub1... ou hex (64 caracteres)",
+      "search": "Pesquisar por nome, npub ou hex..."
+    },
+    "empty": {
+      "selectRelay": "Selecione um relay.",
+      "whitelist": "Whitelist vazia.",
+      "noSearchResults": "Nenhum resultado na pesquisa.",
+      "noExtraUsers": "Nenhum utilizador extra nesta amostra.",
+      "noBlockedUsers": "Ninguém bloqueado.",
+      "noEntries": "Nenhuma entrada. Sem utilizadores nesta amostra.",
+      "noSearchResultsForQuery": "Nenhum resultado para a pesquisa."
+    },
+    "errors": {
+      "loadPolicy": "Erro ao carregar policy",
+      "network": "Erro de rede",
+      "removeWhitelist": "Erro ao remover da whitelist",
+      "unblock": "Erro ao desbloquear",
+      "invalidPubkey": "Pubkey inválida. Use hex (64 chars) ou npub1...",
+      "add": "Erro ao adicionar"
+    }
+  },
+  "RelayDetailShell": {
+    "breadcrumb": {
+      "backToRelays": "← Relays"
+    },
+    "btnRefresh": "Atualizar",
+    "tabs": {
+      "dashboard": "Dashboard",
+      "events": "Eventos",
+      "access": "Acesso",
+      "config": "Config"
+    }
+  },
   "EventsTab": {
     "title": "Eventos",
     "viewMode": {
@@ -341,10 +499,12 @@
       "system": "Sistema"
     },
     "filters": {
-      "allKinds": "Todos os kinds",
+      "allKinds": "Todos os tipos",
       "authorPlaceholder": "npub1… ou hex (64 chars)",
       "authorTitle": "Mostra npub ou hex; o pedido à API usa sempre hex.",
       "myEvents": "Meus eventos",
+      "memorize": "Memorizar",
+      "memorizeTitle": "Guardar este filtro como padrão",
       "periods": {
         "24h": "Últimas 24h",
         "7d": "Última semana",
@@ -352,7 +512,7 @@
       }
     },
     "table": {
-      "kind": "Kind",
+      "kind": "Tipo",
       "pubkey": "Pubkey",
       "date": "Data",
       "content": "Conteúdo",
@@ -391,8 +551,12 @@
     },
     "hints": {
       "noPubkey": "Cola o teu npub no campo para filtrar.",
+      "howToStore": "Define a tua pubkey no perfil para preencher automaticamente este filtro.",
+      "loginToMemorize": "Inicia sessão para memorizar este filtro.",
+      "invalidPubkey": "Pubkey inválida. Usa hex (64 chars) ou npub1...",
       "copied": "Copiado: {label}",
-      "copyError": "Não foi possível copiar."
+      "copyError": "Não foi possível copiar.",
+      "copyFailed": "Não foi possível copiar."
     },
     "errors": {
       "relayUnavailable": "Relay indisponível (LMDB).",

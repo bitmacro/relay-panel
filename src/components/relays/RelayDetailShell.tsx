@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { RelayStatusBadge } from "./RelayStatusBadge";
 import { DashboardContent } from "@/components/dashboard-content";
 import { EventsTab } from "@/components/events-tab";
@@ -36,10 +37,10 @@ interface RelayHealth {
 }
 
 const TABS = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "eventos", label: "Eventos" },
-  { id: "acesso", label: "Acesso" },
-  { id: "config", label: "Config" },
+  { id: "dashboard" },
+  { id: "events" },
+  { id: "access" },
+  { id: "config" },
 ] as const;
 
 type TabId = (typeof TABS)[number]["id"];
@@ -50,6 +51,7 @@ interface RelayDetailShellProps {
 
 export function RelayDetailShell({ relay }: RelayDetailShellProps) {
   const router = useRouter();
+  const t = useTranslations("RelayDetailShell");
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [stats, setStats] = useState<RelayStats | null>(null);
   const [health, setHealth] = useState<RelayHealth | null>(null);
@@ -112,7 +114,7 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
             href="/relays"
             className="hover:text-foreground transition-colors"
           >
-            ← Relays
+            {t("breadcrumb.backToRelays")}
           </Link>
           <span>/</span>
           <span className="text-muted-foreground/60">{relay.name ?? relay.id}</span>
@@ -136,7 +138,7 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
               type="button"
               onClick={handleRefresh}
               className="w-[30px] h-[30px] flex items-center justify-center border border-border rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors text-[16px]"
-              title="Refresh"
+              title={t("btnRefresh")}
             >
               ↺
             </button>
@@ -156,7 +158,7 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
                   : "border-transparent text-muted-foreground hover:text-foreground/80"
               }`}
             >
-              {tab.label}
+              {t(`tabs.${tab.id}`)}
             </button>
           ))}
         </div>
@@ -173,10 +175,10 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
             refreshTrigger={refreshTrigger}
           />
         )}
-        {activeTab === "eventos" && (
+        {activeTab === "events" && (
           <EventsTab selectedId={relay.id} refreshTrigger={refreshTrigger} />
         )}
-        {activeTab === "acesso" && <AccessTab selectedId={relay.id} />}
+        {activeTab === "access" && <AccessTab selectedId={relay.id} />}
         {activeTab === "config" && (
           <ConfigTab
             selectedId={relay.id}
