@@ -437,9 +437,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onChange={(e) => setFilterTime(e.target.value)}
             className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
           >
-            <option value="24h">{t("filters.time.24h")}</option>
-            <option value="7d">{t("filters.time.7d")}</option>
-            <option value="all">{t("filters.time.all")}</option>
+            <option value="24h">{t("filters.periods.24h")}</option>
+            <option value="7d">{t("filters.periods.7d")}</option>
+            <option value="all">{t("filters.periods.all")}</option>
           </select>
           <input
             type="text"

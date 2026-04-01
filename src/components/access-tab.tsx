@@ -8,6 +8,7 @@ import {
   useMemo,
 } from "react";
 import { Copy, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   authorFilterToHex,
   hexToNpubDisplay,
@@ -96,6 +97,7 @@ function truncateHex(hex: string): string {
 }
 
 export function AccessTab({ selectedId }: AccessTabProps) {
+  const t = useTranslations("AccessTab");
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [blockedPubkeys, setBlockedPubkeys] = useState<string[]>([]);
   const [addValue, setAddValue] = useState("");
@@ -239,7 +241,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       if (!policyRes.ok) {
         setPolicyFailed(true);
         setError(
-          policyJson?.error ?? policyJson?.detail ?? "Erro ao carregar policy"
+          policyJson?.error ?? policyJson?.detail ?? t("errors.loadPolicy")
         );
         setEntries([]);
         setBlockedPubkeys([]);
@@ -266,13 +268,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       setBlockedPubkeys(blockedRes.ok ? blockedList : []);
     } catch (err) {
       setPolicyFailed(true);
-      setError(err instanceof Error ? err.message : "Erro de rede");
+      setError(err instanceof Error ? err.message : t("errors.network"));
       setEntries([]);
       setBlockedPubkeys([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedId]);
+  }, [selectedId, t]);
 
   useEffect(() => {
     fetchData();
@@ -345,13 +347,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         setError(
           (json as { detail?: string; error?: string })?.detail ??
             (json as { error?: string })?.error ??
-            "Erro ao remover da whitelist"
+            t("errors.removeWhitelist")
         );
         return;
       }
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro de rede");
+      setError(err instanceof Error ? err.message : t("errors.network"));
     } finally {
       setActionPending(null);
     }
@@ -371,13 +373,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         setError(
           (json as { detail?: string; error?: string })?.detail ??
             (json as { error?: string })?.error ??
-            "Erro ao desbloquear"
+            t("errors.unblock")
         );
         return;
       }
       await fetchData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro de rede");
+      setError(err instanceof Error ? err.message : t("errors.network"));
     } finally {
       setActionPending(null);
     }
@@ -391,7 +393,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     const hex = authorFilterToHex(addValue);
     if (!hex || !selectedId || actionPending) {
       if (addValue.trim() && !hex)
-        setError("Pubkey inválida. Use hex (64 chars) ou npub1...");
+        setError(t("errors.invalidPubkey"));
       return;
     }
     setActionPending(hex);
@@ -404,7 +406,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       });
       const json = await res.json();
       if (!res.ok) {
-        setError(json?.error ?? json?.detail ?? "Erro ao adicionar");
+        setError(json?.error ?? json?.detail ?? t("errors.add"));
         return;
       }
       setEntries((prev) => {
@@ -422,7 +424,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       });
       setAddValue("");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro de rede");
+      setError(err instanceof Error ? err.message : t("errors.network"));
     } finally {
       setActionPending(null);
     }
@@ -462,7 +464,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               target="_blank"
               rel="noopener noreferrer"
               className="shrink-0 text-[#666] hover:text-[#f7931a]"
-              title="Ver perfil em njump.me"
+              title={t("titles.viewProfile")}
               onClick={(ev) => ev.stopPropagation()}
             >
               <ExternalLink className="size-3.5 opacity-70" strokeWidth={1.5} />
@@ -477,7 +479,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               ) : null}
               {meta?.nip05 ? (
                 <span
-                  title="Identificador NIP-05 (não verificado em tempo real)"
+                  title={t("titles.nip05")}
                   className="inline-flex max-w-[min(100%,12rem)] shrink-0 items-center gap-0.5 rounded border border-sky-500/35 bg-sky-500/10 px-1.5 py-px text-[10px] text-sky-200/90"
                 >
                   <span aria-hidden className="shrink-0 opacity-90">
@@ -500,7 +502,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                   className="inline-flex shrink-0 items-center gap-0.5 text-[11px] text-[#888]"
                 >
                   <span aria-hidden>⚡</span>
-                  <span>LNURL</span>
+                  <span>{t("labels.lnurl")}</span>
                 </span>
               ) : null}
             </div>
@@ -512,7 +514,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           </span>
           <button
             type="button"
-            title="Copiar pubkey (hex)"
+            title={t("titles.copyPubkeyHex")}
             className="rounded p-1 text-[#666] hover:bg-[#2a2a2a] hover:text-[#ccc]"
             onClick={() => void navigator.clipboard.writeText(e.pubkey)}
           >
@@ -526,7 +528,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               : "bg-[#2a0a0a] text-[#f87171]"
           }`}
         >
-          {e.status === "allowed" ? "permitido" : "bloqueado"}
+          {e.status === "allowed" ? t("status.allowed") : t("status.blocked")}
         </span>
         <div className="min-w-[5.5rem] shrink-0 text-right">
           {e.source === "blocked" ? (
@@ -536,14 +538,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               disabled={actionPending !== null}
               className="rounded-md border border-[#333] px-2 py-1 text-[10px] text-[#ccc] transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
             >
-              Desbloquear
+              {t("btnUnblock")}
             </button>
           ) : canToggle(e) ? (
             <button
               type="button"
               onClick={() => void toggleAccess(e)}
               disabled={actionPending !== null}
-              title="Remover da whitelist"
+              title={t("titles.removeWhitelist")}
               className={`relative ml-auto block h-4 w-7 shrink-0 cursor-pointer rounded-full border transition-colors disabled:opacity-50 ${
                 e.status === "allowed"
                   ? "border-[#f7931a] bg-[#f7931a]"
@@ -557,7 +559,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               />
             </button>
           ) : (
-            <span className="text-[10px] text-[#555]">—</span>
+            <span className="text-[10px] text-[#555]">{t("dash")}</span>
           )}
         </div>
       </div>
@@ -565,13 +567,11 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   }
 
   function renderSectionHeader(label: string, count: number) {
-    const n = count;
-    const word = n === 1 ? "utilizador" : "utilizadores";
     return (
       <div className="border-b border-[#2a2a2a] bg-[#181818] px-3 py-2">
         <div className="text-[12px] font-medium text-[#aaa]">{label}</div>
         <div className="text-[11px] text-[#555]">
-          {n} {word}
+          {t("section.usersCount", { count })}
         </div>
       </div>
     );
@@ -588,7 +588,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             setError(null);
           }}
           onKeyDown={(ev) => ev.key === "Enter" && void handleAdd()}
-          placeholder="npub1... ou hex (64 caracteres)"
+          placeholder={t("placeholders.addWhitelist")}
           className="flex-1 rounded-md border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
         />
         <button
@@ -597,7 +597,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           disabled={actionPending !== null || loading}
           className="shrink-0 rounded-md border border-[#5a3a0a] px-3 py-1.5 text-[12px] text-[#f7931a] transition-colors hover:bg-[#1e1a0e] disabled:opacity-50"
         >
-          Adicionar
+          {t("btnAdd")}
         </button>
       </div>
     );
@@ -613,9 +613,11 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     return (
       <div className="flex items-center justify-between border-t border-[#222] px-3 py-2.5">
         <span className="text-[11px] text-[#555]">
-          Mostrando {(pageNum - 1) * PAGE_SIZE + 1}–
-          {Math.min(pageNum * PAGE_SIZE, len)} de {len}{" "}
-          {len === 1 ? "entrada" : "entradas"}
+          {t("pagination.showing", {
+            start: (pageNum - 1) * PAGE_SIZE + 1,
+            end: Math.min(pageNum * PAGE_SIZE, len),
+            total: len,
+          })}
         </span>
         <div className="flex items-center gap-1">
           <button
@@ -624,7 +626,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             disabled={pageNum <= 1}
             className="rounded-md border border-[#333] px-2 py-1 text-[11px] text-[#888] hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Anterior
+            {t("btnPrevious")}
           </button>
           <span className="px-2 text-[11px] text-[#666]">
             {pageNum} / {totalP}
@@ -635,7 +637,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             disabled={pageNum >= totalP}
             className="rounded-md border border-[#333] px-2 py-1 text-[11px] text-[#888] hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Seguinte
+            {t("btnNext")}
           </button>
         </div>
       </div>
@@ -645,7 +647,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   if (!selectedId) {
     return (
       <div className="py-4 text-center text-[12px] text-[#666]">
-        Selecione um relay.
+        {t("empty.selectRelay")}
       </div>
     );
   }
@@ -653,7 +655,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   return (
     <div className="space-y-0">
       <div className="mb-3 text-[13px] font-medium text-[#ccc]">
-        Controlo de acesso
+        {t("title")}
       </div>
       {error && (
         <div className="mb-3 rounded-md border border-[#5a2a0a] bg-[#2a1510] px-3 py-2 text-[12px] text-[#f87171]">
@@ -662,13 +664,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       )}
       {policyFailed && !loading ? (
         <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-8 text-center">
-          <p className="mb-3 text-[13px] text-[#f87171]">Erro ao carregar policy</p>
+          <p className="mb-3 text-[13px] text-[#f87171]">{t("errors.loadPolicy")}</p>
           <button
             type="button"
             onClick={() => void fetchData()}
             className="rounded-md border border-border bg-transparent px-3 py-1.5 text-[12px] text-muted-foreground transition-colors hover:bg-secondary"
           >
-            Tentar novamente
+            {t("btnTryAgain")}
           </button>
         </div>
       ) : (
@@ -678,30 +680,30 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Pesquisar por nome, npub ou hex..."
+              placeholder={t("placeholders.search")}
               className="w-full rounded-md border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
             />
           </div>
           <div className="flex items-center gap-2.5 border-b border-[#222] bg-[#1f1f1f] px-3 py-2 text-[11px] font-medium text-[#555]">
             <span className="w-9 shrink-0" />
-            <span className="min-w-0 flex-1">Identidade</span>
-            <span className="w-[120px] shrink-0 text-right">Pubkey</span>
-            <span className="w-[72px] shrink-0 text-center">Estado</span>
-            <span className="min-w-[5.5rem] shrink-0 text-center">Acesso</span>
+            <span className="min-w-0 flex-1">{t("table.identity")}</span>
+            <span className="w-[120px] shrink-0 text-right">{t("table.pubkey")}</span>
+            <span className="w-[72px] shrink-0 text-center">{t("table.status")}</span>
+            <span className="min-w-[5.5rem] shrink-0 text-center">{t("table.access")}</span>
           </div>
           {loading ? (
             <div className="px-3 py-6 text-center text-[12px] text-[#666]">
-              A carregar…
+              {t("loading")}
             </div>
           ) : splitSections ? (
             <>
-              {renderSectionHeader("Whitelist", filteredWhitelist.length)}
+              {renderSectionHeader(t("sections.whitelist"), filteredWhitelist.length)}
               {renderAddWhitelistBar()}
               {filteredWhitelist.length === 0 ? (
                 <div className="px-3 py-4 text-center text-[12px] text-[#555]">
                   {entries.filter((x) => x.source === "whitelist").length === 0
-                    ? "Whitelist vazia."
-                    : "Nenhum resultado na pesquisa."}
+                    ? t("empty.whitelist")
+                    : t("empty.noSearchResults")}
                 </div>
               ) : (
                 paginatedWl!.map(renderRow)
@@ -713,12 +715,12 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 totalPagesWl
               )}
 
-              {renderSectionHeader("Publicaram eventos", filteredUsers.length)}
+              {renderSectionHeader(t("sections.publishedEvents"), filteredUsers.length)}
               {filteredUsers.length === 0 ? (
                 <div className="px-3 py-4 text-center text-[12px] text-[#555]">
                   {entries.filter((x) => x.source === "users").length === 0
-                    ? "Nenhum utilizador extra nesta amostra."
-                    : "Nenhum resultado na pesquisa."}
+                    ? t("empty.noExtraUsers")
+                    : t("empty.noSearchResults")}
                 </div>
               ) : (
                 paginatedUs!.map(renderRow)
@@ -730,12 +732,12 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 totalPagesUs
               )}
 
-              {renderSectionHeader("Bloqueados", filteredBlocked.length)}
+              {renderSectionHeader(t("sections.blocked"), filteredBlocked.length)}
               {filteredBlocked.length === 0 ? (
                 <div className="px-3 py-4 text-center text-[12px] text-[#555]">
                   {blockedPubkeys.length === 0
-                    ? "Ninguém bloqueado."
-                    : "Nenhum resultado na pesquisa."}
+                    ? t("empty.noBlockedUsers")
+                    : t("empty.noSearchResults")}
                 </div>
               ) : (
                 paginatedBlocked!.map(renderRow)
@@ -749,13 +751,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             </>
           ) : (
             <>
-              {renderSectionHeader("Utilizadores activos", filtered.length)}
+              {renderSectionHeader(t("sections.activeUsers"), filtered.length)}
               {renderAddWhitelistBar()}
               {filtered.length === 0 ? (
                 <div className="px-3 py-6 text-center text-[12px] text-[#555]">
                   {entries.length === 0
-                    ? "Nenhuma entrada. Sem utilizadores nesta amostra."
-                    : "Nenhum resultado para a pesquisa."}
+                    ? t("empty.noEntries")
+                    : t("empty.noSearchResultsForQuery")}
                 </div>
               ) : (
                 paginated!.map(renderRow)
@@ -764,10 +766,10 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
               {filteredBlocked.length > 0 || blockedPubkeys.length > 0 ? (
                 <>
-                  {renderSectionHeader("Bloqueados", filteredBlocked.length)}
+                  {renderSectionHeader(t("sections.blocked"), filteredBlocked.length)}
                   {filteredBlocked.length === 0 ? (
                     <div className="px-3 py-4 text-center text-[12px] text-[#555]">
-                      Nenhum resultado na pesquisa.
+                      {t("empty.noSearchResults")}
                     </div>
                   ) : (
                     paginatedBlockedUnified!.map(renderRow)

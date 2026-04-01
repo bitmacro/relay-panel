@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { RelayColorPicker } from "./relay-color-picker";
 
 interface ConfigTabProps {
@@ -32,6 +33,7 @@ export function ConfigTab({
   loading,
 }: ConfigTabProps) {
   const router = useRouter();
+  const t = useTranslations("ConfigTab");
   const [config, setConfig] = useState<{
     id: string;
     name: string;
@@ -65,16 +67,16 @@ export function ConfigTab({
     fetch(`/api/relay/${selectedId}/config`)
       .then(async (r) => {
         const json = await r.json();
-        if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao carregar");
+        if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.loadConfig"));
         return json;
       })
       .then(setConfig)
       .catch((err) => {
         setConfig(null);
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        setError(err instanceof Error ? err.message : t("errors.unknown"));
       })
       .finally(() => setConfigLoading(false));
-  }, [selectedId]);
+  }, [selectedId, t]);
 
   const handleProbe = async () => {
     if (!selectedId) return;
@@ -103,30 +105,30 @@ export function ConfigTab({
 
   function getProbeMessage(res: NonNullable<typeof probeResult>): string {
     if (res.ok) {
-      return `Conexão OK${res.elapsed != null ? ` (${res.elapsed}ms)` : ""}`;
+      return t("probe.ok", { elapsed: res.elapsed != null ? ` (${res.elapsed}ms)` : "" });
     }
     const elapsed = res.elapsed != null ? ` (${res.elapsed}ms)` : "";
     switch (res.error) {
       case "handler_timeout":
-        return `O proxy da API demorou demasiado a responder${elapsed}. Verifica a latência até ao relay-api.`;
+        return t("probe.handlerTimeout", { elapsed });
       case "relay_not_found":
-        return `Relay não encontrado na base de dados${elapsed}. Confirma que o relay está configurado em relay_configs.`;
+        return t("probe.relayNotFound", { elapsed });
       case "network_error":
-        return `Erro de rede${elapsed}: ${res.detail ?? "sem detalhes"}.`;
+        return t("probe.networkError", { elapsed, detail: res.detail ?? t("probe.noDetails") });
       default:
         break;
     }
     switch (res.status) {
       case 502:
-        return `Proxy retornou 502 Bad Gateway${elapsed}. O relay-agent pode estar offline ou o proxy reverso (nginx/openresty) não está a encaminhar corretamente para o agente. Verifica: 1) docker ps | grep relay-agent 2) curl http://localhost:7810/health 3) configuração do upstream no proxy.`;
+        return t("probe.status502", { elapsed });
       case 503:
-        return `Serviço indisponível (503)${elapsed}. O relay-agent pode estar a arrancar, em unhealthy ou o proxy não consegue ligar ao upstream.`;
+        return t("probe.status503", { elapsed });
       case 401:
-        return `Token inválido (401)${elapsed}. O Bearer token nas Config não corresponde ao configurado no RELAY_INSTANCES do agente.`;
+        return t("probe.status401", { elapsed });
       case 404:
-        return `Agent Relay ID inválido (404)${elapsed}. O valor "${res.detail ?? "?"}" não existe em RELAY_INSTANCES. Confirma o id no agente.`;
+        return t("probe.status404", { elapsed, detail: res.detail ?? "?" });
       default:
-        return res.error ?? res.detail ?? `Erro${elapsed}`;
+        return res.error ?? res.detail ?? t("probe.genericError", { elapsed });
     }
   }
 
@@ -155,9 +157,13 @@ export function ConfigTab({
       try {
         json = text ? JSON.parse(text) : {};
       } catch {
-        throw new Error(r.status === 504 ? "Tempo limite excedido. A API pode estar em cold start. Tenta novamente." : "Resposta inválida do servidor.");
+        throw new Error(
+          r.status === 504
+            ? t("errors.timeoutColdStart")
+            : t("errors.invalidServerResponse")
+        );
       }
-      if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao guardar");
+      if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.save"));
       setConfig((prev) =>
         prev
           ? {
@@ -171,14 +177,14 @@ export function ConfigTab({
       );
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao guardar");
+      setError(err instanceof Error ? err.message : t("errors.save"));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!selectedId || !window.confirm("Apagar este relay? Esta ação não pode ser desfeita.")) return;
+    if (!selectedId || !window.confirm(t("confirmDelete"))) return;
     setDeleting(true);
     setError(null);
     try {
@@ -188,12 +194,16 @@ export function ConfigTab({
       try {
         json = text ? JSON.parse(text) : {};
       } catch {
-        throw new Error(r.status === 504 ? "Tempo limite excedido. Tenta novamente." : "Resposta inválida do servidor.");
+        throw new Error(
+          r.status === 504
+            ? t("errors.timeoutTryAgain")
+            : t("errors.invalidServerResponse")
+        );
       }
-      if (!r.ok) throw new Error(json.error ?? json.detail ?? "Erro ao apagar");
+      if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.delete"));
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao apagar");
+      setError(err instanceof Error ? err.message : t("errors.delete"));
     } finally {
       setDeleting(false);
     }
@@ -205,15 +215,15 @@ export function ConfigTab({
       {selectedId && (
         <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
           <div className="mb-3 text-[13px] font-medium text-[#ddd]">
-            relay-agent endpoint
+            {t("title")}
           </div>
           {configLoading ? (
-            <p className="text-[12px] text-[#666]">A carregar…</p>
+            <p className="text-[12px] text-[#666]">{t("loading")}</p>
           ) : config ? (
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2.5">
                 <div className="min-w-[200px] flex-1">
-                  <div className="mb-1 text-[11px] text-[#555]">URL do agente</div>
+                  <div className="mb-1 text-[11px] text-[#555]">{t("form.agentUrl")}</div>
                   <input
                     type="text"
                     value={config.endpoint}
@@ -222,18 +232,18 @@ export function ConfigTab({
                   />
                 </div>
                 <div className="min-w-[150px] flex-1">
-                  <div className="mb-1 text-[11px] text-[#555]">Bearer token</div>
+                  <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
                   <input
                     type="password"
                     value={config.token}
                     onChange={(e) => setConfig((p) => (p ? { ...p, token: e.target.value } : null))}
-                    placeholder="Deixar em branco para manter"
+                    placeholder={t("form.tokenPlaceholder")}
                     className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
                   />
                 </div>
               </div>
               <div>
-                <div className="mb-1 text-[11px] text-[#555]">Nome de display</div>
+                <div className="mb-1 text-[11px] text-[#555]">{t("form.displayName")}</div>
                 <input
                   type="text"
                   value={config.name}
@@ -242,12 +252,12 @@ export function ConfigTab({
                 />
               </div>
               <div>
-                <div className="mb-1 text-[11px] text-[#555]">Agent Relay ID</div>
+                <div className="mb-1 text-[11px] text-[#555]">{t("form.agentRelayId")}</div>
                 <input
                   type="text"
                   value={config.agent_relay_id ?? ""}
                   onChange={(e) => setConfig((p) => (p ? { ...p, agent_relay_id: e.target.value } : null))}
-                  placeholder="ex: public (deixar vazio para agente dedicado)"
+                  placeholder={t("form.agentRelayIdPlaceholder")}
                   className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
                 />
               </div>
@@ -263,7 +273,7 @@ export function ConfigTab({
                   disabled={saving}
                   className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e] disabled:opacity-50"
                 >
-                  {saving ? "A guardar…" : "Guardar"}
+                  {saving ? t("btnSaving") : t("btnSave")}
                 </button>
                 <button
                   type="button"
@@ -271,12 +281,12 @@ export function ConfigTab({
                   disabled={deleting}
                   className="rounded border border-[#5a1a1a] px-4 py-1.5 text-[12px] text-[#f87171] hover:bg-[#2a0a0a] disabled:opacity-50"
                 >
-                  {deleting ? "A apagar…" : "Apagar relay"}
+                  {deleting ? t("btnDeleting") : t("btnDeleteRelay")}
                 </button>
               </div>
             </div>
           ) : (
-            <p className="text-[12px] text-[#666]">{error ?? "Relay não encontrado."}</p>
+            <p className="text-[12px] text-[#666]">{error ?? t("errors.relayNotFound")}</p>
           )}
         </div>
       )}
@@ -284,23 +294,23 @@ export function ConfigTab({
       {/* Connection status */}
       <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
         <div className="mb-3 text-[13px] font-medium text-[#ddd]">
-          Estado da ligação
+          {t("connection.title")}
         </div>
         <div className="flex flex-wrap gap-5 text-[12px]">
           <div>
-            <span className="text-[#555]">Versão strfry: </span>
+            <span className="text-[#555]">{t("connection.strfryVersion")} </span>
             <strong className="text-[#ccc]">
-              {loading ? "…" : statsVersion ?? "—"}
+              {loading ? "…" : statsVersion ?? t("dash")}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">Uptime: </span>
+            <span className="text-[#555]">{t("connection.uptime")} </span>
             <strong className="text-[#ccc]">
               {loading ? "…" : formatUptime(statsUptime)}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">relay-agent: </span>
+            <span className="text-[#555]">{t("connection.relayAgent")} </span>
             <strong
               className={
                 loading
@@ -310,7 +320,7 @@ export function ConfigTab({
                   : "text-[#f87171]"
               }
             >
-              {loading ? "…" : healthOk ? "online" : "offline"}
+              {loading ? "…" : healthOk ? t("connection.online") : t("connection.offline")}
             </strong>
             <button
               type="button"
@@ -318,13 +328,13 @@ export function ConfigTab({
               disabled={probing || !selectedId}
               className="ml-2 rounded border border-[#444] px-2 py-0.5 text-[11px] text-[#888] hover:bg-[#252525] hover:text-[#ccc] disabled:opacity-50"
             >
-              {probing ? "A verificar…" : "Verificar conexão"}
+              {probing ? t("btnProbing") : t("btnProbeConnection")}
             </button>
           </div>
           <div>
-            <span className="text-[#555]">Endpoint: </span>
+            <span className="text-[#555]">{t("connection.endpoint")} </span>
             <strong className="font-mono text-[11px] text-[#666]">
-              {endpoint ?? "—"}
+              {endpoint ?? t("dash")}
             </strong>
           </div>
         </div>
