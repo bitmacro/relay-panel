@@ -2,17 +2,106 @@
 
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { normalizeNip07PubkeyHex } from "@/lib/nip07-pubkey";
 
 function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl")?.trim() || "/relays";
 
+  const [nip07Ready, setNip07Ready] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const n = typeof window !== "undefined" ? window.nostr : undefined;
+    setNip07Ready(!!n?.getPublicKey && !!n?.signEvent);
+  }, []);
+
+  const signInWithNostr = useCallback(async () => {
+    setError(null);
+    if (typeof window === "undefined") return;
+    const nip = window.nostr;
+    if (!nip?.getPublicKey || !nip?.signEvent) {
+      setError("Instala uma extensão NIP-07 (ex.: Alby, nos2x) para continuar.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const res = await fetch("/api/auth/nostr-challenge", { method: "POST" });
+      const data = (await res.json()) as {
+        challenge?: string;
+        challengeToken?: string;
+        error?: string;
+        detail?: string;
+      };
+      if (!res.ok) {
+        setError(
+          typeof data.detail === "string"
+            ? data.detail
+            : typeof data.error === "string"
+              ? data.error
+              : "Não foi possível obter o challenge."
+        );
+        return;
+      }
+      const { challenge, challengeToken } = data;
+      if (!challenge || !challengeToken) {
+        setError("Resposta inválida do servidor.");
+        return;
+      }
+
+      const created = Math.floor(Date.now() / 1000);
+      const unsigned = {
+        kind: 1 as const,
+        created_at: created,
+        tags: [["client", "relay-panel"]],
+        content: challenge,
+      };
+
+      const signed = (await nip.signEvent(unsigned)) as {
+        pubkey: string;
+        id: string;
+        sig: string;
+        kind: number;
+        content: string;
+        created_at: number;
+        tags: unknown[];
+      };
+
+      const pubkeyHex = normalizeNip07PubkeyHex(signed.pubkey);
+      if (!pubkeyHex) {
+        setError("Pubkey inválida devolvida pela extensão.");
+        return;
+      }
+
+      const result = await signIn("nostr", {
+        challengeToken,
+        eventJson: JSON.stringify(signed),
+        pubkey: pubkeyHex,
+        callbackUrl,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError("Autenticação Nostr falhou. Tenta de novo.");
+        return;
+      }
+
+      window.location.assign(result?.url ?? callbackUrl);
+    } catch {
+      setError("Erro inesperado. Verifica a consola ou tenta outra vez.");
+    } finally {
+      setBusy(false);
+    }
+  }, [callbackUrl]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-[380px]">
-        {/* Logo */}
         <div className="flex items-center justify-center gap-2.5 mb-8">
           <Image
             src="/bitmacro-logo.png"
@@ -27,17 +116,18 @@ function SignInForm() {
           </div>
         </div>
 
-        {/* Card */}
         <div className="bg-card border border-border rounded-xl p-8">
           <h1 className="text-[18px] font-semibold mb-1">Entrar</h1>
           <p className="text-[13px] text-muted-foreground mb-6">
-            Autentica com a tua conta GitHub para aceder ao painel.
+            GitHub (equipa) ou Nostr (NIP-07): a pubkey hex é usada como identificador junto do relay-api
+            (<code className="text-[11px]">X-Provider-User-Id</code>).
           </p>
 
           <button
             type="button"
             onClick={() => signIn("github", { callbackUrl })}
-            className="w-full flex items-center justify-center gap-2.5 bg-foreground text-background px-4 py-2.5 rounded-md text-[14px] font-medium hover:opacity-90 transition-opacity"
+            disabled={busy}
+            className="w-full flex items-center justify-center gap-2.5 bg-foreground text-background px-4 py-2.5 rounded-md text-[14px] font-medium hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             <svg
               width="18"
@@ -50,10 +140,43 @@ function SignInForm() {
             </svg>
             Sign in with GitHub
           </button>
+
+          <div className="relative my-5">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-wide">
+              <span className="bg-card px-2 text-muted-foreground">ou</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => void signInWithNostr()}
+            disabled={busy || !nip07Ready}
+            className="w-full flex items-center justify-center gap-2 border border-border bg-background px-4 py-2.5 rounded-md text-[14px] font-medium hover:bg-muted/40 transition-colors disabled:opacity-50"
+          >
+            {busy ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : null}
+            Entrar com Nostr (NIP-07)
+          </button>
+
+          {!nip07Ready && (
+            <p className="text-[11px] text-muted-foreground mt-2">
+              Extensão NIP-07 não detetada neste browser. Usa GitHub ou instala Alby / nos2x.
+            </p>
+          )}
+
+          {error ? (
+            <p className="text-[12px] text-destructive mt-3" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
 
         <p className="text-center text-[11px] text-muted-foreground mt-5">
-          © 2026 BitMacro · relay-panel v0.2.2
+          © 2026 BitMacro · relay-panel
         </p>
       </div>
     </div>
