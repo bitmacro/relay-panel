@@ -125,8 +125,24 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
         {open && (
           <div className="absolute right-0 top-[calc(100%+8px)] w-52 bg-card border border-border rounded-lg shadow-2xl overflow-hidden z-50">
             <div className="px-3.5 py-3 border-b border-border">
-              <div className="text-[13px] font-semibold text-foreground">{user.name}</div>
-              <div className="text-[11px] text-muted-foreground font-mono mt-0.5">{user.email}</div>
+              <div
+                className={`text-[13px] font-semibold text-foreground ${nostrFullNpub ? "font-mono" : ""}`}
+                title={nostrFullNpub ?? undefined}
+              >
+                {nostrFullNpub ? navLabel : user.name ?? "user"}
+              </div>
+              {user.email &&
+              !(
+                nostrFullNpub &&
+                user.email.trim().toLowerCase() === nostrFullNpub.toLowerCase()
+              ) ? (
+                <div
+                  className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate"
+                  title={user.email}
+                >
+                  {user.email}
+                </div>
+              ) : null}
             </div>
 
             <div className="py-1.5 border-b border-border">

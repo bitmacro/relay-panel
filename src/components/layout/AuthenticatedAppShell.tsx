@@ -55,7 +55,7 @@ export async function AuthenticatedAppShell({
       </div>
       <Footer
         panelVersion={pkg.version}
-        defaultRelayId={relays[0]?.id ?? null}
+        relayIdsForHealth={relays.map((r) => r.id)}
       />
     </div>
   );

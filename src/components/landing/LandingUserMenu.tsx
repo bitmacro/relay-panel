@@ -79,8 +79,24 @@ export function LandingUserMenu({ user }: LandingUserMenuProps) {
       {open && (
         <div className="absolute right-0 top-[calc(100%+8px)] w-52 bg-card border border-border rounded-lg shadow-2xl overflow-hidden z-50 py-1">
           <div className="px-3 py-2 border-b border-border">
-            <div className="text-[13px] font-semibold truncate">{user.name}</div>
-            <div className="text-[11px] text-muted-foreground font-mono truncate">{user.email}</div>
+            <div
+              className={`text-[13px] font-semibold ${nostrFullNpub ? "font-mono" : ""}`}
+              title={nostrFullNpub ?? undefined}
+            >
+              {nostrFullNpub ? navLabel : user.name ?? "user"}
+            </div>
+            {user.email &&
+            !(
+              nostrFullNpub &&
+              user.email.trim().toLowerCase() === nostrFullNpub.toLowerCase()
+            ) ? (
+              <div
+                className="text-[11px] text-muted-foreground font-mono mt-0.5 truncate"
+                title={user.email}
+              >
+                {user.email}
+              </div>
+            ) : null}
           </div>
           <Link
             href="/relays"
