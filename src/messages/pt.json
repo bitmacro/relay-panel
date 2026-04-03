@@ -546,6 +546,13 @@
       "blockTitle": "Marcar como spam?",
       "blockDescription": "Remove todos os eventos desta pubkey do relay e impede publicações futuras."
     },
+    "blockModal": {
+      "title": "Marcar como spam?",
+      "description": "Remove todos os eventos desta pubkey e bloqueia novas publicações desta chave neste relay.",
+      "cancel": "Cancelar",
+      "confirm": "Marcar como spam",
+      "processing": "A processar…"
+    },
     "states": {
       "loading": "A carregar...",
       "processing": "A processar..."
@@ -565,7 +572,8 @@
       "timeout": "O pedido demorou demasiado.",
       "proxyUnavailable": "Proxy indisponível.",
       "default": "Erro ao carregar eventos."
-    },"feed": {
+    },
+    "feed": {
       "noDescription": "Sem descrição",
       "reposted": "repostou",
       "repost": "Repost",

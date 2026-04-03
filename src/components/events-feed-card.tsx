@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NostrEventRow } from "@/lib/events-display";
 import {
@@ -14,11 +15,55 @@ import {
   truncateAbout,
 } from "@/lib/events-display";
 
+function FeedAuthorAvatar({
+  pubkey,
+  picture,
+  profileDisplayNameForInitials,
+  sizeClass,
+  textSizeClass,
+}: {
+  pubkey: string;
+  picture?: string | null;
+  profileDisplayNameForInitials: string | null;
+  sizeClass: string;
+  textSizeClass: string;
+}) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const url = picture?.trim() ?? "";
+  const showImage = Boolean(url && !imgFailed);
+
+  if (showImage) {
+    return (
+      <div
+        className={`relative shrink-0 overflow-hidden rounded-full ${sizeClass}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`flex shrink-0 items-center justify-center rounded-full font-bold ${pubkeyAvatarClasses(pubkey)} ${sizeClass} ${textSizeClass}`}
+    >
+      {displayInitials(profileDisplayNameForInitials, pubkey)}
+    </div>
+  );
+}
+
 interface EventFeedCardProps {
   event: NostrEventRow;
   authorLabel: string;
   authorHasProfileName: boolean;
   profileDisplayNameForInitials: string | null;
+  /** From kind 0 metadata (event or profile cache), like Access tab */
+  authorPicture?: string | null;
   formatAgo: (ts: number) => string;
   resolvePubkeyLabel: (hex: string) => string;
   onOpenDetail: () => void;
@@ -31,6 +76,7 @@ export function EventFeedCard({
   authorLabel,
   authorHasProfileName,
   profileDisplayNameForInitials,
+  authorPicture = null,
   formatAgo,
   resolvePubkeyLabel,
   onOpenDetail,
@@ -39,25 +85,21 @@ export function EventFeedCard({
 }: EventFeedCardProps) {
   const t = useTranslations("EventsTab");
   const meta = kindBadgeMeta(e.kind);
-  
-  const initials = displayInitials(
-    authorHasProfileName ? profileDisplayNameForInitials : null,
-    e.pubkey
-  );
-  const headerAvatarClass = pubkeyAvatarClasses(e.pubkey);
 
   function renderBody() {
     if (e.kind === 0) {
-      const { name, about } = parseKind0Profile(e.content);
+      const { name, about, picture } = parseKind0Profile(e.content);
       const displayName = name || authorLabel;
       const aboutText = truncateAbout(about, 120);
       return (
         <div className="flex gap-3 items-start">
-          <div
-            className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-full text-lg font-bold ${headerAvatarClass}`}
-          >
-            {displayInitials(name || null, e.pubkey)}
-          </div>
+          <FeedAuthorAvatar
+            pubkey={e.pubkey}
+            picture={picture ?? authorPicture}
+            profileDisplayNameForInitials={name || null}
+            sizeClass="h-14 w-14"
+            textSizeClass="text-lg"
+          />
           <div className="min-w-0 flex-1 space-y-1">
             <div className="text-[15px] font-semibold text-foreground">
               {displayName}
@@ -184,11 +226,15 @@ export function EventFeedCard({
       className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] overflow-hidden transition-colors hover:border-[#3a3a3a] cursor-pointer text-left"
     >
       <div className="flex items-start gap-3 px-4 pt-3 pb-2 border-b border-[#252525]/80">
-        <div
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${headerAvatarClass}`}
-        >
-          {initials}
-        </div>
+        <FeedAuthorAvatar
+          pubkey={e.pubkey}
+          picture={authorPicture}
+          profileDisplayNameForInitials={
+            authorHasProfileName ? profileDisplayNameForInitials : null
+          }
+          sizeClass="h-9 w-9"
+          textSizeClass="text-[11px]"
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-[13px] font-medium text-foreground truncate max-w-[200px]">

@@ -546,6 +546,13 @@
       "blockTitle": "Mark as spam?",
       "blockDescription": "Removes all events from this pubkey and prevents future publications."
     },
+    "blockModal": {
+      "title": "Mark as spam?",
+      "description": "Removes all events from this pubkey and blocks future publications from it on this relay.",
+      "cancel": "Cancel",
+      "confirm": "Mark as spam",
+      "processing": "Processing…"
+    },
     "states": {
       "loading": "Loading...",
       "processing": "Processing..."
@@ -565,7 +572,8 @@
       "timeout": "The request took too long.",
       "proxyUnavailable": "Proxy unavailable.",
       "default": "Error loading events."
-    },"feed": {
+    },
+    "feed": {
       "noDescription": "No description",
       "reposted": "reposted",
       "repost": "Repost",

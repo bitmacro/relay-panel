@@ -175,7 +175,11 @@ export function truncateEventId(id: string): string {
   return `${id.slice(0, 8)}…${id.slice(-6)}`;
 }
 
-export function parseKind0Profile(content: string): { name: string; about: string } {
+export function parseKind0Profile(content: string): {
+  name: string;
+  about: string;
+  picture?: string;
+} {
   try {
     const j = JSON.parse(content) as Record<string, unknown>;
     const name =
@@ -184,7 +188,11 @@ export function parseKind0Profile(content: string): { name: string; about: strin
       (typeof j.name === "string" && j.name) ||
       "";
     const about = typeof j.about === "string" ? j.about : "";
-    return { name, about };
+    let picture: string | undefined;
+    if (typeof j.picture === "string" && j.picture.trim()) {
+      picture = j.picture.trim();
+    }
+    return { name, about, picture };
   } catch {
     return { name: "", about: "" };
   }

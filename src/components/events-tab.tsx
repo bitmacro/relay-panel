@@ -113,7 +113,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     null
   );
   const [, setProfileBump] = useState(0);
-  const profileCacheRef = useRef<Map<string, string>>(new Map());
+  const profileCacheRef = useRef<
+    Map<string, { display: string; picture?: string }>
+  >(new Map());
   const [viewMode, setViewMode] = useState<EventsViewMode>("table");
 
   useEffect(() => {
@@ -222,8 +224,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   }, [selectedId, filterTime, authorHexForApi, refreshTrigger, formatEventsError]);
 
   const resolveDisplayPubkey = useCallback((hex: string) => {
-    const name = profileCacheRef.current.get(hex);
-    if (name) return name;
+    const meta = profileCacheRef.current.get(hex);
+    if (meta?.display) return meta.display;
     try {
       return truncateNpub(hexToNpubDisplay(hex));
     } catch {
@@ -257,18 +259,17 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           if (!Array.isArray(arr)) continue;
           for (const ev of arr) {
             if (ev.kind !== 0 || !ev.pubkey) continue;
-            let display = "";
-            try {
-              const j = JSON.parse(ev.content) as Record<string, unknown>;
-              display =
-                (typeof j.display_name === "string" && j.display_name) ||
-                (typeof j.displayName === "string" && j.displayName) ||
-                (typeof j.name === "string" && j.name) ||
-                "";
-            } catch {
-              /* ignore */
+            const { name: displayRaw, picture } = parseKind0Profile(ev.content);
+            const display = displayRaw?.trim() ?? "";
+            const prev = profileCacheRef.current.get(ev.pubkey);
+            const mergedDisplay = display || prev?.display || "";
+            const mergedPicture = picture ?? prev?.picture;
+            if (mergedDisplay || mergedPicture) {
+              profileCacheRef.current.set(ev.pubkey, {
+                display: mergedDisplay,
+                picture: mergedPicture,
+              });
             }
-            if (display) profileCacheRef.current.set(ev.pubkey, display);
           }
           setProfileBump((t) => t + 1);
         } catch {
@@ -610,18 +611,23 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
               const parsed0 =
                 e.kind === 0 ? parseKind0Profile(e.content) : null;
               const nameFromEvent = parsed0?.name?.trim() ?? "";
-              const cachedName = profileCacheRef.current.get(e.pubkey);
-              
-              // Correção aqui:
-              const displayNameForInitials = nameFromEvent || cachedName || null;
+              const cached = profileCacheRef.current.get(e.pubkey);
+              const cachedName = cached?.display?.trim() ?? "";
+              const displayNameForInitials =
+                nameFromEvent || cachedName || null;
+              const authorPicture =
+                parsed0?.picture ?? cached?.picture ?? null;
 
               return (
                 <EventFeedCard
                   key={e.id}
                   event={e}
-                  authorLabel={displayNameForInitials || resolveDisplayPubkey(e.pubkey)}
+                  authorLabel={
+                    displayNameForInitials || resolveDisplayPubkey(e.pubkey)
+                  }
                   authorHasProfileName={!!displayNameForInitials}
-                  profileDisplayNameForInitials={displayNameForInitials} // Prop obrigatória
+                  profileDisplayNameForInitials={displayNameForInitials}
+                  authorPicture={authorPicture}
                   formatAgo={formatAgo}
                   resolvePubkeyLabel={resolveDisplayPubkey}
                   onOpenDetail={() => setDetailEvent(e)}
