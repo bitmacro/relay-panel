@@ -134,13 +134,17 @@ export function ConfigTab({
 
   const handleSave = async () => {
     if (!selectedId || !config) return;
+    if (!(config.agent_relay_id?.trim() ?? "")) {
+      setError(t("errors.agentRelayIdRequired"));
+      return;
+    }
     setSaving(true);
     setError(null);
     const body: Record<string, string | null> = {};
     if (config.name) body.name = config.name;
     if (config.endpoint) body.endpoint = config.endpoint;
     if (config.token.trim()) body.token = config.token.trim();
-    body.agent_relay_id = config.agent_relay_id?.trim() || null;
+    body.agent_relay_id = (config.agent_relay_id ?? "").trim();
     body.color = config.color?.trim() || null;
     if (Object.keys(body).length === 0) {
       setSaving(false);

@@ -5,6 +5,7 @@ import type { User } from "next-auth";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { hexToNpubDisplay, truncateNpubNav } from "@/lib/events-display";
 
 interface LandingUserMenuProps {
   user: User;
@@ -33,6 +34,20 @@ export function LandingUserMenu({ user }: LandingUserMenuProps) {
         .toUpperCase()
     : "?";
 
+  const userId = "id" in user && typeof user.id === "string" ? user.id : "";
+  const isNostrSession =
+    /^[0-9a-f]{64}$/i.test(userId) ||
+    (typeof user.name === "string" && user.name.toLowerCase().startsWith("npub1"));
+  const nostrFullNpub =
+    isNostrSession && typeof user.name === "string" && user.name.toLowerCase().startsWith("npub1")
+      ? user.name
+      : isNostrSession && /^[0-9a-f]{64}$/i.test(userId)
+        ? hexToNpubDisplay(userId.toLowerCase())
+        : null;
+  const navLabel = nostrFullNpub
+    ? truncateNpubNav(nostrFullNpub)
+    : user.name?.split(" ")[0] ?? "user";
+
   return (
     <div className="relative ml-4" ref={ref}>
       <button
@@ -52,8 +67,11 @@ export function LandingUserMenu({ user }: LandingUserMenuProps) {
             {initials}
           </div>
         )}
-        <span className="text-[12px] font-medium text-muted-foreground max-w-[120px] truncate hidden sm:inline">
-          {user.name?.split(" ")[0] ?? "user"}
+        <span
+          className="text-[12px] font-medium text-muted-foreground font-mono max-w-[120px] truncate hidden sm:inline"
+          title={nostrFullNpub ?? undefined}
+        >
+          {navLabel}
         </span>
         <span className="text-[9px] text-muted-foreground/60 pr-0.5">▾</span>
       </button>

@@ -9,8 +9,8 @@ function normalizeAgentBase(raw: string): string {
 }
 
 /**
- * POST body: { endpoint: string, token: string, agent_relay_id?: string }
- * Calls relay-agent GET /health (with optional /:agent_relay_id prefix) from the panel server.
+ * POST body: { endpoint: string, token: string, agent_relay_id: string }
+ * Probes relay-agent GET /:agent_relay_id/health (v2 multi-relay; id must match RELAY_INSTANCES).
  */
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -24,15 +24,19 @@ export async function POST(req: NextRequest) {
   const agentRelayId =
     typeof body.agent_relay_id === "string" ? body.agent_relay_id.trim() : "";
 
-  if (!endpointRaw || !token) {
+  if (!endpointRaw || !token || !agentRelayId) {
     return NextResponse.json(
-      { ok: false, error: "missing_fields", detail: "endpoint and token required" },
+      {
+        ok: false,
+        error: "missing_fields",
+        detail: "endpoint, token, and agent_relay_id required",
+      },
       { status: 400 }
     );
   }
 
   const base = normalizeAgentBase(endpointRaw);
-  const path = `${agentRelayId ? `/${agentRelayId}` : ""}/health`;
+  const path = `/${agentRelayId}/health`;
   const url = `${base}${path}`;
   const start = Date.now();
 

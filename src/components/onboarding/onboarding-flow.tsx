@@ -42,7 +42,8 @@ export function OnboardingFlow() {
     const n = name.trim();
     const e = endpoint.trim();
     const tok = token.trim();
-    if (!n || !e || !tok) {
+    const arid = agentRelayId.trim();
+    if (!n || !e || !tok || !arid) {
       setErr(t("probeFail"));
       return;
     }
@@ -60,7 +61,7 @@ export function OnboardingFlow() {
         body: JSON.stringify({
           endpoint: e.replace(/\/$/, ""),
           token: tok,
-          agent_relay_id: agentRelayId.trim(),
+          agent_relay_id: arid,
         }),
       });
       const probeJson = (await probe.json()) as { ok?: boolean };
@@ -74,9 +75,9 @@ export function OnboardingFlow() {
         name: n,
         endpoint: e.replace(/\/$/, ""),
         token: tok,
+        agent_relay_id: arid,
         color: RELAY_COLOR_PRESETS[0] as string,
       };
-      if (agentRelayId.trim()) body.agent_relay_id = agentRelayId.trim();
 
       const create = await fetch("/api/relays", {
         method: "POST",
@@ -265,7 +266,7 @@ export function OnboardingFlow() {
             <label className="text-[11px] font-medium text-muted-foreground uppercase block mb-1">
               {t("agentRelayId")}{" "}
               <span className="normal-case font-normal text-muted-foreground/70">
-                ({t("agentRelayOptional")})
+                ({t("agentRelayIdSubtext")})
               </span>
             </label>
             <input

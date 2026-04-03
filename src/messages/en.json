@@ -60,11 +60,11 @@
     "token": "Bearer token",
     "tokenPlaceholder": "RELAY_AGENT_TOKEN",
     "agentRelayId": "Agent Relay ID",
-    "agentRelayIdHint": "(optional — leave empty for a dedicated agent)",
+    "agentRelayIdHint": "(must match the id in RELAY_INSTANCES, e.g. public, private, paid)",
     "agentRelayPlaceholder": "e.g. public",
     "submit": "Add relay",
     "submitting": "Creating…",
-    "errRequired": "Fill in name, agent URL and token",
+    "errRequired": "Fill in name, agent URL, token, and agent relay ID",
     "errTokenLen": "Token must be at least 8 characters",
     "errCreate": "Could not create relay"
   },
@@ -208,11 +208,11 @@
     "endpoint": "Agent URL (https:// or wss://)",
     "token": "Bearer token",
     "agentRelayId": "agent_relay_id",
-    "agentRelayOptional": "optional (multi-relay)",
+    "agentRelayIdSubtext": "required — same id as in RELAY_INSTANCES (e.g. public)",
     "testConnection": "Test connection",
     "testing": "Testing…",
     "registering": "Registering…",
-    "probeFail": "Connection failed. Check URL, token and agent_relay_id.",
+    "probeFail": "Connection failed. Check agent URL, token, and agent_relay_id.",
     "createFail": "Could not create the relay.",
     "successTitle": "Relay registered",
     "successBody": "You can manage your relay in the panel.",
@@ -346,7 +346,7 @@
       "tokenPlaceholder": "Leave blank to keep current",
       "displayName": "Display name",
       "agentRelayId": "Agent Relay ID",
-      "agentRelayIdPlaceholder": "e.g. public (leave empty for dedicated agent)"
+      "agentRelayIdPlaceholder": "e.g. public — RELAY_INSTANCES id"
     },
     "connection": {
       "title": "Connection status",
@@ -371,7 +371,8 @@
       "invalidServerResponse": "Invalid server response.",
       "save": "Error saving",
       "delete": "Error deleting",
-      "relayNotFound": "Relay not found."
+      "relayNotFound": "Relay not found.",
+      "agentRelayIdRequired": "Agent Relay ID is required (RELAY_INSTANCES id)."
     },
     "probe": {
       "ok": "Connection OK{elapsed}",
@@ -396,13 +397,13 @@
       "bearerToken": "Bearer token",
       "tokenPlaceholder": "RELAY_INSTANCES token",
       "agentRelayId": "Agent Relay ID",
-      "agentRelayIdPlaceholder": "e.g. private (id in RELAY_INSTANCES)"
+      "agentRelayIdPlaceholder": "e.g. private — RELAY_INSTANCES id"
     },
     "btnCancel": "Cancel",
     "btnCreate": "Create",
     "btnCreating": "Creating…",
     "errors": {
-      "requiredFields": "Fill name, agent URL and token",
+      "requiredFields": "Fill name, agent URL, token, and agent relay ID",
       "nameMaxLength": "Name must have at most 100 characters",
       "invalidAgentUrl": "Invalid agent URL (e.g. https://agent.example.com)",
       "tokenMinLength": "Token must have at least 8 characters",

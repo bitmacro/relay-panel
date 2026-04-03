@@ -10,7 +10,11 @@ import type { AppLocale } from "@/lib/local-preferences";
 import { ProfileSheet } from "@/components/layout/ProfileSheet";
 import { HelpSheet } from "@/components/layout/HelpSheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { hexToNpubDisplay, truncateNpub } from "@/lib/events-display";
+import {
+  hexToNpubDisplay,
+  truncateNpub,
+  truncateNpubNav,
+} from "@/lib/events-display";
 import { useNostrPrefs } from "@/lib/use-nostr-prefs";
 
 interface UserMenuProps {
@@ -54,6 +58,22 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
         .toUpperCase()
     : "?";
 
+  const userId = "id" in user && typeof user.id === "string" ? user.id : "";
+  const isNostrSession =
+    /^[0-9a-f]{64}$/i.test(userId) ||
+    (typeof user.name === "string" && user.name.toLowerCase().startsWith("npub1"));
+
+  const nostrFullNpub =
+    isNostrSession && typeof user.name === "string" && user.name.toLowerCase().startsWith("npub1")
+      ? user.name
+      : isNostrSession && /^[0-9a-f]{64}$/i.test(userId)
+        ? hexToNpubDisplay(userId.toLowerCase())
+        : null;
+
+  const navLabel = nostrFullNpub
+    ? truncateNpubNav(nostrFullNpub)
+    : user.name?.split(" ")[0] ?? "user";
+
   const nostrNpub =
     nostrHex && /^[0-9a-f]{64}$/i.test(nostrHex)
       ? truncateNpub(hexToNpubDisplay(nostrHex.toLowerCase()))
@@ -93,8 +113,11 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
                 )}
               </div>
             </div>
-            <span className="text-[12px] font-medium text-muted-foreground">
-              {user.name?.split(" ")[0] ?? "user"}
+            <span
+              className="text-[12px] font-medium text-muted-foreground font-mono max-w-[11rem] truncate"
+              title={nostrFullNpub ?? undefined}
+            >
+              {navLabel}
             </span>
             <span className="text-[9px] text-muted-foreground/60">▾</span>
           </button>

@@ -45,6 +45,15 @@ export function truncateNpub(npub: string): string {
   return `${npub.slice(0, 10)}…${npub.slice(-8)}`;
 }
 
+/** Navbar / espaços estreitos: início + `...` + fim curto (ex. `npub1sjx7...d34h`). */
+export function truncateNpubNav(npub: string): string {
+  const s = npub.trim();
+  const head = 10;
+  const tail = 4;
+  if (s.length <= head + tail + 3) return s;
+  return `${s.slice(0, head)}...${s.slice(-tail)}`;
+}
+
 export function kindBadgeMeta(kind: number): {
   label: string;
   badgeClass: string;

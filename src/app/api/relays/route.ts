@@ -13,7 +13,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({}));
+  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const agentRelayId =
+    typeof body.agent_relay_id === "string" ? body.agent_relay_id.trim() : "";
+  if (!agentRelayId) {
+    return NextResponse.json(
+      { error: "validation_error", detail: "agent_relay_id is required" },
+      { status: 400 }
+    );
+  }
+  const payload = { ...body, agent_relay_id: agentRelayId };
   const res = await fetch(apiUrl("relays"), {
     method: "POST",
     headers: {
@@ -21,7 +30,7 @@ export async function POST(req: NextRequest) {
       "X-API-Key": apiKey,
       "X-Provider-User-Id": providerUserId,
     },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
     cache: "no-store",
     signal: AbortSignal.timeout(30_000),
   }).catch((err) => {

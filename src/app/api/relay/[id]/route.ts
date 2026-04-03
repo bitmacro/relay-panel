@@ -73,7 +73,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const body = await req.json().catch(() => ({}));
+  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  if ("agent_relay_id" in body) {
+    const arid =
+      typeof body.agent_relay_id === "string" ? body.agent_relay_id.trim() : "";
+    if (!arid) {
+      return NextResponse.json(
+        { error: "validation_error", detail: "agent_relay_id is required" },
+        { status: 400 }
+      );
+    }
+    body.agent_relay_id = arid;
+  }
   return proxy("PATCH", id, body);
 }
 

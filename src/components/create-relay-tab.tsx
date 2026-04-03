@@ -28,7 +28,7 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
     const tokenTrim = form.token.trim();
     const aid = form.agent_relay_id.trim();
 
-    if (!n || !e || !tokenTrim) {
+    if (!n || !e || !tokenTrim || !aid) {
       setError(t("errors.requiredFields"));
       return;
     }
@@ -52,9 +52,9 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
         name: n,
         endpoint: e.replace(/\/$/, ""),
         token: tokenTrim,
+        agent_relay_id: aid,
         color: form.color || null,
       };
-      if (aid) body.agent_relay_id = aid;
 
       const r = await fetch("/api/relays", {
         method: "POST",

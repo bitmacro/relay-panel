@@ -27,8 +27,9 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
     const n = form.name.trim();
     const e = form.endpoint.trim();
     const tok = form.token.trim();
+    const aid = form.agent_relay_id.trim();
 
-    if (!n || !e || !tok) {
+    if (!n || !e || !tok || !aid) {
       setError(tr("errRequired"));
       return;
     }
@@ -44,9 +45,9 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
         name: n,
         endpoint: e.replace(/\/$/, ""),
         token: tok,
+        agent_relay_id: aid,
         color: form.color || null,
       };
-      if (form.agent_relay_id.trim()) body.agent_relay_id = form.agent_relay_id.trim();
 
       const r = await fetch("/api/relays", {
         method: "POST",
