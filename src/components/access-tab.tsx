@@ -409,20 +409,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         setError(json?.error ?? json?.detail ?? t("errors.add"));
         return;
       }
-      setEntries((prev) => {
-        if (prev.some((e) => e.pubkey === hex)) {
-          return prev.map((e) =>
-            e.pubkey === hex
-              ? { ...e, status: "allowed" as const, source: "whitelist" as const }
-              : e
-          );
-        }
-        return [
-          ...prev,
-          { pubkey: hex, status: "allowed" as const, source: "whitelist" as const },
-        ];
-      });
       setAddValue("");
+      await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errors.network"));
     } finally {
