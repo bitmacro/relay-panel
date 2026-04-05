@@ -29,6 +29,19 @@ type ProfileMeta = {
   lud06?: string;
 };
 
+/** Label line for whitelist.txt (agent appends “# label — npub”). */
+function buildWhitelistLabelFromProfile(meta: {
+  name?: string;
+  nip05?: string;
+}): string | undefined {
+  const name = meta.name?.trim() ?? "";
+  const nip = meta.nip05?.trim() ?? "";
+  if (name && nip) return `${name} (${nip})`;
+  if (name) return name;
+  if (nip) return nip;
+  return undefined;
+}
+
 function parseKind0ProfileExtended(content: string): ProfileMeta {
   const base = parseKind0Profile(content);
   try {
@@ -324,6 +337,46 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           /* non-blocking */
         }
       }
+      if (cancelled) return;
+      const stillNeed = need.filter((pk) => !profileCacheRef.current.has(pk));
+      if (stillNeed.length === 0) return;
+      try {
+        const r = await fetch(
+          `/api/nostr/kind0?pubkeys=${encodeURIComponent(stillNeed.join(","))}`
+        );
+        if (!r.ok || cancelled) return;
+        const data = (await r.json()) as {
+          profiles?: Record<
+            string,
+            { name?: string; picture?: string; nip05?: string }
+          >;
+        };
+        const profiles = data.profiles ?? {};
+        let any = false;
+        for (const [hexKey, p] of Object.entries(profiles)) {
+          if (cancelled) break;
+          const key = hexKey.toLowerCase();
+          const name = (p.name ?? "").trim();
+          const picture =
+            typeof p.picture === "string" && p.picture.trim()
+              ? p.picture.trim()
+              : undefined;
+          const nip05 =
+            typeof p.nip05 === "string" && p.nip05.trim()
+              ? p.nip05.trim()
+              : undefined;
+          if (!name && !picture && !nip05) continue;
+          profileCacheRef.current.set(key, {
+            name,
+            ...(picture ? { picture } : {}),
+            ...(nip05 ? { nip05 } : {}),
+          });
+          any = true;
+        }
+        if (any) profileBump((t) => t + 1);
+      } catch {
+        /* non-blocking */
+      }
     })();
 
     return () => {
@@ -399,10 +452,51 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     setActionPending(hex);
     setError(null);
     try {
+      let label: string | undefined;
+      try {
+        const br = await fetch(
+          `/api/nostr/kind0?pubkeys=${encodeURIComponent(hex)}`
+        );
+        if (br.ok) {
+          const data = (await br.json()) as {
+            profiles?: Record<
+              string,
+              { name?: string; picture?: string; nip05?: string }
+            >;
+          };
+          const p = data.profiles?.[hex.toLowerCase()];
+          if (p) {
+            const name = (p.name ?? "").trim();
+            const picture =
+              typeof p.picture === "string" && p.picture.trim()
+                ? p.picture.trim()
+                : undefined;
+            const nip05 =
+              typeof p.nip05 === "string" && p.nip05.trim()
+                ? p.nip05.trim()
+                : undefined;
+            if (name || picture || nip05) {
+              profileCacheRef.current.set(hex.toLowerCase(), {
+                name,
+                ...(picture ? { picture } : {}),
+                ...(nip05 ? { nip05 } : {}),
+              });
+              profileBump((t) => t + 1);
+              label = buildWhitelistLabelFromProfile({ name, nip05 });
+            }
+          }
+        }
+      } catch {
+        /* optional enrichment */
+      }
+
       const res = await fetch(`/api/relay/${selectedId}/policy/allow`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pubkey: hex }),
+        body: JSON.stringify({
+          pubkey: hex,
+          ...(label ? { label } : {}),
+        }),
       });
       const json = await res.json();
       if (!res.ok) {
