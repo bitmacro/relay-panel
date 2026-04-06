@@ -4,7 +4,7 @@ import { apiUrl } from "@/lib/api";
 import { TopNav } from "@/components/layout/TopNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Footer } from "@/components/layout/Footer";
-import pkg from "../../../package.json";
+import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
 interface Relay {
   id: string;
@@ -54,7 +54,7 @@ export async function AuthenticatedAppShell({
         </main>
       </div>
       <Footer
-        panelVersion={pkg.version}
+        panelVersion={PANEL_PACKAGE_VERSION}
         relayIdsForHealth={relays.map((r) => r.id)}
       />
     </div>

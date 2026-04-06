@@ -4,9 +4,11 @@ import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
 export function LandingFooter() {
   const t = useTranslations("landing.footer");
+  const tFooter = useTranslations("footer");
 
   return (
     <footer className="border-t border-border bg-card px-6 py-8">
@@ -29,7 +31,7 @@ export function LandingFooter() {
           </a>
           <span className="text-border">·</span>
           <span className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded">
-            v0.2.2
+            {tFooter("panelVersion", { version: PANEL_PACKAGE_VERSION })}
           </span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] text-muted-foreground">

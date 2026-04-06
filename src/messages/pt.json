@@ -231,8 +231,8 @@
       "locale": "Idioma"
     },
     "hero": {
-      "kickerA": "relay-agent v0.2.0 · MIT · Open Source",
-      "kickerB": "5-module ecosystem · relay-agent · relay-panel · relay-connect",
+      "kickerA": "relay-agent multi-relay (npm / GHCR) · MIT · Open Source",
+      "kickerB": "Ecossistema · relay-agent · relay-api · relay-panel · relay-connect (SDK)",
       "title": "Gerir o teu relay Nostr sem usar o terminal",
       "subtitle": "Painel visual para operadores — moderação, controlo de acesso, Lightning e multi-relay num só sítio.",
       "ctaPrimary": "Começar →",

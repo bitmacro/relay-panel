@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 import { LandingNav } from "@/components/landing/LandingNav";
 import { Hero } from "@/components/landing/Hero";
 import { ProblemSection } from "@/components/landing/ProblemSection";
@@ -31,6 +32,7 @@ const JSON_LD = {
   name: "BitMacro Relay Manager",
   applicationCategory: "DeveloperApplication",
   operatingSystem: "Web",
+  softwareVersion: PANEL_PACKAGE_VERSION,
   url: "https://relay-panel.bitmacro.io",
   description:
     "Visual dashboard for Nostr relay operators — moderation, access control, Lightning payments and multi-relay management.",

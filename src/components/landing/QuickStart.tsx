@@ -36,8 +36,14 @@ docker pull ghcr.io/bitmacro/relay-agent`}
                 {t("s2")}
               </div>
               <pre className="p-4 rounded-lg bg-secondary/80 border border-border overflow-x-auto text-[13px] font-mono text-foreground">
-{`[
-  { "id": "public", "token": "your-token", "strfryConfig": "/etc/strfry.conf" }
+{`# RELAY_INSTANCES — JSON array, one entry per logical relay (e.g. public / private / paid).
+# Each: id, token, strfryConfig, strfryDb, whitelistPath (see relay-agent README + compose).
+# In strfry.conf use db = "./data/" and mount host nostr/<id>/data to match strfryDb.
+
+[
+  {"id":"public","token":"…","strfryConfig":"/app/nostr/public/strfry.conf","strfryDb":"/app/nostr/public/data","whitelistPath":"/app/nostr/public/whitelist.txt"},
+  {"id":"private","token":"…","strfryConfig":"/app/nostr/private/strfry.conf","strfryDb":"/app/nostr/private/data","whitelistPath":"/app/nostr/private/whitelist.txt"},
+  {"id":"paid","token":"…","strfryConfig":"/app/nostr/paid/strfry.conf","strfryDb":"/app/nostr/paid/data","whitelistPath":"/app/nostr/paid/whitelist.txt"}
 ]`}
               </pre>
             </div>
