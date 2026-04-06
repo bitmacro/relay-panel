@@ -4,16 +4,44 @@ import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { startTransition, useEffect, useState } from "react";
 import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
 export function LandingFooter() {
   const t = useTranslations("landing.footer");
   const tFooter = useTranslations("footer");
+  const [agentVersion, setAgentVersion] = useState<string | null>(null);
+  const [agentLoading, setAgentLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    startTransition(() => setAgentLoading(true));
+    (async () => {
+      try {
+        const r = await fetch("/api/public/agent-health", { cache: "no-store" });
+        const json = (await r.json()) as { version?: string | null };
+        if (!cancelled && typeof json.version === "string" && json.version) {
+          setAgentVersion(json.version);
+        } else if (!cancelled) {
+          setAgentVersion(null);
+        }
+      } catch {
+        if (!cancelled) setAgentVersion(null);
+      } finally {
+        if (!cancelled) startTransition(() => setAgentLoading(false));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const agentLabel = agentLoading ? "…" : agentVersion != null ? `v${agentVersion}` : "—";
 
   return (
     <footer className="border-t border-border bg-card px-6 py-8">
       <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1.5">
           <a
             href="https://bitmacro.io"
             target="_blank"
@@ -29,9 +57,19 @@ export function LandingFooter() {
             />
             <span className="text-[13px] font-medium">{t("brand")}</span>
           </a>
-          <span className="text-border">·</span>
-          <span className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded">
+          <span className="text-border hidden sm:inline">·</span>
+          <span
+            className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded"
+            title={tFooter("panelTitle")}
+          >
             {tFooter("panelVersion", { version: PANEL_PACKAGE_VERSION })}
+          </span>
+          <span className="text-border">·</span>
+          <span
+            className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded"
+            title={tFooter("agentTitleLanding")}
+          >
+            {tFooter("agent", { label: agentLabel })}
           </span>
         </div>
         <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] text-muted-foreground">

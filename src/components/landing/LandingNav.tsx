@@ -13,7 +13,7 @@ export function LandingNav() {
   const { locale, setLocale } = useAppLocale();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 h-14 glass-card-strong border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 h-14 border-b border-border bg-card/95 text-card-foreground shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/90">
       <div className="mx-auto flex h-full max-w-6xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2 shrink-0">
           <Image

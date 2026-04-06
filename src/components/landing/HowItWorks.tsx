@@ -49,9 +49,11 @@ export function HowItWorks() {
           <ScrollReveal delay={100}>
             <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">{t("apiTag")}</div>
-              <div className="text-[11px] font-mono text-muted-foreground mb-4">{t("private")}</div>
+              <div className="text-[11px] font-mono text-muted-foreground mb-4">{t("apiProtocol")}</div>
               <p className="text-[13px] text-muted-foreground mb-4">{t("apiStack")}</p>
-              <p className="text-[12px] text-muted-foreground/80 mt-auto">{t("apiRole")}</p>
+              <p className="text-[12px] text-muted-foreground/80 mt-auto whitespace-pre-line">
+                {t("apiRole")}
+              </p>
             </div>
           </ScrollReveal>
 
