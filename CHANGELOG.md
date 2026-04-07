@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-04-07
+
+### Added
+
+- Landing page: responsive nav (mobile Sheet), touch-friendly CTAs and footer
+- Panel shell: mobile sidebar as drawer, relay quick chips, compact header
+- Local dev: `AUTH_SECRET` optional placeholder with console warning
+- Local dev: default relay-api `https://relay-api.bitmacro.io` when upstream URL unset
+- `RELAY_API_ALLOW_LOCALHOST_UPSTREAM` to opt into localhost relay-api in dev
+
+### Changed
+
+- Onboarding: fix hydration mismatch for suggested agent token (UUID after mount)
+- relay-api base URL: in `next dev`, loopback `NEXT_PUBLIC_API_URL` / `RELAY_API_URL` is ignored unless opt-in flag (avoids proxying to `localhost:3000` by mistake)
+
+### Fixed
+
+- NextAuth `MissingSecret` when running `next dev` without `.env`
+
 ## [0.2.2] - 2026-03-23
 
 ### Changed

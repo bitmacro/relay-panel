@@ -1,6 +1,6 @@
 {
   "name": "@bitmacro/relay-panel",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Web UI for managing Nostr relays via relay-api",
   "private": true,
   "license": "BSL-1.1",

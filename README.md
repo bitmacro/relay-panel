@@ -83,11 +83,12 @@ npm run dev
 |----------|-------------|
 | `NEXTAUTH_SECRET` | Secret for JWT signing (min 32 chars, e.g. `openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | App URL (e.g. `http://localhost:3000`) |
-| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`). **Local dev:** if unset, `next dev` defaults to that production URL so the panel works without copying `.env`; override to point at a staging API |
+| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`). **Local dev:** if unset, `next dev` defaults to production relay-api. **Loopback** values (`http://localhost:…`) are ignored in dev unless `RELAY_API_ALLOW_LOCALHOST_UPSTREAM=1` (avoids mistaking the panel origin for relay-api). |
 | `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret |
 | `RELAY_API_KEY` | API key shared with relay-api |
 | `RELAY_API_URL` | (Optional) Server-side relay-api base URL; defaults to `NEXT_PUBLIC_API_URL`. Use if PATCH/config timeouts suggest a different Vercel region than the browser URL |
+| `RELAY_API_ALLOW_LOCALHOST_UPSTREAM` | Set to `1` only in dev when relay-api runs on localhost; otherwise loopback `NEXT_PUBLIC_API_URL` / `RELAY_API_URL` is ignored and production relay-api is used |
 
 ---
 
