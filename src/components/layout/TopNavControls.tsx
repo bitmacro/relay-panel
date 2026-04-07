@@ -22,12 +22,12 @@ export function TopNavControls({ user }: TopNavControlsProps) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5 md:gap-2">
       <button
         type="button"
         onClick={() => setTheme(isDark ? "light" : "dark")}
         title={t("toggleTheme")}
-        className="w-8 h-8 flex items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors text-[15px]"
+        className="hidden md:inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors text-[15px]"
       >
         {isDark ? "🌙" : "☀️"}
       </button>
@@ -36,7 +36,7 @@ export function TopNavControls({ user }: TopNavControlsProps) {
         type="button"
         onClick={toggleLocale}
         title={t("toggleLang")}
-        className="h-8 px-2 flex items-center justify-center rounded-md border border-border text-[11px] font-bold font-mono text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors"
+        className="hidden md:inline-flex h-9 px-2.5 items-center justify-center rounded-md border border-border text-[11px] font-bold font-mono text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors"
       >
         {locale.toUpperCase()}
       </button>

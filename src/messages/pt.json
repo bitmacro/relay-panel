@@ -12,7 +12,9 @@
     "title": "BitMacro Relay Manager",
     "domain": "relay-panel.bitmacro.io",
     "toggleTheme": "Alternar tema",
-    "toggleLang": "Idioma"
+    "toggleLang": "Idioma",
+    "openMenu": "Abrir menu de navegação",
+    "menuTitle": "Navegação"
   },
   "userMenu": {
     "profile": "Perfil",
@@ -29,7 +31,8 @@
     "relays": "Relays",
     "activeRelays": "Relays ativos",
     "none": "Nenhum relay",
-    "newRelay": "Novo relay"
+    "newRelay": "Novo relay",
+    "appearance": "Aparência"
   },
   "relayTable": {
     "title": "Relay Hosts",

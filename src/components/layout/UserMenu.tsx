@@ -86,7 +86,7 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="flex items-center gap-2 bg-secondary border border-border rounded-full pl-1 pr-2.5 py-1 hover:border-muted-foreground/30 transition-colors"
+            className="flex min-h-11 md:min-h-0 items-center gap-2 bg-secondary border border-border rounded-full pl-1 pr-2.5 py-1.5 md:py-1 hover:border-muted-foreground/30 transition-colors"
           >
             <div className="flex items-center gap-1">
               {nostrNpub ? (

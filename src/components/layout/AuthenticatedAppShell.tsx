@@ -1,9 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { apiUrl } from "@/lib/api";
-import { TopNav } from "@/components/layout/TopNav";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Footer } from "@/components/layout/Footer";
+import { AppShellClient } from "@/components/layout/Sidebar";
 import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
 interface Relay {
@@ -45,18 +43,13 @@ export async function AuthenticatedAppShell({
     apiKey && providerUserId ? await fetchRelays(apiKey, providerUserId) : [];
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <TopNav user={session.user ?? null} />
-      <div className="flex min-h-0 flex-1 overflow-hidden">
-        <Sidebar relays={relays} />
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-auto">
-          {children}
-        </main>
-      </div>
-      <Footer
-        panelVersion={PANEL_PACKAGE_VERSION}
-        relayIdsForHealth={relays.map((r) => r.id)}
-      />
-    </div>
+    <AppShellClient
+      relays={relays}
+      user={session.user ?? null}
+      panelVersion={PANEL_PACKAGE_VERSION}
+      relayIdsForHealth={relays.map((r) => r.id)}
+    >
+      {children}
+    </AppShellClient>
   );
 }
