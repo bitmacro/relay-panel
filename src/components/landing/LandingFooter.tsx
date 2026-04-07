@@ -7,6 +7,9 @@ import { useTranslations } from "next-intl";
 import { startTransition, useEffect, useState } from "react";
 import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
+const footerNavLink =
+  "footer-link inline-flex min-h-11 items-center justify-center rounded-md px-2 touch-manipulation sm:min-h-0 sm:inline sm:px-0";
+
 export function LandingFooter() {
   const t = useTranslations("landing.footer");
   const tFooter = useTranslations("footer");
@@ -39,51 +42,55 @@ export function LandingFooter() {
   const agentLabel = agentLoading ? "…" : agentVersion != null ? `v${agentVersion}` : "—";
 
   return (
-    <footer className="border-t border-border bg-card px-6 py-8">
-      <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-between gap-6">
-        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-2 gap-y-1.5">
+    <footer className="border-t border-border bg-card px-4 py-8 sm:px-6">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
           <a
             href="https://bitmacro.io"
             target="_blank"
             rel="noreferrer"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex min-h-11 shrink-0 items-center gap-2 rounded-md transition-opacity hover:opacity-80 touch-manipulation sm:min-h-0"
           >
             <Image
               src="/bitmacro-logo.png"
               alt="BitMacro"
               width={24}
               height={24}
-              className="w-6 h-6 object-contain"
+              className="h-6 w-6 object-contain"
             />
             <span className="text-[13px] font-medium">{t("brand")}</span>
           </a>
-          <span className="text-border hidden sm:inline">·</span>
-          <span
-            className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded"
-            title={tFooter("panelTitle")}
-          >
-            {tFooter("panelVersion", { version: PANEL_PACKAGE_VERSION })}
-          </span>
-          <span className="text-border">·</span>
-          <span
-            className="text-[11px] font-mono bg-secondary border border-border px-1.5 py-0.5 rounded"
-            title={tFooter("agentTitleLanding")}
-          >
-            {tFooter("agent", { label: agentLabel })}
-          </span>
+          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 sm:justify-end">
+            <span
+              className="text-[11px] font-mono rounded border border-border bg-secondary px-1.5 py-0.5"
+              title={tFooter("panelTitle")}
+            >
+              {tFooter("panelVersion", { version: PANEL_PACKAGE_VERSION })}
+            </span>
+            <span className="text-border select-none" aria-hidden>
+              ·
+            </span>
+            <span
+              className="text-[11px] font-mono rounded border border-border bg-secondary px-1.5 py-0.5"
+              title={tFooter("agentTitleLanding")}
+            >
+              {tFooter("agent", { label: agentLabel })}
+            </span>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-4 text-[12px] text-muted-foreground">
-          <Link
-            href="https://bitmacro.io"
-            className="hover:text-foreground transition-colors"
-          >
+
+        <nav
+          className="flex flex-col items-stretch gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-3 sm:gap-y-2"
+          aria-label={t("brand")}
+        >
+          <a href="https://bitmacro.io" className={footerNavLink}>
             {t("bitmacro")}
-          </Link>
+          </a>
           <a
             href="https://bitmacro.io/relay-manager"
             target="_blank"
             rel="noreferrer"
-            className="footer-link"
+            className={footerNavLink}
           >
             {t("ecosystem")}
           </a>
@@ -91,7 +98,7 @@ export function LandingFooter() {
             href="https://bitmacro.io/relay-manager/docs"
             target="_blank"
             rel="noreferrer"
-            className="footer-link"
+            className={footerNavLink}
           >
             {t("techDocs")}
           </a>
@@ -99,7 +106,7 @@ export function LandingFooter() {
             href="https://github.com/bitmacro/relay-panel"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-foreground transition-colors"
+            className={footerNavLink}
           >
             relay-panel ↗
           </Link>
@@ -107,7 +114,7 @@ export function LandingFooter() {
             href="https://github.com/bitmacro/relay-agent"
             target="_blank"
             rel="noreferrer"
-            className="hover:text-foreground transition-colors"
+            className={footerNavLink}
           >
             relay-agent ↗
           </Link>
@@ -116,13 +123,13 @@ export function LandingFooter() {
             target="_blank"
             rel="noreferrer"
             title="@bitmacro/relay-connect (BitMacro Connect SDK)"
-            className="inline-flex items-center gap-1 font-mono hover:text-foreground transition-colors"
+            className={`${footerNavLink} gap-1 font-mono`}
           >
             <Github className="size-3.5 shrink-0 opacity-80" aria-hidden />
-            <span>@bitmacro/relay-connect</span>
+            <span className="break-all text-left sm:break-normal">@bitmacro/relay-connect</span>
           </Link>
-          <span>{t("copyright")}</span>
-        </div>
+        </nav>
+        <p className="text-center text-[12px] text-muted-foreground">{t("copyright")}</p>
       </div>
     </footer>
   );

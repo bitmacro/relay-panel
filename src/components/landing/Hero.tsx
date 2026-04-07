@@ -12,7 +12,7 @@ export function Hero() {
   const primaryHref = session?.user ? "/relays" : "/auth/signin";
 
   return (
-    <section className="relative pt-24 pb-16 md:pt-32 md:pb-24 px-6">
+    <section className="relative px-4 pb-12 pt-20 sm:px-6 sm:pb-16 sm:pt-24 md:pb-24 md:pt-32">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-16">
           <div className="flex-1">
@@ -21,7 +21,7 @@ export function Hero() {
                 <p className="text-[12px] font-mono text-muted-foreground uppercase tracking-wider">
                   {t("kickerA")}
                 </p>
-                <p className="text-[11px] font-mono text-muted-foreground/75 uppercase tracking-wider">
+                <p className="text-[10px] font-mono text-muted-foreground/75 uppercase tracking-wider sm:text-[11px]">
                   {t("kickerB")}
                 </p>
               </div>
@@ -37,10 +37,10 @@ export function Hero() {
               </p>
             </ScrollReveal>
             <ScrollReveal delay={240}>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <Link
                   href={primaryHref}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#f7931a] text-black text-[14px] font-semibold rounded-lg glow-orange hover:glow-orange-strong transition-all duration-300 hover:scale-[1.02]"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#f7931a] px-5 text-[14px] font-semibold text-black glow-orange transition-all duration-300 hover:glow-orange-strong hover:scale-[1.02] touch-manipulation sm:min-h-0 sm:py-2.5"
                 >
                   {t("ctaPrimary")}
                 </Link>
@@ -48,7 +48,7 @@ export function Hero() {
                   href="https://github.com/bitmacro/relay-panel"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 border border-border text-[14px] font-medium rounded-lg hover:bg-secondary/50 transition-colors"
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-border px-5 text-[14px] font-medium transition-colors hover:bg-secondary/50 touch-manipulation sm:min-h-0 sm:py-2.5"
                 >
                   {t("ctaGithub")}
                 </Link>

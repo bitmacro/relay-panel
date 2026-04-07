@@ -7,7 +7,7 @@ export function HowItWorks() {
   const t = useTranslations("landing.how");
 
   return (
-    <section className="py-20 md:py-28 px-6 section-glow-divider relative">
+    <section className="section-glow-divider relative px-4 py-16 sm:px-6 sm:py-20 md:py-28">
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
           <h2 className="text-[22px] md:text-[26px] font-bold text-foreground mb-14 text-center">
@@ -19,7 +19,7 @@ export function HowItWorks() {
           <div className="absolute inset-0 -inset-x-8 top-1/2 -translate-y-1/2 h-32 bg-gradient-to-r from-transparent via-[#f7931a]/5 to-transparent pointer-events-none rounded-full blur-2xl" />
 
           <ScrollReveal delay={0}>
-            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
+            <div className="relative flex-1 glass-card flex min-w-0 flex-col rounded-2xl border border-border p-4 elevation-1 card-hover-lift gradient-border-card sm:p-6 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">{t("agentTag")}</div>
               <div className="text-[11px] font-mono text-muted-foreground mb-4">{t("mit")}</div>
               <p className="text-[13px] text-muted-foreground mb-4">{t("agentStack")}</p>
@@ -47,7 +47,7 @@ export function HowItWorks() {
           </div>
 
           <ScrollReveal delay={100}>
-            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
+            <div className="relative flex-1 glass-card flex min-w-0 flex-col rounded-2xl border border-border p-4 elevation-1 card-hover-lift gradient-border-card sm:p-6 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">{t("apiTag")}</div>
               <div className="text-[11px] font-mono text-muted-foreground mb-4">{t("apiProtocol")}</div>
               <p className="text-[13px] text-muted-foreground mb-4">{t("apiStack")}</p>
@@ -74,7 +74,7 @@ export function HowItWorks() {
           </div>
 
           <ScrollReveal delay={200}>
-            <div className="relative flex-1 glass-card rounded-2xl border border-border p-6 flex flex-col elevation-1 card-hover-lift gradient-border-card min-w-0 hover:glow-orange transition-shadow duration-300">
+            <div className="relative flex-1 glass-card flex min-w-0 flex-col rounded-2xl border border-border p-4 elevation-1 card-hover-lift gradient-border-card sm:p-6 hover:glow-orange transition-shadow duration-300">
               <div className="text-[13px] font-mono text-[#f7931a] mb-2">{t("panelTag")}</div>
               <div className="text-[11px] font-mono text-muted-foreground mb-4">{t("bsl")}</div>
               <p className="text-[13px] text-muted-foreground mb-4">{t("panelStack")}</p>

@@ -8,7 +8,10 @@ export function QuickStart() {
   const t = useTranslations("landing.quickstart");
 
   return (
-    <section id="quickstart" className="py-20 md:py-28 px-6 scroll-mt-20 section-glow-divider relative">
+    <section
+      id="quickstart"
+      className="scroll-mt-[5.5rem] section-glow-divider relative px-4 py-16 sm:px-6 sm:py-20 md:py-28"
+    >
       <div className="mx-auto max-w-4xl">
         <ScrollReveal>
           <h2 className="text-[22px] md:text-[26px] font-bold text-foreground mb-12 text-center">
@@ -18,11 +21,11 @@ export function QuickStart() {
 
         <div className="space-y-8">
           <ScrollReveal delay={0}>
-            <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
+            <div className="glass-card rounded-2xl border border-border p-4 elevation-1 card-hover-lift sm:p-6">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 {t("s1")}
               </div>
-              <pre className="p-4 rounded-lg bg-secondary/80 border border-border overflow-x-auto text-[13px] font-mono text-foreground">
+              <pre className="rounded-lg border border-border bg-secondary/80 p-3 text-[12px] font-mono text-foreground overflow-x-auto sm:p-4 sm:text-[13px] [-webkit-overflow-scrolling:touch]">
 {`npx @bitmacro/relay-agent
 # or
 docker pull ghcr.io/bitmacro/relay-agent`}
@@ -31,11 +34,11 @@ docker pull ghcr.io/bitmacro/relay-agent`}
           </ScrollReveal>
 
           <ScrollReveal delay={80}>
-            <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
+            <div className="glass-card rounded-2xl border border-border p-4 elevation-1 card-hover-lift sm:p-6">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 {t("s2")}
               </div>
-              <pre className="p-4 rounded-lg bg-secondary/80 border border-border overflow-x-auto text-[13px] font-mono text-foreground">
+              <pre className="rounded-lg border border-border bg-secondary/80 p-3 text-[11px] font-mono text-foreground overflow-x-auto sm:p-4 sm:text-[13px] [-webkit-overflow-scrolling:touch]">
 {`# RELAY_INSTANCES — JSON array, one entry per logical relay (e.g. public / private / paid).
 # Each: id, token, strfryConfig, strfryDb, whitelistPath (see relay-agent README + compose).
 # In strfry.conf use db = "./data/" and mount host nostr/<id>/data to match strfryDb.
@@ -50,7 +53,7 @@ docker pull ghcr.io/bitmacro/relay-agent`}
           </ScrollReveal>
 
           <ScrollReveal delay={160}>
-            <div className="glass-card rounded-2xl p-6 border border-border elevation-1 card-hover-lift">
+            <div className="glass-card rounded-2xl border border-border p-4 elevation-1 card-hover-lift sm:p-6">
               <div className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 {t("s3a")}{" "}
                 <span className="text-foreground font-mono">relay-panel.bitmacro.io</span>{" "}
@@ -61,7 +64,7 @@ docker pull ghcr.io/bitmacro/relay-agent`}
           </ScrollReveal>
 
           <ScrollReveal delay={220}>
-            <div className="rounded-2xl border border-border/80 bg-secondary/30 p-6">
+            <div className="rounded-2xl border border-border/80 bg-secondary/30 p-4 sm:p-6">
               <p className="text-[12px] font-semibold text-muted-foreground uppercase tracking-wider mb-3">
                 {t("deeper")}
               </p>

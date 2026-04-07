@@ -18,7 +18,7 @@ export function ProblemSection() {
   return (
     <section
       id="problem"
-      className="py-20 md:py-28 px-6 scroll-mt-20 section-glow-divider relative"
+      className="scroll-mt-[5.5rem] section-glow-divider relative px-4 py-16 sm:px-6 sm:py-20 md:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
@@ -29,7 +29,7 @@ export function ProblemSection() {
         <div className="grid sm:grid-cols-2 gap-5">
           {[0, 1, 2, 3].map((i) => (
             <ScrollReveal key={i} delay={i * 80}>
-              <div className="group relative glass-card rounded-2xl p-6 elevation-1 card-hover-lift flex items-start gap-4 overflow-hidden">
+              <div className="group relative glass-card flex items-start gap-4 overflow-hidden rounded-2xl p-5 elevation-1 card-hover-lift sm:p-6">
                 <div
                   className={`absolute top-0 left-0 w-full h-20 bg-gradient-to-b ${ACCENTS[i]} to-transparent opacity-0 transition-opacity duration-400 card-hover-accent`}
                 />

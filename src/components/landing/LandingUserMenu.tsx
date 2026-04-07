@@ -49,11 +49,11 @@ export function LandingUserMenu({ user }: LandingUserMenuProps) {
     : user.name?.split(" ")[0] ?? "user";
 
   return (
-    <div className="relative ml-4" ref={ref}>
+    <div className="relative md:ml-3 lg:ml-4" ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 bg-secondary/80 border border-border rounded-full pl-1 pr-2.5 py-1 hover:border-muted-foreground/30 transition-colors"
+        className="flex min-h-11 md:min-h-10 items-center gap-2 rounded-full border border-border bg-secondary/80 py-1.5 pl-1 pr-2.5 md:py-1 hover:border-muted-foreground/30 transition-colors touch-manipulation"
       >
         {user.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -101,14 +101,14 @@ export function LandingUserMenu({ user }: LandingUserMenuProps) {
           <Link
             href="/relays"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2 text-[13px] text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+            className="flex min-h-11 items-center px-3 text-[13px] text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground touch-manipulation"
           >
             {tNav("goToPanel")}
           </Link>
           <button
             type="button"
             onClick={() => signOut({ callbackUrl: "/" })}
-            className="w-full text-left px-3 py-2 text-[13px] text-[#ef4444] hover:bg-[#ef444410] transition-colors"
+            className="flex min-h-11 w-full items-center px-3 text-left text-[13px] text-[#ef4444] transition-colors hover:bg-[#ef444410] touch-manipulation"
           >
             {tUser("signOut")}
           </button>

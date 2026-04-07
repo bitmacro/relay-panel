@@ -232,7 +232,9 @@
       "github": "GitHub",
       "signIn": "Entrar",
       "goToPanel": "Ir para o painel",
-      "locale": "Idioma"
+      "locale": "Idioma",
+      "openMenu": "Abrir menu",
+      "menuTitle": "Menu"
     },
     "hero": {
       "kickerA": "relay-agent multi-relay (npm / GHCR) · MIT · Open Source",

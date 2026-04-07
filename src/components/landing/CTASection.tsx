@@ -11,8 +11,8 @@ export function CTASection() {
   const ctaHref = session?.user ? "/relays" : "/auth/signin";
 
   return (
-    <section className="py-20 md:py-28 px-6 bg-secondary/40">
-      <div className="mx-auto max-w-2xl text-center">
+    <section className="bg-secondary/40 px-4 py-16 sm:px-6 sm:py-20 md:py-28">
+      <div className="mx-auto max-w-2xl px-1 text-center sm:px-0">
         <ScrollReveal>
           <h2 className="text-[24px] md:text-[28px] font-bold text-foreground mb-3">
             {t("title")}
@@ -24,7 +24,7 @@ export function CTASection() {
         <ScrollReveal delay={120}>
           <Link
             href={ctaHref}
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-[#f7931a] text-black text-[15px] font-semibold rounded-xl glow-orange hover:glow-orange-strong transition-all duration-300 hover:scale-[1.02]"
+            className="inline-flex min-h-11 w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-[#f7931a] px-8 text-[15px] font-semibold text-black glow-orange transition-all duration-300 hover:glow-orange-strong hover:scale-[1.02] touch-manipulation sm:inline-flex sm:w-auto sm:min-h-0 sm:py-3.5"
           >
             {t("button")}
           </Link>

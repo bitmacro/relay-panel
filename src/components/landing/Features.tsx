@@ -11,7 +11,7 @@ export function Features() {
   return (
     <section
       id="features"
-      className="py-20 md:py-28 px-6 scroll-mt-20 section-glow-divider relative"
+      className="scroll-mt-[5.5rem] section-glow-divider relative px-4 py-16 sm:px-6 sm:py-20 md:py-28"
     >
       <div className="mx-auto max-w-6xl">
         <ScrollReveal>
@@ -19,10 +19,10 @@ export function Features() {
             {t("title")}
           </h2>
         </ScrollReveal>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((n, i) => (
             <ScrollReveal key={n} delay={i * 60}>
-              <div className="group glass-card rounded-2xl p-6 elevation-1 card-hover-lift relative overflow-hidden">
+              <div className="group glass-card relative overflow-hidden rounded-2xl p-5 elevation-1 card-hover-lift sm:p-6">
                 <div className="absolute top-0 left-0 w-full h-16 bg-gradient-to-b from-[#f7931a]/10 to-transparent opacity-0 transition-opacity duration-400 card-hover-accent" />
                 <span className="text-2xl mb-3 block card-hover-scale transition-transform duration-300">
                   {ICONS[i]}
