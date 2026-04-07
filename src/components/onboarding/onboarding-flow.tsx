@@ -3,19 +3,23 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { RELAY_COLOR_PRESETS } from "@/components/relay-color-picker";
 
 type Tab = "npx" | "docker";
+
+/** Placeholder in docker snippet until client-only random token is ready (avoids SSR/hydration mismatch). */
+const DOCKER_TOKEN_PLACEHOLDER = "<token>";
 
 export function OnboardingFlow() {
   const t = useTranslations("onboarding");
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const suggestedToken = useMemo(
-    () => crypto.randomUUID().replace(/-/g, "").slice(0, 32),
-    []
-  );
+  const [suggestedToken, setSuggestedToken] = useState("");
+
+  useEffect(() => {
+    setSuggestedToken(crypto.randomUUID().replace(/-/g, "").slice(0, 32));
+  }, []);
 
   const [step, setStep] = useState(1);
   const [tab, setTab] = useState<Tab>("npx");
@@ -28,7 +32,7 @@ export function OnboardingFlow() {
   const [createdId, setCreatedId] = useState<string | null>(null);
 
   const npxCmd = "npx @bitmacro/relay-agent";
-  const dockerCmd = `docker run -d -p 7810:7800 -e RELAY_AGENT_TOKEN=${suggestedToken} ghcr.io/bitmacro/relay-agent:latest`;
+  const dockerCmd = `docker run -d -p 7810:7800 -e RELAY_AGENT_TOKEN=${suggestedToken || DOCKER_TOKEN_PLACEHOLDER} ghcr.io/bitmacro/relay-agent:latest`;
 
   async function copy(text: string) {
     try {
@@ -195,11 +199,16 @@ export function OnboardingFlow() {
             <div className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
               {t("suggestedToken")}
             </div>
-            <code className="text-[12px] font-mono block break-all">{suggestedToken}</code>
+            <code className="text-[12px] font-mono block break-all">
+              {suggestedToken || (
+                <span className="text-muted-foreground">{tCommon("loading")}</span>
+              )}
+            </code>
             <button
               type="button"
-              onClick={() => copy(suggestedToken)}
-              className="text-[12px] text-[#f7931a] hover:underline"
+              disabled={!suggestedToken}
+              onClick={() => suggestedToken && copy(suggestedToken)}
+              className="text-[12px] text-[#f7931a] hover:underline disabled:opacity-40 disabled:pointer-events-none"
             >
               {tCommon("copy")}
             </button>
