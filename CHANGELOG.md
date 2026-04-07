@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-04-07
+
+### Added
+
+- Bearer token inputs: reveal/hide secret (eye) and copy to clipboard on onboarding (step 2), Config tab, Create relay tab, and New relay modal (`BearerSecretInput`)
+
+### Changed
+
+- `POST /api/relays`: 401 responses include a `detail` field when `RELAY_API_KEY` is missing vs. when the session has no user id (easier local debugging)
+
 ## [0.2.7] - 2026-04-07
 
 ### Added
