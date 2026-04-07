@@ -9,8 +9,24 @@ export async function POST(req: NextRequest) {
   const apiKey = process.env.RELAY_API_KEY;
   const providerUserId = (session?.user as { id?: string })?.id;
 
-  if (!apiKey || !providerUserId) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!apiKey?.trim()) {
+    return NextResponse.json(
+      {
+        error: "unauthorized",
+        detail: "RELAY_API_KEY ausente no servidor. Define em .env.local (o mesmo segredo que o relay-api).",
+      },
+      { status: 401 }
+    );
+  }
+  if (!providerUserId) {
+    return NextResponse.json(
+      {
+        error: "unauthorized",
+        detail:
+          "Sessão sem identificador de utilizador. Volta a iniciar sessão (GitHub / Nostr).",
+      },
+      { status: 401 }
+    );
   }
 
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
