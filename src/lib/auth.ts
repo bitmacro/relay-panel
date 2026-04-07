@@ -1,10 +1,12 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
+import { getAuthSecret } from "@/lib/auth-secret";
 import { authorizeNostrNip07 } from "@/lib/nostr-nip07-authorize";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  secret: getAuthSecret(),
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,

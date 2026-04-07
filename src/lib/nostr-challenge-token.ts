@@ -1,9 +1,10 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { getAuthSecret } from "@/lib/auth-secret";
 
 const TTL_MS = 5 * 60 * 1000;
 
 function authSecret(): string | null {
-  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET ?? null;
+  return getAuthSecret() ?? null;
 }
 
 export function mintNostrChallengeToken(): { challenge: string; challengeToken: string } | null {
