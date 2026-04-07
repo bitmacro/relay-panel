@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { BearerSecretInput } from "@/components/BearerSecretInput";
 import { RELAY_COLOR_PRESETS } from "@/components/relay-color-picker";
 
 interface NewRelayModalProps {
@@ -102,12 +103,11 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
               {tr("token")}
             </label>
-            <input
-              type="password"
+            <BearerSecretInput
               value={form.token}
               onChange={(e) => setForm((p) => ({ ...p, token: e.target.value }))}
               placeholder={tr("tokenPlaceholder")}
-              className="w-full bg-secondary border border-border rounded-md px-3 py-1.5 text-[13px] font-mono outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
+              inputClassName="w-full rounded-md border border-border bg-secondary py-1.5 pl-3 pr-[4.75rem] text-[13px] font-mono outline-none focus:border-[#f7931a] placeholder:text-muted-foreground/40"
             />
           </div>
           <div>

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BearerSecretInput } from "@/components/BearerSecretInput";
 import { RELAY_COLOR_PRESETS } from "@/components/relay-color-picker";
 
 type Tab = "npx" | "docker";
@@ -264,11 +265,10 @@ export function OnboardingFlow() {
             <label className="text-[11px] font-medium text-muted-foreground uppercase block mb-1">
               {t("token")}
             </label>
-            <input
-              type="password"
-              className="w-full bg-secondary border border-border rounded-md px-3 py-2 text-[13px] font-mono outline-none focus:border-[#f7931a]"
+            <BearerSecretInput
               value={token}
               onChange={(e) => setToken(e.target.value)}
+              inputClassName="w-full rounded-md border border-border bg-secondary py-2 pl-3 pr-[4.75rem] text-[13px] font-mono outline-none focus:border-[#f7931a]"
             />
           </div>
           <div>

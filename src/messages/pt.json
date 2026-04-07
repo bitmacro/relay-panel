@@ -6,7 +6,9 @@
     "copy": "Copiar",
     "copied": "Copiado",
     "close": "Fechar",
-    "optional": "opcional"
+    "optional": "opcional",
+    "showSecret": "Mostrar token",
+    "hideSecret": "Ocultar token"
   },
   "nav": {
     "title": "BitMacro Relay Manager",

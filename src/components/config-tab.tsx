@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { BearerSecretInput } from "@/components/BearerSecretInput";
 import { RelayColorPicker } from "./relay-color-picker";
 
 interface ConfigTabProps {
@@ -237,12 +238,11 @@ export function ConfigTab({
                 </div>
                 <div className="min-w-[150px] flex-1">
                   <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
-                  <input
-                    type="password"
+                  <BearerSecretInput
                     value={config.token}
                     onChange={(e) => setConfig((p) => (p ? { ...p, token: e.target.value } : null))}
                     placeholder={t("form.tokenPlaceholder")}
-                    className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+                    inputClassName="w-full rounded border border-[#333] bg-[#141414] py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-[#ccc] placeholder:text-[#555] focus:border-[#f7931a]"
                   />
                 </div>
               </div>

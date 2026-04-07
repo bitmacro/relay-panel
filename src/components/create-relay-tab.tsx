@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { BearerSecretInput } from "@/components/BearerSecretInput";
 import { RelayColorPicker, RELAY_COLOR_PRESETS } from "./relay-color-picker";
 
 interface CreateRelayTabProps {
@@ -103,12 +104,12 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
           </div>
           <div>
             <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
-            <input
-              type="password"
+            <BearerSecretInput
               value={form.token}
               onChange={(e) => setForm((p) => ({ ...p, token: e.target.value }))}
               placeholder={t("form.tokenPlaceholder")}
-              className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+              className="max-w-[300px]"
+              inputClassName="w-full max-w-[300px] rounded border border-[#333] bg-[#141414] py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-[#ccc] placeholder:text-[#555] focus:border-[#f7931a]"
             />
           </div>
           <div>
