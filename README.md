@@ -83,7 +83,7 @@ npm run dev
 |----------|-------------|
 | `NEXTAUTH_SECRET` | Secret for JWT signing (min 32 chars, e.g. `openssl rand -base64 32`) |
 | `NEXTAUTH_URL` | App URL (e.g. `http://localhost:3000`) |
-| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`) |
+| `NEXT_PUBLIC_API_URL` | relay-api base URL (e.g. `https://relay-api.bitmacro.io`). **Local dev:** if unset, `next dev` defaults to that production URL so the panel works without copying `.env`; override to point at a staging API |
 | `GITHUB_CLIENT_ID` | GitHub OAuth App client ID |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret |
 | `RELAY_API_KEY` | API key shared with relay-api |

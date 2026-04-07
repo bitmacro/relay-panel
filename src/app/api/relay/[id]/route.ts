@@ -1,12 +1,12 @@
 import { auth } from "@/lib/auth";
+import { relayApiBaseUrl } from "@/lib/api";
 import { NextRequest, NextResponse } from "next/server";
 
 export const maxDuration = 300;
 
-const BASE_URL = process.env.RELAY_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "";
-
 function relayApiUrl(path: string): string {
-  return `${BASE_URL.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+  const base = relayApiBaseUrl();
+  return `${base}/${path.replace(/^\//, "")}`;
 }
 
 async function proxy(
@@ -22,7 +22,7 @@ async function proxy(
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  if (!BASE_URL) {
+  if (!relayApiBaseUrl()) {
     return NextResponse.json(
       { error: "config_error", detail: "RELAY_API_URL ou NEXT_PUBLIC_API_URL não configurado" },
       { status: 500 }
