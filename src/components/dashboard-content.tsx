@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Fragment, useState, useEffect, useCallback, useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import {
   CATEGORY_COLORS,
@@ -14,6 +14,8 @@ import {
   dashboardKindRowTooltip,
   kindNipReference,
 } from "@/lib/events-display";
+import type { DashboardKindTableRow, KindActivityRow } from "@/lib/dashboard-kind-activity";
+import { buildGroupedKindTableRows, formatMemberKindsList } from "@/lib/dashboard-kind-activity";
 import {
   Tooltip,
   TooltipContent,
@@ -48,6 +50,10 @@ interface RelayStats {
 interface RelayHealth {
   status?: string;
   timestamp?: string;
+  /** relay-agent package version from GET /health */
+  version?: string;
+  /** strfry binary version from GET /health (per relay instance in v0.2) */
+  strfry_version?: string;
   error?: string;
   detail?: string;
   _status?: number;
@@ -71,8 +77,6 @@ function formatUptime(seconds?: number): string {
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m`;
 }
-
-type KindRow = { kind: number; events: number; pct: string };
 
 export function DashboardContent({
   stats,
@@ -123,13 +127,31 @@ export function DashboardContent({
     [tErr]
   );
 
-  const [kindActivity, setKindActivity] = useState<KindRow[]>([]);
+  const [kindActivity, setKindActivity] = useState<KindActivityRow[]>([]);
   const [kindLoading, setKindLoading] = useState(false);
   const [kindError, setKindError] = useState<string | null>(null);
   const [pubkeySampleCount, setPubkeySampleCount] = useState<number | null>(null);
   const [blockedPolicyCount, setBlockedPolicyCount] = useState<number | null>(null);
   const [metricsLoading, setMetricsLoading] = useState(false);
   const [kindSheetKind, setKindSheetKind] = useState<number | null>(null);
+  const [kindTableExpanded, setKindTableExpanded] = useState(false);
+  const [expandedKindGroups, setExpandedKindGroups] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const toggleKindGroup = useCallback((id: string) => {
+    setExpandedKindGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    setKindTableExpanded(false);
+    setExpandedKindGroups(new Set());
+  }, [selectedRelay?.id]);
 
   const fetchKindActivity = useCallback(async (relayId: string) => {
     setKindLoading(true);
@@ -153,7 +175,7 @@ export function DashboardContent({
         counts[k] = (counts[k] ?? 0) + 1;
       }
       const total = events.length;
-      const rows: KindRow[] = Object.entries(counts)
+      const rows: KindActivityRow[] = Object.entries(counts)
         .map(([k, n]) => ({
           kind: parseInt(k, 10),
           events: n,
@@ -240,6 +262,144 @@ export function DashboardContent({
     const total = Object.values(totals).reduce((a, b) => a + b, 0);
     return { totals, total };
   }, [kindActivity]);
+
+  const groupedKindTableRows = useMemo(
+    () => buildGroupedKindTableRows(kindActivity),
+    [kindActivity]
+  );
+
+  const kindSampleTotal = useMemo(
+    () => kindActivity.reduce((s, r) => s + r.events, 0),
+    [kindActivity]
+  );
+
+  const primaryKindTableRow = (row: KindActivityRow, opts?: { nested?: boolean; reactKey?: string }) => {
+    const meta = kindBadgeMeta(row.kind);
+    const rk = opts?.reactKey ?? String(row.kind);
+    const trClass = opts?.nested
+      ? "border-b border-[#222] bg-[#151515] transition-colors last:border-b-0 hover:bg-[#1c1c1c] cursor-help"
+      : "border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-help";
+    const padFirst = opts?.nested ? "pl-8" : "";
+
+    return (
+      <Tooltip key={rk}>
+        <TooltipTrigger asChild>
+          <tr className={trClass}>
+            <td className={`px-2.5 py-2 align-top ${padFirst}`}>
+              <button
+                type="button"
+                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold cursor-pointer transition-opacity hover:opacity-90 ${meta.badgeClass}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setKindSheetKind(row.kind);
+                }}
+              >
+                {meta.label}
+              </button>
+            </td>
+            <td className="min-w-0 break-words px-2.5 py-2 text-[#ccc] align-top leading-snug">
+              {dashboardKindLongDescription(row.kind)}
+            </td>
+            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">
+              {kindNipReference(row.kind)}
+            </td>
+            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+              {row.events.toLocaleString(nfLocale)}
+            </td>
+            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+              {row.pct}
+            </td>
+          </tr>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[280px] text-left leading-snug whitespace-pre-line">
+          {dashboardKindRowTooltip(row.kind)}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
+
+  const groupedAggregateTableRow = (
+    row: Exclude<DashboardKindTableRow, { rowType: "primary" }>,
+    expanded: boolean
+  ) => {
+    const expandId = row.expandId;
+    const meta =
+      row.rowType === "group-addressable"
+        ? kindBadgeMeta(30000)
+        : row.rowType === "group-ephemeral"
+          ? kindBadgeMeta(20000)
+          : {
+              label: t("groupOthersBadge"),
+              badgeClass: kindBadgeMeta(12345).badgeClass,
+            };
+    const description =
+      row.rowType === "group-addressable"
+        ? t("groupAddressableTableDescription")
+        : row.rowType === "group-ephemeral"
+          ? t("groupEphemeralDescription")
+          : t("groupOthersTableDescription");
+    const nipCol =
+      row.rowType === "group-addressable" ? t("groupAddressableNip") : "—";
+    const hint =
+      row.rowType === "group-addressable"
+        ? t("groupAddressableHint")
+        : row.rowType === "group-ephemeral"
+          ? t("groupEphemeralHint")
+          : t("groupUnknownHint");
+    const kindNums = row.memberRows.map((r) => r.kind);
+    const { shown, extra } = formatMemberKindsList(kindNums);
+    const kindsLine =
+      extra > 0
+        ? t("groupedKindsLineMore", { shown, extra })
+        : t("groupedKindsLine", { shown });
+    const tooltip = `${hint}\n\n${t("groupRowExpandHint")}\n\n${kindsLine}`;
+
+    return (
+      <Tooltip key={`grp-${expandId}`}>
+        <TooltipTrigger asChild>
+          <tr
+            role="button"
+            tabIndex={0}
+            className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#252525] cursor-pointer"
+            onClick={() => toggleKindGroup(expandId)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                toggleKindGroup(expandId);
+              }
+            }}
+          >
+            <td className="px-2.5 py-2 align-top">
+              <div className="flex items-center gap-1.5">
+                <span className="w-3 shrink-0 text-[10px] text-[#666]" aria-hidden>
+                  {expanded ? "▼" : "▶"}
+                </span>
+                <span
+                  className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold ${meta.badgeClass}`}
+                >
+                  {meta.label}
+                </span>
+              </div>
+            </td>
+            <td className="min-w-0 break-words px-2.5 py-2 text-[#ccc] align-top leading-snug">
+              {description}
+            </td>
+            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">{nipCol}</td>
+            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+              {row.events.toLocaleString(nfLocale)}
+            </td>
+            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+              {row.pct}
+            </td>
+          </tr>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-[320px] text-left leading-snug whitespace-pre-line">
+          {tooltip}
+        </TooltipContent>
+      </Tooltip>
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -350,25 +510,43 @@ export function DashboardContent({
 
       {/* Atividade por kind */}
       <div>
-        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">{t("kindActivity")}</div>
-        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
+        <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="text-[13px] font-medium text-[#ccc]">{t("kindActivity")}</div>
+          {kindActivity.length > 0 && !kindLoading && !kindError ? (
+            <button
+              type="button"
+              className="shrink-0 rounded-md border border-[#333] bg-[#252525] px-2.5 py-1 text-[11px] font-medium text-[#ccc] transition-colors hover:bg-[#2a2a2a]"
+              onClick={() => setKindTableExpanded((v) => !v)}
+            >
+              {kindTableExpanded ? t("showGrouped") : t("showAllKinds")}
+            </button>
+          ) : null}
+        </div>
+        <div className="overflow-x-auto rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
           <TooltipProvider delayDuration={300}>
-            <table className="w-full border-collapse text-[12px]">
+            <table className="w-full min-w-[640px] table-fixed border-collapse text-[12px]">
+              <colgroup>
+                <col className="w-[124px]" />
+                <col />
+                <col className="w-[76px]" />
+                <col className="w-[88px]" />
+                <col className="w-[52px]" />
+              </colgroup>
               <thead>
                 <tr>
-                  <th className="w-[104px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                     {t("colKind")}
                   </th>
-                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="min-w-0 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                     {t("colDescription")}
                   </th>
-                  <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
                     {t("colNip")}
                   </th>
-                  <th className="w-20 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
                     {t("colEvents")}
                   </th>
-                  <th className="w-16 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
                     {t("colPct")}
                   </th>
                 </tr>
@@ -398,45 +576,25 @@ export function DashboardContent({
                       {t("noDataSelect")}
                     </td>
                   </tr>
+                ) : kindTableExpanded ? (
+                  kindActivity.map((r) => primaryKindTableRow(r))
                 ) : (
-                  kindActivity.map((row) => {
-                    const meta = kindBadgeMeta(row.kind);
-                    return (
-                      <Tooltip key={row.kind}>
-                        <TooltipTrigger asChild>
-                          <tr className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-help">
-                            <td className="px-2.5 py-2 align-top">
-                              <button
-                                type="button"
-                                className={`inline-flex items-center rounded-md border px-1.5 py-0.5 text-[10px] font-semibold cursor-pointer transition-opacity hover:opacity-90 ${meta.badgeClass}`}
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  setKindSheetKind(row.kind);
-                                }}
-                              >
-                                {meta.label}
-                              </button>
-                            </td>
-                            <td className="px-2.5 py-2 text-[#ccc] align-top leading-snug">
-                              {dashboardKindLongDescription(row.kind)}
-                            </td>
-                            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">
-                              {kindNipReference(row.kind)}
-                            </td>
-                            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
-                              {row.events.toLocaleString(nfLocale)}
-                            </td>
-                            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
-                              {row.pct}
-                            </td>
-                          </tr>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-[280px] text-left leading-snug">
-                          {dashboardKindRowTooltip(row.kind)}
-                        </TooltipContent>
-                      </Tooltip>
-                    );
+                  groupedKindTableRows.flatMap((row) => {
+                    if (row.rowType === "primary") {
+                      return [primaryKindTableRow(row)];
+                    }
+                    const exp = expandedKindGroups.has(row.expandId);
+                    return [
+                      groupedAggregateTableRow(row, exp),
+                      ...(exp
+                        ? row.memberRows.map((m) =>
+                            primaryKindTableRow(m, {
+                              nested: true,
+                              reactKey: `${row.expandId}-${m.kind}`,
+                            })
+                          )
+                        : []),
+                    ];
                   })
                 )}
               </tbody>
@@ -446,7 +604,7 @@ export function DashboardContent({
         <p className="mt-1.5 text-[11px] text-[#555]">
           {kindActivity.length > 0
             ? t("sampleFooterKinds", {
-                count: kindActivity.reduce((s, r) => s + r.events, 0).toLocaleString(nfLocale),
+                count: kindSampleTotal.toLocaleString(nfLocale),
               })
             : t("sampleHint")}
         </p>
@@ -508,12 +666,29 @@ export function DashboardContent({
       <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
         <div className="mb-3 text-[13px] font-medium text-[#ddd]">{t("connection")}</div>
         <div className="flex flex-wrap gap-5 text-sm">
-          <div>
-            <span className="text-[#555]">{t("strfryVersion")} </span>
-            <strong className="text-[#ccc]">
-              {loading ? "…" : stats?.version ?? "—"}
-            </strong>
+          <div className="min-w-0 max-w-[20rem]">
+            <div>
+              <span className="text-[#555]">{t("strfryVersion")} </span>
+              <strong className="text-[#ccc]">
+                {loading
+                  ? "…"
+                  : (health?.strfry_version &&
+                      health.strfry_version !== "unknown" &&
+                      health.strfry_version) ||
+                    stats?.version ||
+                    "—"}
+              </strong>
+            </div>
+            <p className="mt-1 text-[10px] leading-snug text-[#555]">
+              {t("strfryVersionHint")}
+            </p>
           </div>
+          {!loading && health?.status === "ok" && health?.version ? (
+            <div>
+              <span className="text-[#555]">{t("relayAgentPackageVersion")} </span>
+              <strong className="text-[#ccc]">{health.version}</strong>
+            </div>
+          ) : null}
           <div>
             <span className="text-[#555]">{t("uptime")} </span>
             <strong className="text-[#ccc]">

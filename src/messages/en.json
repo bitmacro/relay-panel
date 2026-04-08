@@ -113,7 +113,9 @@
     "sheetDescription": "Description",
     "sheetNote": "Note",
     "connection": "Connection status",
-    "strfryVersion": "strfry version:",
+    "strfryVersion": "strfry CLI (relay-agent):",
+    "strfryVersionHint": "Version of the strfry binary bundled in relay-agent. Relay containers may run a different version.",
+    "relayAgentPackageVersion": "relay-agent package:",
     "uptime": "Uptime:",
     "relayAgent": "relay-agent:",
     "endpoint": "Endpoint:",
@@ -123,7 +125,23 @@
       "ephemeral": "Ephemeral",
       "replaceable": "Replaceable",
       "system": "System"
-    }
+    },
+    "showAllKinds": "View all kinds",
+    "showGrouped": "Group",
+    "groupUnknownLabel": "Other / unknown",
+    "groupOthersBadge": "Other",
+    "groupAddressableTableDescription": "Addressable content — articles, named lists.",
+    "groupOthersTableDescription": "Unidentified kinds",
+    "groupAddressableDescription": "All addressable kinds (30000–39999) in this sample.",
+    "groupEphemeralDescription": "All ephemeral kinds (20000–29999) in this sample.",
+    "groupUnknownDescription": "Kinds without a dedicated label in this dashboard (aggregated).",
+    "groupAddressableNip": "NIP-33",
+    "groupAddressableHint": "Sum of addressable events (30000–39999) in this sample.",
+    "groupEphemeralHint": "Sum of ephemeral events (20000–29999) in this sample.",
+    "groupUnknownHint": "Kinds outside ephemeral and addressable ranges without a dedicated badge.",
+    "groupedKindsLine": "Kinds: {shown}",
+    "groupedKindsLineMore": "Kinds: {shown} (+{extra} more)",
+    "groupRowExpandHint": "Click the row to expand or collapse."
   },
   "errors": {
     "events": {

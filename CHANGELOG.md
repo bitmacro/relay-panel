@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-04-08
+
+### Added
+
+- **Dashboard — “Atividade por tipo”** — grouped rows for addressable kinds (30000–39999), ephemeral (20000–29999), and unidentified kinds (“Outros”); primary kinds stay on their own rows; **click a group row** to expand/collapse per-kind breakdown; **“Ver todos os tipos”** flattens the full list.
+- **`dashboard-kind-activity.ts`** — pure helpers for grouped rows and summed sample percentages.
+
+### Changed
+
+- **Kind activity table** — `table-fixed` + column widths + `overflow-x-auto` and description `break-words` so **NIP / Eventos / %** stay visible beside long Portuguese copy.
+- **Connection status** — label **“strfry CLI (relay-agent)”** and short hint that the version is the binary bundled in relay-agent (relay containers may differ).
+- **i18n** (`pt` / `en`) — dashboard strings for groups, expand hint, strfry CLI copy.
+
+### Fixed
+
+- **`RelayDetailShell`** health typing — `version` and `strfry_version` from agent `/health`.
+
 ## [0.2.8] - 2026-04-07
 
 ### Added

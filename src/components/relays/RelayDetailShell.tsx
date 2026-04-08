@@ -30,6 +30,8 @@ interface RelayStats {
 
 interface RelayHealth {
   status?: string;
+  version?: string;
+  strfry_version?: string;
   error?: string;
   detail?: string;
   _status?: number;
