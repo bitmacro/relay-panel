@@ -171,7 +171,16 @@ For the **full BitMacro Relay Manager topology** (marketing site → relay-conne
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and PR guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and PR guidelines.  
+Issues and PRs are welcome — bug fixes, UI improvements, and new relay-agent integrations.
+
+This project is maintained by [BitMacro](https://bitmacro.io).
+
+## Contributors
+
+<a align="center" href="https://github.com/bitmacro/relay-panel/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=bitmacro/relay-panel" />
+</a>
 
 ---
 
