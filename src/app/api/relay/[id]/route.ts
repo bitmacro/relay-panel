@@ -24,7 +24,7 @@ async function proxy(
 
   if (!relayApiBaseUrl()) {
     return NextResponse.json(
-      { error: "config_error", detail: "RELAY_API_URL ou NEXT_PUBLIC_API_URL não configurado" },
+      { error: "config_error", detail: "RELAY_API_URL or NEXT_PUBLIC_API_URL is not configured" },
       { status: 500 }
     );
   }
@@ -62,7 +62,10 @@ async function proxy(
   } catch {
     json = {
       error: "invalid_response",
-      detail: res.status === 504 ? "O gateway excedeu o tempo limite. Tenta novamente." : "Resposta inválida do servidor.",
+      detail:
+        res.status === 504
+          ? "The gateway timed out. Please try again."
+          : "Invalid response from server.",
     };
   }
   return NextResponse.json(json, { status: res.ok ? res.status : res.status >= 400 ? res.status : 500 });

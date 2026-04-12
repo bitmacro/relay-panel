@@ -57,7 +57,7 @@ export function RelaySelectorRow({
             onClick={onStartCreate}
             className="rounded border border-[#5a3a0a] px-3 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
           >
-            + Novo relay
+            + New relay
           </button>
         )}
 
@@ -65,10 +65,10 @@ export function RelaySelectorRow({
         <div className="flex items-center gap-2" ref={dropdownRef}>
           {relays.length === 0 ? (
             <p className="text-[11px] text-[#666]">
-              Sem relays.
+              No relays.
               {providerUserId && (
                 <span className="ml-1">
-                  Adicione em Supabase (provider_user_id=
+                  Add in Supabase (provider_user_id=
                   {providerUserId?.slice(0, 8)}…)
                 </span>
               )}
@@ -86,7 +86,7 @@ export function RelaySelectorRow({
                     style={{ backgroundColor: relayColor(selectedRelay) }}
                   />
                 )}
-                <span>{selectedRelay ? relayLabel(selectedRelay) : "Selecionar"}</span>
+                <span>{selectedRelay ? relayLabel(selectedRelay) : "Select"}</span>
               </button>
               {dropdownOpen && (
                 <div className="absolute right-0 top-full z-10 mt-0.5 min-w-[180px] rounded border border-[#333] bg-[#1a1a1a] py-1 shadow-lg">

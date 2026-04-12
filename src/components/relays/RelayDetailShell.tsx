@@ -59,27 +59,70 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
   const [health, setHealth] = useState<RelayHealth | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [uniquePubkeysCount, setUniquePubkeysCount] = useState<number | null>(null);
+  const [blockedCount, setBlockedCount] = useState<number | null>(null);
+  const [pubkeysCountLoading, setPubkeysCountLoading] = useState(true);
+  const [blockedCountLoading, setBlockedCountLoading] = useState(true);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(() => {
+    queueMicrotask(() => {
+      setLoading(true);
+      setPubkeysCountLoading(true);
+      setBlockedCountLoading(true);
+      setUniquePubkeysCount(null);
+      setBlockedCount(null);
+    });
+
     const fetchWithStatus = (path: string) =>
       fetch(path).then(async (r) => {
         const json = await r.json().catch(() => ({}));
         return { ...json, _status: r.status, _ok: r.ok };
       });
-    try {
-      const [s, h] = await Promise.all([
-        fetchWithStatus(`/api/relay/${relay.id}/stats`),
-        fetchWithStatus(`/api/relay/${relay.id}/health`),
-      ]);
-      setStats(s);
-      setHealth(h);
-    } catch {
-      setStats({ error: "fetch_error" });
-      setHealth({ error: "fetch_error" });
-    } finally {
-      setLoading(false);
-    }
+
+    const metricsFetchOpts = {
+      cache: "no-store" as const,
+      signal: AbortSignal.timeout(30_000),
+    };
+
+    Promise.all([
+      fetchWithStatus(`/api/relay/${relay.id}/stats`),
+      fetchWithStatus(`/api/relay/${relay.id}/health`),
+    ])
+      .then(([s, h]) => {
+        setStats(s);
+        setHealth(h);
+      })
+      .catch(() => {
+        setStats({ error: "fetch_error" });
+        setHealth({ error: "fetch_error" });
+      })
+      .finally(() => setLoading(false));
+
+    fetch(`/api/relay/${relay.id}/users`, metricsFetchOpts)
+      .then(async (r) => {
+        const j = (await r.json().catch(() => ({}))) as { users?: unknown };
+        if (!r.ok) {
+          setUniquePubkeysCount(null);
+          return;
+        }
+        const u = j.users;
+        setUniquePubkeysCount(Array.isArray(u) ? u.length : null);
+      })
+      .catch(() => setUniquePubkeysCount(null))
+      .finally(() => setPubkeysCountLoading(false));
+
+    fetch(`/api/relay/${relay.id}/policy/blocked`, metricsFetchOpts)
+      .then(async (r) => {
+        const j = (await r.json().catch(() => ({}))) as { blocked?: unknown };
+        if (!r.ok) {
+          setBlockedCount(null);
+          return;
+        }
+        const b = j.blocked;
+        setBlockedCount(Array.isArray(b) ? b.length : null);
+      })
+      .catch(() => setBlockedCount(null))
+      .finally(() => setBlockedCountLoading(false));
   }, [relay.id]);
 
   useEffect(() => {
@@ -175,6 +218,10 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
             selectedRelay={relay}
             loading={loading}
             refreshTrigger={refreshTrigger}
+            uniquePubkeysCount={uniquePubkeysCount}
+            blockedCount={blockedCount}
+            pubkeysCountLoading={pubkeysCountLoading}
+            blockedCountLoading={blockedCountLoading}
           />
         )}
         {activeTab === "events" && (

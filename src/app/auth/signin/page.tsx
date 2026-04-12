@@ -25,7 +25,7 @@ function SignInForm() {
     if (typeof window === "undefined") return;
     const nip = window.nostr;
     if (!nip?.getPublicKey || !nip?.signEvent) {
-      setError("Instala uma extensão NIP-07 (ex.: Alby, nos2x) para continuar.");
+      setError("Install a NIP-07 extension (e.g. Alby, nos2x) to continue.");
       return;
     }
 
@@ -44,13 +44,13 @@ function SignInForm() {
             ? data.detail
             : typeof data.error === "string"
               ? data.error
-              : "Não foi possível obter o challenge."
+              : "Could not obtain the challenge."
         );
         return;
       }
       const { challenge, challengeToken } = data;
       if (!challenge || !challengeToken) {
-        setError("Resposta inválida do servidor.");
+        setError("Invalid response from server.");
         return;
       }
 
@@ -74,7 +74,7 @@ function SignInForm() {
 
       const pubkeyHex = normalizeNip07PubkeyHex(signed.pubkey);
       if (!pubkeyHex) {
-        setError("Pubkey inválida devolvida pela extensão.");
+        setError("Invalid pubkey returned by the extension.");
         return;
       }
 
@@ -87,13 +87,13 @@ function SignInForm() {
       });
 
       if (result?.error) {
-        setError("Autenticação Nostr falhou. Tenta de novo.");
+        setError("Nostr sign-in failed. Try again.");
         return;
       }
 
       window.location.assign(result?.url ?? callbackUrl);
     } catch {
-      setError("Erro inesperado. Verifica a consola ou tenta outra vez.");
+      setError("Unexpected error. Check the console or try again.");
     } finally {
       setBusy(false);
     }
@@ -117,9 +117,9 @@ function SignInForm() {
         </div>
 
         <div className="bg-card border border-border rounded-xl p-8">
-          <h1 className="text-[18px] font-semibold mb-1">Entrar</h1>
+          <h1 className="text-[18px] font-semibold mb-1">Sign in</h1>
           <p className="text-[13px] text-muted-foreground mb-6">
-            GitHub (equipa) ou Nostr (NIP-07): a pubkey hex é usada como identificador junto do relay-api
+            GitHub (team) or Nostr (NIP-07): the hex pubkey is used as the identifier with relay-api
             (<code className="text-[11px]">X-Provider-User-Id</code>).
           </p>
 
@@ -146,7 +146,7 @@ function SignInForm() {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-[11px] uppercase tracking-wide">
-              <span className="bg-card px-2 text-muted-foreground">ou</span>
+              <span className="bg-card px-2 text-muted-foreground">or</span>
             </div>
           </div>
 
@@ -159,12 +159,12 @@ function SignInForm() {
             {busy ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
             ) : null}
-            Entrar com Nostr (NIP-07)
+            Sign in with Nostr (NIP-07)
           </button>
 
           {!nip07Ready && (
             <p className="text-[11px] text-muted-foreground mt-2">
-              Extensão NIP-07 não detetada neste browser. Usa GitHub ou instala Alby / nos2x.
+              NIP-07 extension not detected in this browser. Use GitHub or install Alby / nos2x.
             </p>
           )}
 

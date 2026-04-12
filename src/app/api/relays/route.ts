@@ -13,7 +13,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "unauthorized",
-        detail: "RELAY_API_KEY ausente no servidor. Define em .env.local (o mesmo segredo que o relay-api).",
+        detail:
+          "RELAY_API_KEY is missing on the server. Set it in .env.local (same secret as relay-api).",
       },
       { status: 401 }
     );
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
       {
         error: "unauthorized",
         detail:
-          "Sessão sem identificador de utilizador. Volta a iniciar sessão (GitHub / Nostr).",
+          "Session has no user id. Sign in again (GitHub or Nostr).",
       },
       { status: 401 }
     );

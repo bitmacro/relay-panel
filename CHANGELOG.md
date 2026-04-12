@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-04-12
+
+### Added
+
+- **Dashboard — real metric counts** — unique pubkeys (`GET /users`) and blocked pubkeys (`GET /policy/blocked`) with per-card loading and 30s upstream timeouts; fetched in parallel with stats/health in `RelayPanelShell` and `RelayDetailShell`.
+- **Kind grouping** — expandable rows for Addressable (30000–39999), Others (unknown kinds), and Ephemeral (20000–29999); primary kinds remain on dedicated rows; helpers in `dashboard-kind-activity.ts`.
+- **Mobile layout** — sidebar drawer, responsive tables and overflow for kind activity (from v0.2.7+ refinements).
+- **i18n** — Portuguese (`pt-BR`) and English (`en`) coverage for dashboard, access, config, events, and related UI; Spanish overrides where applicable.
+
+### Changed
+
+- **Connection status** — clearer separation between **strfry** binary version and **relay-agent** package version from `/health` (labels and hints).
+- **Documentation** — `NEXT_STEPS.md` roadmap (replaces Portuguese-only planning doc); open-source-facing copy and API error messages default to English.
+- **`relay-api` proxy routes** — `relay/[id]/users` and `policy/blocked` upstream timeout increased to 30s for large strfry scans.
+
+### Fixed
+
+- **`RelayDetailShell` / dashboard** — health typings and display for `version` vs `strfry_version` aligned with relay-agent v0.2.
+
+### Related (ecosystem)
+
+- **relay-agent** — Dockerfile / strfry image reference updated to `ghcr.io/hoytech/strfry:latest` where applicable (see relay-agent repo).
+
 ## [0.2.9] - 2026-04-08
 
 ### Added

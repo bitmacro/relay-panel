@@ -42,7 +42,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-/** Categoria no filtro: inclui modos especiais além de KindCategory */
+/** Filter category: includes special modes beyond KindCategory */
 type CategoryFilterValue = "all" | "no_ephemeral" | KindCategory;
 
 const CATEGORY_OPTIONS: { value: CategoryFilterValue; key: string }[] = [

@@ -1,16 +1,16 @@
 /**
- * Dashboard "Atividade por kind": agrupa addressable (30000–39999), efémeros (20000–29999)
- * e kinds sem etiqueta dedicada; mantém kinds principais sempre em linhas próprias.
+ * Dashboard “activity by kind”: groups addressable (30000–39999), ephemeral (20000–29999),
+ * and kinds without a dedicated label; main kinds always stay on their own rows.
  */
 
 export type KindActivityRow = { kind: number; events: number; pct: string };
 
-/** Kinds com badge dedicado (sempre linha individual no modo agrupado). */
+/** Kinds with a dedicated badge (always an individual row in grouped mode). */
 export const DASHBOARD_PRIMARY_KINDS: ReadonlySet<number> = new Set([
   0, 1, 3, 6, 7, 10002, 1059,
 ]);
 
-/** Identificadores de grupos expansíveis na tabela (modo agrupado). */
+/** Expandable group ids in the table (grouped mode). */
 export const KIND_TABLE_EXPAND_ADDRESSABLE = "addressable" as const;
 export const KIND_TABLE_EXPAND_EPHEMERAL = "ephemeral" as const;
 export const KIND_TABLE_EXPAND_UNKNOWN = "unknown" as const;
@@ -47,12 +47,12 @@ function isEphemeralRange(kind: number): boolean {
   return kind >= 20000 && kind <= 29999;
 }
 
-/** Amostra total de eventos (soma das contagens por kind). */
+/** Total events in the sample (sum of per-kind counts). */
 export function kindActivitySampleTotal(rows: KindActivityRow[]): number {
   return rows.reduce((s, r) => s + r.events, 0);
 }
 
-/** Soma das percentagens já arredondadas por linha (como pedido no UI). */
+/** Sum of row percentages (already rounded per row, as shown in the UI). */
 export function sumRowPercents(rows: KindActivityRow[]): string {
   let s = 0;
   for (const r of rows) {
@@ -68,8 +68,8 @@ function sortByEventsDesc(rows: KindActivityRow[]): KindActivityRow[] {
 }
 
 /**
- * Constrói linhas da tabela em modo agrupado (default).
- * Ordenação: por eventos (desc).
+ * Builds grouped table rows (default mode).
+ * Sort order: by events (desc).
  */
 export function buildGroupedKindTableRows(
   kindRows: KindActivityRow[]
@@ -114,15 +114,15 @@ export function buildGroupedKindTableRows(
     });
   }
 
-  const ephSorted = sortByEventsDesc(ephemeralMembers);
-  const ephEvents = ephSorted.reduce((s, r) => s + r.events, 0);
-  if (ephEvents > 0) {
+  const ephemSorted = sortByEventsDesc(ephemeralMembers);
+  const ephemEvents = ephemSorted.reduce((s, r) => s + r.events, 0);
+  if (ephemEvents > 0) {
     out.push({
       rowType: "group-ephemeral",
-      events: ephEvents,
-      pct: sumRowPercents(ephSorted),
+      events: ephemEvents,
+      pct: sumRowPercents(ephemSorted),
       expandId: KIND_TABLE_EXPAND_EPHEMERAL,
-      memberRows: ephSorted,
+      memberRows: ephemSorted,
     });
   }
 
@@ -142,7 +142,7 @@ export function buildGroupedKindTableRows(
   return out;
 }
 
-/** Lista kinds para tooltip (truncada). */
+/** Formats kind list for tooltips (truncated). */
 export function formatMemberKindsList(
   kinds: number[],
   maxShow = 24

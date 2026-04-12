@@ -67,6 +67,12 @@ interface DashboardContentProps {
   selectedRelay: Relay | null;
   loading: boolean;
   refreshTrigger?: number;
+  /** From GET /users — unique pubkeys count; null if loading failed or unknown */
+  uniquePubkeysCount: number | null;
+  /** From GET /policy/blocked — blocked pubkeys count; null if loading failed or unknown */
+  blockedCount: number | null;
+  pubkeysCountLoading: boolean;
+  blockedCountLoading: boolean;
 }
 
 function formatUptime(seconds?: number): string {
@@ -85,6 +91,10 @@ export function DashboardContent({
   selectedRelay,
   loading,
   refreshTrigger,
+  uniquePubkeysCount,
+  blockedCount,
+  pubkeysCountLoading,
+  blockedCountLoading,
 }: DashboardContentProps) {
   const locale = useLocale();
   const t = useTranslations("dashboard");
@@ -133,9 +143,6 @@ export function DashboardContent({
   const [kindActivity, setKindActivity] = useState<KindActivityRow[]>([]);
   const [kindLoading, setKindLoading] = useState(false);
   const [kindError, setKindError] = useState<string | null>(null);
-  const [pubkeySampleCount, setPubkeySampleCount] = useState<number | null>(null);
-  const [blockedPolicyCount, setBlockedPolicyCount] = useState<number | null>(null);
-  const [metricsLoading, setMetricsLoading] = useState(false);
   const [kindSheetKind, setKindSheetKind] = useState<number | null>(null);
   const [kindTableExpanded, setKindTableExpanded] = useState(false);
   const [expandedKindGroups, setExpandedKindGroups] = useState<Set<string>>(
@@ -194,61 +201,14 @@ export function DashboardContent({
     }
   }, [formatEventsError]);
 
-  const fetchDashboardMetrics = useCallback(async (relayId: string) => {
-    setMetricsLoading(true);
-    try {
-      const [usersRes, policyRes] = await Promise.all([
-        fetch(`/api/relay/${relayId}/users?limit=10000`, {
-          cache: "no-store",
-          signal: AbortSignal.timeout(25_000),
-        }),
-        fetch(`/api/relay/${relayId}/policy`, {
-          cache: "no-store",
-          signal: AbortSignal.timeout(15_000),
-        }),
-      ]);
-      if (usersRes.ok) {
-        const j = (await usersRes.json()) as { users?: string[] };
-        setPubkeySampleCount(Array.isArray(j.users) ? j.users.length : null);
-      } else {
-        setPubkeySampleCount(null);
-      }
-      if (policyRes.ok) {
-        const j = (await policyRes.json()) as {
-          entries?: { status?: string }[];
-        };
-        const blocked = (j.entries ?? []).filter(
-          (e) => e.status === "blocked"
-        ).length;
-        setBlockedPolicyCount(blocked);
-      } else {
-        setBlockedPolicyCount(null);
-      }
-    } catch {
-      setPubkeySampleCount(null);
-      setBlockedPolicyCount(null);
-    } finally {
-      setMetricsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     if (selectedRelay?.id && !loading) {
       fetchKindActivity(selectedRelay.id);
-      fetchDashboardMetrics(selectedRelay.id);
     } else {
       setKindActivity([]);
       setKindError(null);
-      setPubkeySampleCount(null);
-      setBlockedPolicyCount(null);
     }
-  }, [
-    selectedRelay?.id,
-    loading,
-    refreshTrigger,
-    fetchKindActivity,
-    fetchDashboardMetrics,
-  ]);
+  }, [selectedRelay?.id, loading, refreshTrigger, fetchKindActivity]);
 
   const categorySummary = useMemo(() => {
     const totals: Record<KindCategory, number> = {
@@ -428,10 +388,10 @@ export function DashboardContent({
         >
           <div className="text-[11px] text-[#555]">{t("metrics.uniquePubkeys")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
-            {loading || metricsLoading
+            {pubkeysCountLoading
               ? "…"
-              : pubkeySampleCount != null
-                ? formatNumber(pubkeySampleCount)
+              : uniquePubkeysCount != null
+                ? formatNumber(uniquePubkeysCount)
                 : "—"}
           </div>
           <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.uniquePubkeysHint")}</div>
@@ -442,17 +402,17 @@ export function DashboardContent({
         >
           <div className="text-[11px] text-[#555]">{t("metrics.blocked")}</div>
           <div className="text-xl font-semibold text-[#f0f0f0]">
-            {loading || metricsLoading
+            {blockedCountLoading
               ? "…"
-              : blockedPolicyCount != null
-                ? formatNumber(blockedPolicyCount)
+              : blockedCount != null
+                ? formatNumber(blockedCount)
                 : "—"}
           </div>
           <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.whitelistHint")}</div>
         </div>
       </div>
 
-      {/* Resumo por categoria */}
+      {/* Category summary */}
       <div>
         <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
           {t("categorySummary")}
@@ -511,7 +471,7 @@ export function DashboardContent({
         </p>
       </div>
 
-      {/* Atividade por kind */}
+      {/* Activity by kind */}
       <div>
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
           <div className="text-[13px] font-medium text-[#ccc]">{t("kindActivity")}</div>
@@ -665,7 +625,7 @@ export function DashboardContent({
         </SheetContent>
       </Sheet>
 
-      {/* Estado da ligação */}
+      {/* Connection status */}
       <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
         <div className="mb-3 text-[13px] font-medium text-[#ddd]">{t("connection")}</div>
         <div className="flex flex-wrap gap-5 text-sm">

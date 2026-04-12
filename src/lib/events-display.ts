@@ -45,7 +45,7 @@ export function truncateNpub(npub: string): string {
   return `${npub.slice(0, 10)}…${npub.slice(-8)}`;
 }
 
-/** Navbar / espaços estreitos: início + `...` + fim curto (ex. `npub1sjx7...d34h`). */
+/** Navbar / tight layouts: start + `...` + short end (e.g. `npub1sjx7...d34h`). */
 export function truncateNpubNav(npub: string): string {
   const s = npub.trim();
   const head = 10;
@@ -185,7 +185,7 @@ export function extractNoteImageUrl(content: string): string | null {
 
 export function feedOtherContentPreview(event: NostrEventRow): string {
   const t = event.content?.trim();
-  if (!t) return "— sem conteúdo —";
+  if (!t) return "— no content —";
   if (t.length <= 140) return t;
   return `${t.slice(0, 140)}…`;
 }
@@ -196,7 +196,7 @@ export function truncateAbout(s: string, max: number): string {
   return `${s.slice(0, max)}…`;
 }
 
-/** Referência NIP principal para o operador (não exaustivo). */
+/** Primary NIP reference for operators (non-exhaustive). */
 export function kindNipReference(kind: number): string {
   if (kind === 0 || kind === 1) return "NIP-01";
   if (kind === 3) return "NIP-02";
@@ -207,13 +207,13 @@ export function kindNipReference(kind: number): string {
   return "—";
 }
 
-/** Mensagem para AlertDialog ao ocultar perfil / follows / relay list. */
+/** AlertDialog copy when hiding profile / follows / relay list events. */
 export function ocultarSensitiveKindDescription(kind: number): string | null {
   if (kind === 0)
-    return "Este evento é o perfil do utilizador. Removê-lo apaga o nome, bio e avatar deste utilizador no relay.";
+    return "This event is the user profile. Removing it deletes this user’s name, bio, and avatar on this relay.";
   if (kind === 3)
-    return "Este evento contém a lista de contactos do utilizador. Removê-lo apaga os seus follows neste relay.";
+    return "This event holds the user’s contact list. Removing it deletes their follows on this relay.";
   if (kind === 10002)
-    return "Este evento é a configuração de relays do utilizador. Removê-lo pode desligar o cliente deste relay.";
+    return "This event is the user’s relay configuration. Removing it may disconnect the client from this relay.";
   return null;
 }

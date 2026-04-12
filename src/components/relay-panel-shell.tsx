@@ -49,8 +49,8 @@ const STORAGE_KEY = "relay-panel-selected-id";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
-  { id: "events", label: "Eventos" },
-  { id: "access", label: "Acesso" },
+  { id: "events", label: "Events" },
+  { id: "access", label: "Access" },
   { id: "config", label: "Config" },
 ] as const;
 
@@ -66,6 +66,14 @@ export function RelayPanelShell({
   const [stats, setStats] = useState<RelayStats | null>(null);
   const [health, setHealth] = useState<RelayHealth | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uniquePubkeysCount, setUniquePubkeysCount] = useState<number | null>(null);
+  const [blockedCount, setBlockedCount] = useState<number | null>(null);
+  const [pubkeysCountLoading, setPubkeysCountLoading] = useState(
+    () => Boolean(relays[0]?.id)
+  );
+  const [blockedCountLoading, setBlockedCountLoading] = useState(
+    () => Boolean(relays[0]?.id)
+  );
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -93,15 +101,32 @@ export function RelayPanelShell({
       queueMicrotask(() => {
         setStats(null);
         setHealth(null);
+        setUniquePubkeysCount(null);
+        setBlockedCount(null);
+        setPubkeysCountLoading(false);
+        setBlockedCountLoading(false);
       });
       return;
     }
-    queueMicrotask(() => setLoading(true));
+    queueMicrotask(() => {
+      setLoading(true);
+      setPubkeysCountLoading(true);
+      setBlockedCountLoading(true);
+      setUniquePubkeysCount(null);
+      setBlockedCount(null);
+    });
+
     const fetchWithStatus = (path: string) =>
       fetch(path).then(async (r) => {
         const json = await r.json().catch(() => ({}));
         return { ...json, _status: r.status, _ok: r.ok };
       });
+
+    const metricsFetchOpts = {
+      cache: "no-store" as const,
+      signal: AbortSignal.timeout(30_000),
+    };
+
     Promise.all([
       fetchWithStatus(`/api/relay/${selectedId}/stats`),
       fetchWithStatus(`/api/relay/${selectedId}/health`),
@@ -116,6 +141,32 @@ export function RelayPanelShell({
         setHealth({ error: "fetch_error", detail: msg });
       })
       .finally(() => setLoading(false));
+
+    fetch(`/api/relay/${selectedId}/users`, metricsFetchOpts)
+      .then(async (r) => {
+        const j = (await r.json().catch(() => ({}))) as { users?: unknown };
+        if (!r.ok) {
+          setUniquePubkeysCount(null);
+          return;
+        }
+        const u = j.users;
+        setUniquePubkeysCount(Array.isArray(u) ? u.length : null);
+      })
+      .catch(() => setUniquePubkeysCount(null))
+      .finally(() => setPubkeysCountLoading(false));
+
+    fetch(`/api/relay/${selectedId}/policy/blocked`, metricsFetchOpts)
+      .then(async (r) => {
+        const j = (await r.json().catch(() => ({}))) as { blocked?: unknown };
+        if (!r.ok) {
+          setBlockedCount(null);
+          return;
+        }
+        const b = j.blocked;
+        setBlockedCount(Array.isArray(b) ? b.length : null);
+      })
+      .catch(() => setBlockedCount(null))
+      .finally(() => setBlockedCountLoading(false));
   }, [selectedId, refreshTrigger]);
 
   const selectedRelay = relays.find((r) => r.id === selectedId);
@@ -188,8 +239,8 @@ export function RelayPanelShell({
             type="button"
             onClick={handleRefresh}
             className="ml-auto flex h-8 w-8 items-center justify-center rounded border border-[#333] text-[#888] transition-colors hover:border-[#444] hover:bg-[#252525] hover:text-[#ccc]"
-            title="Atualizar dados do relay"
-            aria-label="Atualizar"
+            title="Refresh relay data"
+            aria-label="Refresh"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -204,14 +255,14 @@ export function RelayPanelShell({
           ) : relays.length === 0 ? (
             <div className="py-8 text-center">
               <p className="mb-4 text-[12px] text-[#666]">
-                Adicione o seu primeiro relay.
+                Add your first relay.
               </p>
               <button
                 type="button"
                 onClick={() => setShowCreateForm(true)}
                 className="rounded border border-[#5a3a0a] px-4 py-2 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
               >
-                + Novo relay
+                + New relay
               </button>
             </div>
           ) : (
@@ -223,6 +274,10 @@ export function RelayPanelShell({
                   selectedRelay={selectedRelay ?? null}
                   loading={loading}
                   refreshTrigger={refreshTrigger}
+                  uniquePubkeysCount={uniquePubkeysCount}
+                  blockedCount={blockedCount}
+                  pubkeysCountLoading={pubkeysCountLoading}
+                  blockedCountLoading={blockedCountLoading}
                 />
               )}
               {activeTab === "events" && (
