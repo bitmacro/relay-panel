@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NostrEventRow } from "@/lib/events-display";
+import { kindBadgeMetaI18n } from "@/lib/dashboard-kind-i18n";
 import {
-  kindBadgeMeta,
   pubkeyAvatarClasses,
   displayInitials,
   firstTagValue,
@@ -84,7 +84,8 @@ export function EventFeedCard({
   onBlock,
 }: EventFeedCardProps) {
   const t = useTranslations("EventsTab");
-  const meta = kindBadgeMeta(e.kind);
+  const td = useTranslations("dashboard");
+  const meta = kindBadgeMetaI18n(e.kind, td);
 
   function renderBody() {
     if (e.kind === 0) {

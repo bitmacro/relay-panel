@@ -7,11 +7,11 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { HELP_REFERENCE_KINDS } from "@/lib/events-display";
 import {
-  kindBadgeMeta,
-  dashboardKindLongDescription,
-  HELP_REFERENCE_KINDS,
-} from "@/lib/events-display";
+  kindBadgeMetaI18n,
+  kindLongDescription,
+} from "@/lib/dashboard-kind-i18n";
 
 function CopyBlock({ label, text }: { label: string; text: string }) {
   const t = useTranslations("common");
@@ -66,6 +66,7 @@ interface HelpSheetProps {
 export function HelpSheet({ open, onOpenChange }: HelpSheetProps) {
   const t = useTranslations("help");
   const tCmd = useTranslations("help.cmd");
+  const td = useTranslations("dashboard");
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -125,7 +126,7 @@ export function HelpSheet({ open, onOpenChange }: HelpSheetProps) {
                 </thead>
                 <tbody>
                   {HELP_REFERENCE_KINDS.map((k) => {
-                    const meta = kindBadgeMeta(k);
+                    const meta = kindBadgeMetaI18n(k, td);
                     return (
                       <tr key={k} className="border-b border-border last:border-0">
                         <td className="px-2 py-1.5 font-mono tabular-nums">{k}</td>
@@ -137,7 +138,7 @@ export function HelpSheet({ open, onOpenChange }: HelpSheetProps) {
                           </span>
                         </td>
                         <td className="px-2 py-1.5 text-muted-foreground leading-snug">
-                          {dashboardKindLongDescription(k)}
+                          {kindLongDescription(k, td)}
                         </td>
                       </tr>
                     );

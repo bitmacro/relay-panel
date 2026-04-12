@@ -8,12 +8,13 @@ import {
   getKindInfo,
   type KindCategory,
 } from "@/lib/nostr-kinds";
+import { kindNipReference } from "@/lib/events-display";
 import {
-  kindBadgeMeta,
-  dashboardKindLongDescription,
-  dashboardKindRowTooltip,
-  kindNipReference,
-} from "@/lib/events-display";
+  kindBadgeClass,
+  kindBadgeMetaI18n,
+  kindDashboardRowTooltip,
+  kindLongDescription,
+} from "@/lib/dashboard-kind-i18n";
 import type { DashboardKindTableRow, KindActivityRow } from "@/lib/dashboard-kind-activity";
 import { buildGroupedKindTableRows, formatMemberKindsList } from "@/lib/dashboard-kind-activity";
 import {
@@ -89,8 +90,10 @@ export function DashboardContent({
   const t = useTranslations("dashboard");
   const tErr = useTranslations("errors");
   const tc = useTranslations("common");
+  const tRelayStatus = useTranslations("relayStatus");
 
-  const nfLocale = locale === "en" ? "en-US" : "pt-PT";
+  const nfLocale =
+    locale === "en" ? "en-US" : locale === "es" ? "es-ES" : "pt-BR";
   const formatNumber = (n?: number | null) =>
     n == null ? "—" : n.toLocaleString(nfLocale);
 
@@ -274,7 +277,7 @@ export function DashboardContent({
   );
 
   const primaryKindTableRow = (row: KindActivityRow, opts?: { nested?: boolean; reactKey?: string }) => {
-    const meta = kindBadgeMeta(row.kind);
+    const meta = kindBadgeMetaI18n(row.kind, t);
     const rk = opts?.reactKey ?? String(row.kind);
     const trClass = opts?.nested
       ? "border-b border-[#222] bg-[#151515] transition-colors last:border-b-0 hover:bg-[#1c1c1c] cursor-help"
@@ -299,7 +302,7 @@ export function DashboardContent({
               </button>
             </td>
             <td className="min-w-0 break-words px-2.5 py-2 text-[#ccc] align-top leading-snug">
-              {dashboardKindLongDescription(row.kind)}
+              {kindLongDescription(row.kind, t)}
             </td>
             <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">
               {kindNipReference(row.kind)}
@@ -313,7 +316,7 @@ export function DashboardContent({
           </tr>
         </TooltipTrigger>
         <TooltipContent side="top" className="max-w-[280px] text-left leading-snug whitespace-pre-line">
-          {dashboardKindRowTooltip(row.kind)}
+          {kindDashboardRowTooltip(row.kind, t)}
         </TooltipContent>
       </Tooltip>
     );
@@ -326,12 +329,12 @@ export function DashboardContent({
     const expandId = row.expandId;
     const meta =
       row.rowType === "group-addressable"
-        ? kindBadgeMeta(30000)
+        ? kindBadgeMetaI18n(30000, t)
         : row.rowType === "group-ephemeral"
-          ? kindBadgeMeta(20000)
+          ? kindBadgeMetaI18n(20000, t)
           : {
               label: t("groupOthersBadge"),
-              badgeClass: kindBadgeMeta(12345).badgeClass,
+              badgeClass: kindBadgeClass(12345),
             };
     const description =
       row.rowType === "group-addressable"
@@ -621,7 +624,7 @@ export function DashboardContent({
             <>
               <SheetHeader>
                 <SheetTitle className="text-foreground">
-                  {kindBadgeMeta(kindSheetKind).label}
+                  {kindBadgeMetaI18n(kindSheetKind, t).label}
                 </SheetTitle>
                 <p className="text-[11px] font-mono text-muted-foreground">
                   kind {kindSheetKind}
@@ -645,7 +648,7 @@ export function DashboardContent({
                     {t("sheetDescription")}
                   </div>
                   <p className="text-muted-foreground leading-snug">
-                    {dashboardKindLongDescription(kindSheetKind)}
+                    {kindLongDescription(kindSheetKind, t)}
                   </p>
                 </div>
                 <div>
@@ -653,7 +656,7 @@ export function DashboardContent({
                     {t("sheetNote")}
                   </div>
                   <p className="text-muted-foreground text-[12px] leading-snug">
-                    {dashboardKindRowTooltip(kindSheetKind)}
+                    {kindDashboardRowTooltip(kindSheetKind, t)}
                   </p>
                 </div>
               </div>
@@ -710,7 +713,7 @@ export function DashboardContent({
               {loading
                 ? "…"
                 : health?.status === "ok"
-                ? "online"
+                ? tRelayStatus("online")
                 : formatHealthError(health)}
             </strong>
           </div>

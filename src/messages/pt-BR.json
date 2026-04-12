@@ -141,7 +141,43 @@
     "groupUnknownHint": "Kinds fora dos intervalos ephemerais e addressable e sem badge dedicado.",
     "groupedKindsLine": "Kinds: {shown}",
     "groupedKindsLineMore": "Kinds: {shown} (+{extra} mais)",
-    "groupRowExpandHint": "Clica na linha para expandir ou recolher."
+    "groupRowExpandHint": "Clica na linha para expandir ou recolher.",
+    "kindBadge": {
+      "profile": "Perfil",
+      "note": "Nota",
+      "contacts": "Contactos",
+      "repost": "Repost",
+      "reaction": "Reação",
+      "dm": "DM",
+      "relayList": "Lista de relays",
+      "ephemeral": "Efémero",
+      "addressable": "Addressable",
+      "fallback": "Kind {kind}"
+    },
+    "kindLong": {
+      "k0": "Perfil de utilizador — nome, bio, avatar. Não apagar.",
+      "k1": "Post / nota de texto — conteúdo principal do feed.",
+      "k3": "Lista de contactos — follows do utilizador. Não apagar.",
+      "k6": "Repost — partilha de um kind 1. Pode apagar.",
+      "k7": "Reação / curtida — emoji em resposta a nota. Pode apagar.",
+      "k1059": "DM encriptada (NIP-59) — ilegível pelo operador. Normal em relay privado.",
+      "k10002": "Lista de relays do utilizador — configuração do cliente. Não apagar.",
+      "ephemeral": "Evento efémero — desaparece automaticamente.",
+      "addressable": "Conteúdo addressable — artigos, listas nomeadas.",
+      "fallback": "Kind {kind} — tipo desconhecido."
+    },
+    "kindTooltip": {
+      "k0": "O kind 0 expõe nome e bio públicos; remover só em caso de abuso claro.",
+      "k1": "Nota de texto pública — uso típico para moderar spam ou conteúdo ilícito.",
+      "k3": "Grafo de follows; apagar pode deixar o estado incoerente para clientes Nostr.",
+      "k6": "Republica outro evento; pode remover sem quebrar o perfil do autor.",
+      "k7": "Emoji de reação; em geral seguro apagar em limpezas de abuso.",
+      "k1059": "Mensagem cifrada — o operador não vê o texto; apagar só por pedido ou política.",
+      "k10002": "Preferências de relay; evite apagar para não desconfigurar utilizadores.",
+      "ephemeral": "Efémero, pouco persistente; impacto da remoção costuma ser baixo.",
+      "addressable": "Dados substituíveis por d-tag; avalie antes de apagar listas ou artigos.",
+      "default": "Tipo menos comum neste painel; confira a NIP antes de remover."
+    }
   },
   "errors": {
     "events": {

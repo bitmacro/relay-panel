@@ -141,7 +141,43 @@
     "groupUnknownHint": "Kinds outside ephemeral and addressable ranges without a dedicated badge.",
     "groupedKindsLine": "Kinds: {shown}",
     "groupedKindsLineMore": "Kinds: {shown} (+{extra} more)",
-    "groupRowExpandHint": "Click the row to expand or collapse."
+    "groupRowExpandHint": "Click the row to expand or collapse.",
+    "kindBadge": {
+      "profile": "Profile",
+      "note": "Note",
+      "contacts": "Contacts",
+      "repost": "Repost",
+      "reaction": "Reaction",
+      "dm": "DM",
+      "relayList": "Relay list",
+      "ephemeral": "Ephemeral",
+      "addressable": "Addressable",
+      "fallback": "Kind {kind}"
+    },
+    "kindLong": {
+      "k0": "User profile — name, bio, avatar. Do not delete.",
+      "k1": "Text note — main feed content.",
+      "k3": "Contact list — user follows. Do not delete.",
+      "k6": "Repost — share of a kind 1 note. May delete.",
+      "k7": "Reaction — emoji reply to a note. May delete.",
+      "k1059": "Encrypted DM (NIP-59) — unreadable by the operator. Normal on a private relay.",
+      "k10002": "User relay list — client configuration. Do not delete.",
+      "ephemeral": "Ephemeral event — disappears automatically.",
+      "addressable": "Addressable content — articles, named lists.",
+      "fallback": "Kind {kind} — unknown type."
+    },
+    "kindTooltip": {
+      "k0": "Kind 0 exposes name and bio publicly; remove only for clear abuse.",
+      "k1": "Public text note — typical use is moderating spam or illegal content.",
+      "k3": "Follow graph; deleting may leave clients in an inconsistent state.",
+      "k6": "Reposts another event; can remove without breaking the author profile.",
+      "k7": "Emoji reaction; usually safe to delete in abuse cleanups.",
+      "k1059": "Encrypted message — the operator cannot see the text; delete only per policy.",
+      "k10002": "Relay preferences; avoid deleting so users are not misconfigured.",
+      "ephemeral": "Ephemeral, low persistence; removal impact is usually low.",
+      "addressable": "Replaceable by d-tag; think twice before deleting lists or articles.",
+      "default": "Less common kind in this panel; check the NIP before removing."
+    }
   },
   "errors": {
     "events": {

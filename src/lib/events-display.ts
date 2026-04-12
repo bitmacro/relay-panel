@@ -1,6 +1,6 @@
 import { nip19 } from "nostr-tools";
 
-/** Kinds shown in Help “quick reference” (labels/descriptions from kindBadgeMeta + dashboardKindLongDescription). */
+/** Kinds shown in Help “quick reference” (badges/descriptions via `dashboard-kind-i18n` + `dashboard` messages). */
 export const HELP_REFERENCE_KINDS = [0, 1, 3, 6, 7, 10002, 1059] as const;
 
 export interface NostrEventRow {
@@ -52,37 +52,6 @@ export function truncateNpubNav(npub: string): string {
   const tail = 4;
   if (s.length <= head + tail + 3) return s;
   return `${s.slice(0, head)}...${s.slice(-tail)}`;
-}
-
-export function kindBadgeMeta(kind: number): {
-  label: string;
-  badgeClass: string;
-} {
-  if (kind === 0)
-    return { label: "Profile", badgeClass: "bg-blue-500/20 text-blue-300 border-blue-500/40" };
-  if (kind === 1)
-    return { label: "Note", badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40" };
-  if (kind === 3)
-    return { label: "Contacts", badgeClass: "bg-violet-500/20 text-violet-300 border-violet-500/40" };
-  if (kind === 6)
-    return { label: "Repost", badgeClass: "bg-amber-500/20 text-amber-200 border-amber-500/40" };
-  if (kind === 7)
-    return { label: "Reaction", badgeClass: "bg-pink-500/20 text-pink-300 border-pink-500/40" };
-  if (kind === 1059)
-    return { label: "DM", badgeClass: "bg-orange-500/20 text-orange-300 border-orange-500/40" };
-  if (kind === 10002)
-    return { label: "Relay List", badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40" };
-  if (kind >= 20000 && kind <= 29999)
-    return { label: "Ephemeral", badgeClass: "bg-zinc-500/20 text-zinc-400 border-zinc-500/40" };
-  if (kind >= 30000 && kind <= 39999)
-    return {
-      label: "Addressable",
-      badgeClass: "bg-indigo-500/20 text-indigo-300 border-indigo-500/40",
-    };
-  return {
-    label: `Kind ${kind}`,
-    badgeClass: "bg-zinc-600/30 text-zinc-400 border-zinc-500/30",
-  };
 }
 
 function countTagName(tags: string[][] | undefined, name: string): number {
@@ -227,29 +196,6 @@ export function truncateAbout(s: string, max: number): string {
   return `${s.slice(0, max)}…`;
 }
 
-/** Uma linha para a coluna «Descrição» no dashboard (Atividade por kind). */
-export function dashboardKindLongDescription(kind: number): string {
-  if (kind === 0)
-    return "Perfil de utilizador — nome, bio, avatar. Não apagar.";
-  if (kind === 1)
-    return "Post / nota de texto — conteúdo principal do feed.";
-  if (kind === 3)
-    return "Lista de contactos — follows do utilizador. Não apagar.";
-  if (kind === 6)
-    return "Repost — partilha de um kind 1. Pode apagar.";
-  if (kind === 7)
-    return "Reação / curtida — emoji em resposta a nota. Pode apagar.";
-  if (kind === 1059)
-    return "DM encriptada (NIP-59) — ilegível pelo operador. Normal em relay privado.";
-  if (kind === 10002)
-    return "Lista de relays do utilizador — configuração do cliente. Não apagar.";
-  if (kind >= 20000 && kind <= 29999)
-    return "Evento efémero — desaparece automaticamente.";
-  if (kind >= 30000 && kind <= 39999)
-    return "Conteúdo addressable — artigos, listas nomeadas.";
-  return `Kind ${kind} — tipo desconhecido.`;
-}
-
 /** Referência NIP principal para o operador (não exaustivo). */
 export function kindNipReference(kind: number): string {
   if (kind === 0 || kind === 1) return "NIP-01";
@@ -270,27 +216,4 @@ export function ocultarSensitiveKindDescription(kind: number): string | null {
   if (kind === 10002)
     return "Este evento é a configuração de relays do utilizador. Removê-lo pode desligar o cliente deste relay.";
   return null;
-}
-
-/** Tooltip de uma frase ao hover da linha no dashboard. */
-export function dashboardKindRowTooltip(kind: number): string {
-  if (kind === 0)
-    return "O kind 0 expõe nome e bio públicos; remover só em caso de abuso claro.";
-  if (kind === 1)
-    return "Nota de texto pública — uso típico para moderar spam ou conteúdo ilícito.";
-  if (kind === 3)
-    return "Grafo de follows; apagar pode deixar o estado incoerente para clientes Nostr.";
-  if (kind === 6)
-    return "Republica outro evento; pode remover sem quebrar o perfil do autor.";
-  if (kind === 7)
-    return "Emoji de reação; em geral seguro apagar em limpezas de abuso.";
-  if (kind === 1059)
-    return "Mensagem cifrada — o operador não vê o texto; apagar só por pedido ou política.";
-  if (kind === 10002)
-    return "Preferências de relay; evite apagar para não desconfigurar utilizadores.";
-  if (kind >= 20000 && kind <= 29999)
-    return "Efémero, pouco persistente; impacto da remoção costuma ser baixo.";
-  if (kind >= 30000 && kind <= 39999)
-    return "Dados substituíveis por d-tag; avalie antes de apagar listas ou artigos.";
-  return "Tipo menos comum neste painel; confira a NIP antes de remover.";
 }

@@ -12,13 +12,13 @@ import {
   authorFilterToHex,
   hexToNpubDisplay,
   truncateNpub,
-  kindBadgeMeta,
   getContentPreview,
   parseKind0Profile,
   EVENTS_VIEW_MODE_KEY,
   type EventsViewMode,
   ocultarSensitiveKindDescription,
 } from "@/lib/events-display";
+import { kindBadgeMetaI18n } from "@/lib/dashboard-kind-i18n";
 import {
   legacyStorageKeyForPubkey,
   MY_NOSTR_PUBKEY_KEY,
@@ -80,6 +80,7 @@ interface EventsTabProps {
 
 export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   const t = useTranslations("EventsTab");
+  const td = useTranslations("dashboard");
   const { data: session } = useSession();
   
   const userId =
@@ -533,7 +534,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 </tr>
               ) : (
                 filteredEvents.map((e) => {
-                  const meta = kindBadgeMeta(e.kind);
+                  const meta = kindBadgeMetaI18n(e.kind, td);
                   return (
                     <tr
                       key={e.id}
@@ -712,7 +713,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                     {t("detail.kind")}
                   </div>
                   <div>
-                    {kindBadgeMeta(detailEvent.kind).label} ({detailEvent.kind})
+                    {kindBadgeMetaI18n(detailEvent.kind, td).label} ({detailEvent.kind})
                   </div>
                 </div>
                 <div>
