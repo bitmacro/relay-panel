@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAppLocale } from "@/components/intl-client-provider";
+import { localeShortLabel, nextLocale } from "@/lib/locale-ui";
 import {
   Sheet,
   SheetContent,
@@ -80,11 +81,11 @@ export function LandingNav() {
           </a>
           <button
             type="button"
-            onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
+            onClick={() => setLocale(nextLocale(locale))}
             title={t("locale")}
             className="ml-1 inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-border text-[11px] font-bold font-mono text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors touch-manipulation"
           >
-            {locale.toUpperCase()}
+            {localeShortLabel(locale)}
           </button>
           {session?.user ? (
             <LandingUserMenu user={session.user} />
@@ -172,13 +173,13 @@ export function LandingNav() {
             <button
               type="button"
               onClick={() => {
-                setLocale(locale === "pt" ? "en" : "pt");
+                setLocale(nextLocale(locale));
               }}
               className="flex min-h-11 w-full items-center justify-between gap-3 rounded-md border border-border px-3 text-[13px] hover:bg-secondary transition-colors touch-manipulation"
             >
               <span className="text-muted-foreground">{t("locale")}</span>
               <span className="text-[11px] font-bold font-mono tabular-nums">
-                {locale.toUpperCase()}
+                {localeShortLabel(locale)}
               </span>
             </button>
           </div>

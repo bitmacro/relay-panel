@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
-import { LOCALE_COOKIE_NAME, parseLocaleCookie } from "@/lib/local-preferences";
+import {
+  BITMACRO_LOCALE_COOKIE,
+  LEGACY_LOCALE_COOKIE_NAME,
+  resolveInitialLocale,
+} from "@/lib/local-preferences";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -67,12 +71,17 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
   const cookieStore = await cookies();
-  const initialLocale = parseLocaleCookie(cookieStore.get(LOCALE_COOKIE_NAME)?.value);
+  const initialLocale = resolveInitialLocale(
+    headerList.get("x-bitmacro-locale"),
+    cookieStore.get(BITMACRO_LOCALE_COOKIE)?.value,
+    cookieStore.get(LEGACY_LOCALE_COOKIE_NAME)?.value,
+  );
 
   return (
     <html
-      lang={initialLocale}
+      lang={initialLocale === "pt-BR" ? "pt-BR" : initialLocale}
       className={`dark ${ibmPlexSans.variable} ${ibmPlexMono.variable}`}
       suppressHydrationWarning
     >

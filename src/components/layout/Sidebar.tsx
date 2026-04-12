@@ -16,6 +16,7 @@ import { TopNav } from "@/components/layout/TopNav";
 import { Footer } from "@/components/layout/Footer";
 import { useTheme } from "@/components/theme-provider";
 import { useAppLocale } from "@/components/intl-client-provider";
+import { localeShortLabel, nextLocale } from "@/lib/locale-ui";
 import { cn } from "@/lib/utils";
 
 export interface SidebarRelay {
@@ -156,12 +157,12 @@ function MobileDrawerPreferences() {
       </button>
       <button
         type="button"
-        onClick={() => setLocale(locale === "pt" ? "en" : "pt")}
+        onClick={() => setLocale(nextLocale(locale))}
         className="flex w-full min-h-11 items-center justify-between gap-3 rounded-md border border-border px-3 text-[13px] text-foreground hover:bg-secondary transition-colors"
       >
         <span className="text-muted-foreground">{t("toggleLang")}</span>
         <span className="text-[11px] font-bold font-mono tabular-nums">
-          {locale.toUpperCase()}
+          {localeShortLabel(locale)}
         </span>
       </button>
     </div>

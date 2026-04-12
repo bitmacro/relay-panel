@@ -1,0 +1,248 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "loading": "Cargando…",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "close": "Cerrar",
+    "optional": "opcional",
+    "showSecret": "Mostrar token",
+    "hideSecret": "Ocultar token"
+  },
+  "nav": {
+    "title": "BitMacro Relay Manager",
+    "domain": "relay-panel.bitmacro.io",
+    "toggleTheme": "Cambiar tema",
+    "toggleLang": "Idioma",
+    "openMenu": "Abrir menú de navegación",
+    "menuTitle": "Navegación"
+  },
+  "userMenu": {
+    "profile": "Perfil",
+    "onboarding": "Onboarding",
+    "help": "Ayuda y documentación",
+    "darkTheme": "Tema oscuro",
+    "language": "Idioma",
+    "signOut": "Cerrar sesión",
+    "nostrTooltip": "Nostr: {npub}",
+    "nostrBadgeAria": "Identidad Nostr conectada"
+  },
+  "sidebar": {
+    "general": "General",
+    "relays": "Relays",
+    "activeRelays": "Relays activos",
+    "none": "Sin relays",
+    "newRelay": "Nuevo relay",
+    "appearance": "Apariencia"
+  },
+  "relayTable": {
+    "title": "Hosts de relay",
+    "configured": "{count, plural, one {# relay configurado} other {# relays configurados}}",
+    "filterPlaceholder": "Filtrar por nombre o URL…",
+    "newRelay": "Nuevo relay",
+    "colRelay": "Relay",
+    "colAgent": "Endpoint del agente",
+    "colAgentRelayId": "Agent Relay ID",
+    "colStatus": "Estado",
+    "colEvents": "Eventos",
+    "colDbSize": "Tamaño BD",
+    "emptySearch": "Ningún relay coincide con la búsqueda.",
+    "empty": "Añade tu primer relay.",
+    "manage": "Gestionar"
+  },
+  "relayStatus": {
+    "online": "En línea",
+    "unhealthy": "No saludable",
+    "offline": "Sin conexión"
+  },
+  "newRelay": {
+    "title": "Nuevo relay",
+    "displayName": "Nombre visible",
+    "displayPlaceholder": "p. ej. relay.ejemplo.com",
+    "agentUrl": "URL del agente",
+    "agentPlaceholder": "https://agent.ejemplo.com",
+    "token": "Bearer token",
+    "tokenPlaceholder": "RELAY_AGENT_TOKEN",
+    "agentRelayId": "Agent Relay ID",
+    "agentRelayIdHint": "(debe coincidir con el id en RELAY_INSTANCES, p. ej. public, private, paid)",
+    "agentRelayPlaceholder": "p. ej. public",
+    "submit": "Añadir relay",
+    "submitting": "Creando…",
+    "errRequired": "Completa nombre, URL del agente, token y agent relay ID",
+    "errTokenLen": "El token debe tener al menos 8 caracteres",
+    "errCreate": "No se pudo crear el relay"
+  },
+  "footer": {
+    "panelTitle": "relay-panel (este sitio)",
+    "panelVersion": "panel v{version}",
+    "agentTitle": "relay-agent vía GET /health (relay seleccionado o primero)",
+    "agentTitleLanding": "versión relay-agent desde GET /health público (AGENT_PUBLIC_HEALTH_URL o por defecto)",
+    "agent": "agente {label}",
+    "ecosystem": "Ecosistema BitMacro ↗",
+    "repoPanel": "relay-panel ↗",
+    "repoAgent": "relay-agent ↗",
+    "repoConnect": "@bitmacro/relay-connect",
+    "copyright": "© 2026 BitMacro",
+    "brand": "BitMacro Relay Manager"
+  },
+  "landing": {
+    "nav": {
+      "brand": "Relay Manager",
+      "features": "Funciones",
+      "quickstart": "Inicio rápido",
+      "docs": "Docs del stack ↗",
+      "github": "GitHub",
+      "signIn": "Iniciar sesión",
+      "goToPanel": "Ir al panel",
+      "locale": "Idioma",
+      "openMenu": "Abrir menú",
+      "menuTitle": "Menú"
+    },
+    "hero": {
+      "kickerA": "relay-agent multi-relay (npm / GHCR) · MIT · Open Source",
+      "kickerB": "Ecosistema · relay-agent · relay-api · relay-panel · relay-connect (SDK)",
+      "title": "Gestiona tu relay Nostr sin tocar la terminal",
+      "subtitle": "Panel visual para operadores de relay: moderación, control de acceso, Lightning y multi-relay en un solo lugar.",
+      "ctaPrimary": "Empezar a gestionar →",
+      "ctaGithub": "Ver en GitHub",
+      "docsLead": "Documentación técnica full-stack",
+      "docsTrail": " — bitmacro.io a través de relay-agent, con autenticación NIP-07 y NIP-46 (complementa la ruta panel → relay-api → agente del README de este repo).",
+      "imageAlt": "BitMacro Relay Manager — Panel con tabla de relays, barra lateral y badges de estado"
+    },
+    "problem": {
+      "title": "Operar un relay Nostr hoy implica…",
+      "footerA": "No existía una herramienta visual para esto.",
+      "footerB": "Hasta ahora.",
+      "p1": "Gestionar listas blancas con bash en la terminal",
+      "p2": "Inspeccionar eventos con CLI (strfry scan, nak req)",
+      "p3": "Borrar spam manualmente por ID de evento",
+      "p4": "Implementar un relay de pago con código distinto en cada instalación"
+    },
+    "how": {
+      "title": "Tres componentes. Un flujo.",
+      "agentTag": "relay-agent",
+      "mit": "Licencia MIT",
+      "agentStack": "Node.js · CLI strfry",
+      "agentRuns": "En tu servidor",
+      "apiTag": "relay-api",
+      "apiProtocol": "Protocolo abierto",
+      "apiStack": "REST · Hono · Vercel",
+      "apiRole": "Proxy autenticado\nSin estado por diseño",
+      "panelTag": "relay-panel",
+      "bsl": "BSL 1.1",
+      "panelStack": "Next.js · Vercel",
+      "panelRole": "UI en el navegador"
+    },
+    "features": {
+      "title": "Todo lo que necesitas para operar un relay",
+      "f1t": "Panel visual",
+      "f1d": "Eventos, tamaño de BD, uptime, actividad por kind",
+      "f2t": "Control de acceso",
+      "f2d": "Lista blanca / bloqueados con un clic, sin SSH",
+      "f3t": "Pagos Lightning",
+      "f3d": "Acceso automático tras el pago, webhook LNbits",
+      "f4t": "Multi-relay",
+      "f4d": "Gestiona N relays desde una instancia de agente",
+      "f5t": "Agnóstico al relay",
+      "f5d": "Funciona con strfry (nostr-rs-relay próximamente)",
+      "f6t": "Auth con GitHub",
+      "f6d": "NextAuth.js v5, sin contraseñas"
+    },
+    "quickstart": {
+      "title": "En marcha en 3 pasos",
+      "s1": "Paso 1 — Instala el agente",
+      "s2": "Paso 2 — Configura RELAY_INSTANCES",
+      "s3a": "Paso 3 — Inicia sesión en",
+      "s3b": "y añade el endpoint del agente",
+      "s3body": "Crea un relay en el panel, pega la URL del agente y el token. Listo.",
+      "deeper": "Profundizar",
+      "deeperBodyA": "Este camino rápido sigue",
+      "deeperBold": "panel → relay-api → relay-agent",
+      "deeperBodyB": "(ver el",
+      "deeperLinkReadme": "README de relay-panel",
+      "deeperBodyC": "). Para la historia completa de BitMacro Relay Manager — incluyendo",
+      "deeperLinkDocs": "documentación técnica en bitmacro.io",
+      "deeperEnd": "."
+    },
+    "opensource": {
+      "title": "Open source en el núcleo",
+      "docsTitle": "Documentación",
+      "docsLi1a": "Panel → agente —",
+      "docsLi1b": "Cómo esta UI llega a tus relays (vía relay-api) está documentado en el",
+      "docsLinkPanel": "README de relay-panel",
+      "docsLi2a": "Web → agente —",
+      "docsLi2b": "Referencia del ecosistema en",
+      "docsLi2c": ", incluyendo",
+      "nip": "NIP-07 y NIP-46",
+      "footer": "relay-agent y relay-connect son MIT: instala, bifurca, contribuye. El código de relay-panel es visible bajo BSL 1.1.",
+      "gh": "GitHub →",
+      "agentMeta": "CI · npm · Docker",
+      "panelMeta": "CI · Next.js",
+      "connectMeta": "SDK NIP-46 / NIP-07"
+    },
+    "cta": {
+      "title": "Empieza a gestionar tu relay hoy",
+      "subtitle": "Gratis para 1 relay. Sin tarjeta. Inicia sesión con GitHub.",
+      "button": "Iniciar sesión con GitHub →"
+    },
+    "footer": {
+      "brand": "Relay Manager",
+      "bitmacro": "BitMacro — herramientas Bitcoin, Lightning y Nostr ↗",
+      "ecosystem": "Resumen del ecosistema →",
+      "techDocs": "Docs técnicos (NIP-07 · NIP-46) ↗",
+      "copyright": "© 2026 BitMacro"
+    }
+  },
+  "Dashboard": {
+    "title": "Relay Panel",
+    "signedInAs": "Sesión como {user}",
+    "fallbackUser": "usuario",
+    "btnSignOut": "Cerrar sesión",
+    "yourRelays": "Tus relays",
+    "emptyDescriptionStart": "Aún no hay relays. Añade una fila en Supabase",
+    "emptyDescriptionEnd": "con tu id de usuario de GitHub.",
+    "githubUserIdLabel": "Tu id de usuario de GitHub:"
+  },
+  "RelayDetailShell": {
+    "breadcrumb": {
+      "backToRelays": "← Relays"
+    },
+    "btnRefresh": "Actualizar",
+    "tabs": {
+      "dashboard": "Panel",
+      "events": "Eventos",
+      "access": "Acceso",
+      "config": "Config"
+    }
+  },
+  "onboarding": {
+    "title": "Onboarding",
+    "subtitle": "Instala relay-agent y registra tu relay en el panel.",
+    "step1": "Instalar relay-agent",
+    "step2": "Registrar en el panel",
+    "step3": "Listo",
+    "tabNpx": "npx",
+    "tabDocker": "Docker",
+    "npxCmd": "comando npx",
+    "dockerCmd": "Docker run",
+    "suggestedToken": "Token sugerido (copiar)",
+    "tokenHint": "Usa el mismo valor para RELAY_AGENT_TOKEN en el agente y al añadir el relay.",
+    "fullDocs": "Documentación completa ↗",
+    "step2Title": "Datos del relay",
+    "name": "Nombre",
+    "endpoint": "URL del agente (https:// o wss://)",
+    "token": "Bearer token",
+    "agentRelayId": "agent_relay_id",
+    "agentRelayIdSubtext": "obligatorio — mismo id que en RELAY_INSTANCES (p. ej. public)",
+    "testConnection": "Probar conexión",
+    "testing": "Probando…",
+    "registering": "Registrando…",
+    "probeFail": "Conexión fallida. Revisa URL del agente, token y agent_relay_id.",
+    "createFail": "No se pudo crear el relay.",
+    "successTitle": "Relay registrado",
+    "successBody": "Puedes gestionar tu relay en el panel.",
+    "viewRelay": "Ver mi relay",
+    "back": "Volver"
+  }
+}

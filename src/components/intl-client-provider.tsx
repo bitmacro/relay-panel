@@ -1,6 +1,7 @@
 "use client";
 
 import { NextIntlClientProvider } from "next-intl";
+import { useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -10,14 +11,22 @@ import {
   useState,
 } from "react";
 import type { AppLocale } from "@/lib/local-preferences";
-import { LOCALE_COOKIE_NAME } from "@/lib/local-preferences";
+import { BITMACRO_LOCALE_COOKIE } from "@/lib/local-preferences";
+import { deepMerge } from "@/lib/deep-merge";
 
-import messagesPt from "@/messages/pt.json";
+import messagesPtBR from "@/messages/pt-BR.json";
 import messagesEn from "@/messages/en.json";
+import messagesEsOverrides from "@/messages/es.overrides.json";
 
-const MESSAGES: Record<AppLocale, typeof messagesPt> = {
-  pt: messagesPt,
+const messagesEs = deepMerge(
+  messagesEn as Record<string, unknown>,
+  messagesEsOverrides as Record<string, unknown>,
+) as typeof messagesEn;
+
+const MESSAGES: Record<AppLocale, typeof messagesEn> = {
+  "pt-BR": messagesPtBR as typeof messagesEn,
   en: messagesEn,
+  es: messagesEs,
 };
 
 type LocaleContextValue = {
@@ -37,7 +46,7 @@ export function useAppLocale() {
 
 function writeLocaleCookie(locale: AppLocale) {
   const maxAge = 60 * 60 * 24 * 365;
-  document.cookie = `${LOCALE_COOKIE_NAME}=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
+  document.cookie = `${BITMACRO_LOCALE_COOKIE}=${locale}; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
 export function IntlClientProvider({
@@ -47,16 +56,35 @@ export function IntlClientProvider({
   children: React.ReactNode;
   initialLocale: AppLocale;
 }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
 
   useEffect(() => {
-    document.documentElement.lang = locale;
+    setLocaleState(initialLocale);
+  }, [initialLocale]);
+
+  useEffect(() => {
+    const map: Record<AppLocale, string> = {
+      "pt-BR": "pt-BR",
+      en: "en",
+      es: "es",
+    };
+    document.documentElement.lang = map[locale] ?? "pt-BR";
   }, [locale]);
 
-  const setLocale = useCallback((next: AppLocale) => {
-    setLocaleState(next);
-    writeLocaleCookie(next);
-  }, []);
+  const setLocale = useCallback(
+    (next: AppLocale) => {
+      setLocaleState(next);
+      writeLocaleCookie(next);
+      try {
+        localStorage.setItem("bitmacro-locale", next);
+      } catch {
+        /* ignore */
+      }
+      router.refresh();
+    },
+    [router],
+  );
 
   const value = useMemo(() => ({ locale, setLocale }), [locale, setLocale]);
   const messages = MESSAGES[locale];

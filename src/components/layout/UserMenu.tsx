@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import type { User } from "next-auth";
 import { useAppLocale } from "@/components/intl-client-provider";
 import type { AppLocale } from "@/lib/local-preferences";
+import { localeShortLabel, nextLocale } from "@/lib/locale-ui";
 import { ProfileSheet } from "@/components/layout/ProfileSheet";
 import { HelpSheet } from "@/components/layout/HelpSheet";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -28,7 +29,7 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
   const router = useRouter();
   const { locale, setLocale } = useAppLocale();
   const { hex: nostrHex } = useNostrPrefs();
-  const langLabel = locale.toUpperCase();
+  const langLabel = localeShortLabel(locale);
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -45,7 +46,7 @@ export function UserMenu({ user, isDark, onThemeToggle }: UserMenuProps) {
   }, []);
 
   function toggleLocale() {
-    const next: AppLocale = locale === "pt" ? "en" : "pt";
+    const next: AppLocale = nextLocale(locale);
     setLocale(next);
   }
 

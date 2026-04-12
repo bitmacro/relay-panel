@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import type { User } from "next-auth";
 import { UserMenu } from "./UserMenu";
 import { useAppLocale } from "@/components/intl-client-provider";
+import { localeShortLabel, nextLocale } from "@/lib/locale-ui";
 
 interface TopNavControlsProps {
   user: User | null;
@@ -18,7 +19,7 @@ export function TopNavControls({ user }: TopNavControlsProps) {
   const isDark = theme === "dark";
 
   function toggleLocale() {
-    setLocale(locale === "pt" ? "en" : "pt");
+    setLocale(nextLocale(locale));
   }
 
   return (
@@ -38,7 +39,7 @@ export function TopNavControls({ user }: TopNavControlsProps) {
         title={t("toggleLang")}
         className="hidden md:inline-flex h-9 px-2.5 items-center justify-center rounded-md border border-border text-[11px] font-bold font-mono text-muted-foreground hover:text-foreground hover:bg-secondary hover:border-muted-foreground/30 transition-colors"
       >
-        {locale.toUpperCase()}
+        {localeShortLabel(locale)}
       </button>
 
       {user && (
