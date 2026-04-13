@@ -22,7 +22,7 @@ export function RelayColorPicker({ value, onChange, label = "Cor" }: RelayColorP
 
   return (
     <div>
-      <div className="mb-1 text-[11px] text-[#555]">{label}</div>
+      <div className="mb-1 text-[11px] text-muted-foreground">{label}</div>
       <div className="flex flex-wrap items-center gap-2">
         {RELAY_COLOR_PRESETS.map((hex) => (
           <button
@@ -31,8 +31,8 @@ export function RelayColorPicker({ value, onChange, label = "Cor" }: RelayColorP
             onClick={() => onChange(hex)}
             className={`h-6 w-6 rounded-full border-2 transition-opacity hover:opacity-80 ${
               value === hex
-                ? "border-[#f7931a] ring-1 ring-[#f7931a]"
-                : "border-[#333] hover:border-[#555]"
+                ? "border-primary ring-1 ring-primary"
+                : "border-border hover:border-muted-foreground/50"
             }`}
             style={{ backgroundColor: hex }}
             title={hex}
@@ -49,12 +49,12 @@ export function RelayColorPicker({ value, onChange, label = "Cor" }: RelayColorP
               else if (/^[0-9a-fA-F]{6}$/.test(v)) onChange(`#${v}`);
             }}
             placeholder="#000000"
-            className="w-20 rounded border border-[#333] bg-[#141414] px-2 py-1 text-[11px] font-mono text-[#ccc] placeholder:text-[#555]"
+            className="w-20 rounded-md border border-input bg-background px-2 py-1 text-[11px] font-mono text-foreground placeholder:text-muted-foreground shadow-sm"
           />
           {value && (
             <span
-              className="h-5 w-5 shrink-0 rounded-full border border-[#333]"
-              style={{ backgroundColor: isValidHex ? value : "#333" }}
+              className="h-5 w-5 shrink-0 rounded-full border border-border"
+              style={{ backgroundColor: isValidHex ? value : "var(--border)" }}
             />
           )}
         </div>

@@ -375,9 +375,9 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[13px] font-medium text-[#ccc]">{t("title")}</span>
+        <span className="text-[13px] font-medium text-foreground">{t("title")}</span>
         <div
-          className="inline-flex rounded-md border border-[#333] bg-[#1a1a1a] p-0.5 text-[11px]"
+          className="inline-flex rounded-md border border-border bg-muted/50 p-0.5 text-[11px]"
           role="group"
           aria-label={t("aria.viewToggle")}
         >
@@ -386,8 +386,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onClick={() => setViewModePersist("table")}
             className={`rounded px-2 py-1 transition-colors ${
               viewMode === "table"
-                ? "bg-[#333] text-[#eee]"
-                : "text-[#888] hover:text-[#ccc]"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t("viewMode.table")}
@@ -397,8 +397,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onClick={() => setViewModePersist("feed")}
             className={`rounded px-2 py-1 transition-colors ${
               viewMode === "feed"
-                ? "bg-[#333] text-[#eee]"
-                : "text-[#888] hover:text-[#ccc]"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t("viewMode.feed")}
@@ -410,7 +410,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             onChange={(e) =>
               setFilterCategory(e.target.value as CategoryFilterValue)
             }
-            className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
+            className="rounded-md border border-input bg-background px-2 py-1 text-[11px] text-muted-foreground shadow-sm"
           >
             {CATEGORY_OPTIONS.map((o) => (
               <option key={o.value} value={o.value}>
@@ -421,7 +421,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           <select
             value={filterKind}
             onChange={(e) => setFilterKind(e.target.value)}
-            className="min-w-[120px] rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
+            className="min-w-[120px] rounded-md border border-input bg-background px-2 py-1 text-[11px] text-muted-foreground shadow-sm"
           >
             <option value="">{t("filters.allKinds")}</option>
             {kindOptions.map((k) => {
@@ -437,7 +437,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           <select
             value={filterTime}
             onChange={(e) => setFilterTime(e.target.value)}
-            className="rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888]"
+            className="rounded-md border border-input bg-background px-2 py-1 text-[11px] text-muted-foreground shadow-sm"
           >
             <option value="24h">{t("filters.periods.24h")}</option>
             <option value="7d">{t("filters.periods.7d")}</option>
@@ -448,20 +448,20 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
             value={authorFilterInput}
             onChange={(e) => setAuthorFilterInput(e.target.value)}
             placeholder={t("filters.authorPlaceholder")}
-            className="w-[200px] rounded-md border border-[#333] bg-[#1f1f1f] px-2 py-1 text-[11px] text-[#888] placeholder:text-[#555]"
+            className="w-[200px] rounded-md border border-input bg-background px-2 py-1 text-[11px] text-foreground placeholder:text-muted-foreground shadow-sm"
             title={t("filters.authorTitle")}
           />
           <button
             type="button"
             onClick={loadMyEventsPubkey}
-            className="rounded-md border border-[#444] bg-[#252525] px-2 py-1 text-[11px] text-[#ccc] hover:bg-[#333]"
+            className="rounded-md border border-border bg-muted/70 px-2 py-1 text-[11px] text-foreground hover:bg-muted"
           >
             {t("filters.myEvents")}
           </button>
           <button
             type="button"
             onClick={memorizeAuthorFilter}
-            className="rounded-md border border-[#444] bg-[#252525] px-2 py-1 text-[11px] text-[#888] hover:bg-[#333]"
+            className="rounded-md border border-border bg-muted/70 px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground"
             title={t("filters.memorizeTitle")}
           >
             {t("filters.memorize")}
@@ -474,7 +474,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       )}
 
       {error && (
-        <p className="rounded border border-[#5a1a1a] bg-[#2a0a0a] px-3 py-2 text-[12px] text-[#f87171]">
+        <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
           {error}
         </p>
       )}
@@ -483,7 +483,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       events.length > 0 &&
       filteredEvents.length === 0 &&
       !error ? (
-        <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-12 text-center text-muted-foreground">
+        <div className="rounded-[10px] border border-border bg-card py-12 text-center text-muted-foreground">
           <p className="text-[13px]">
             {t("empty.noEventsInCategory", { 
               category: t(CATEGORY_OPTIONS.find(o => o.value === filterCategory)?.key || "categories.all") 
@@ -495,29 +495,29 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
               setFilterCategory("all");
               setFilterKind("");
             }}
-            className="mt-3 text-sm text-[#f7931a] underline underline-offset-2 hover:text-[#e07b10]"
+            className="mt-3 text-sm text-primary underline underline-offset-2 hover:text-primary/90"
           >
             {t("empty.viewAll")}
           </button>
         </div>
       ) : viewMode === "table" ? (
-        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
+        <div className="overflow-hidden rounded-[10px] border border-border bg-card">
           <table className="w-full table-fixed border-collapse text-[12px]">
             <thead>
               <tr>
-                <th className="w-[100px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[100px] border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                   {t("table.kind")}
                 </th>
-                <th className="w-[120px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[120px] border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                   {t("table.pubkey")}
                 </th>
-                <th className="w-[72px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="w-[72px] border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                   {t("table.date")}
                 </th>
-                <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                <th className="border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                   {t("table.content")}
                 </th>
-                <th className="w-[200px] border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                <th className="w-[200px] border-b border-border bg-muted/60 px-2.5 py-1.5 text-right text-[11px] font-medium text-muted-foreground">
                   {t("table.actions")}
                 </th>
               </tr>
@@ -527,7 +527,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                 <tr>
                   <td
                     colSpan={5}
-                    className="px-4 py-8 text-center text-[12px] text-[#666]"
+                    className="px-4 py-8 text-center text-[12px] text-muted-foreground"
                   >
                     {t("status.loading")}
                   </td>
@@ -547,7 +547,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                           setDetailEvent(e);
                         }
                       }}
-                      className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-pointer"
+                      className="border-b border-border transition-colors last:border-b-0 hover:bg-muted/50 cursor-pointer"
                     >
                       <td className="px-2.5 py-2 align-middle">
                         <span
@@ -557,15 +557,15 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
                         </span>
                       </td>
                       <td
-                        className="overflow-hidden px-2.5 py-2 text-[11px] text-[#555] text-ellipsis whitespace-nowrap"
+                        className="overflow-hidden px-2.5 py-2 text-[11px] text-muted-foreground text-ellipsis whitespace-nowrap"
                         title={e.pubkey}
                       >
                         {resolveDisplayPubkey(e.pubkey)}
                       </td>
-                      <td className="overflow-hidden px-2.5 py-2 text-[11px] text-[#555] text-ellipsis whitespace-nowrap">
+                      <td className="overflow-hidden px-2.5 py-2 text-[11px] text-muted-foreground text-ellipsis whitespace-nowrap">
                         {formatAgo(e.created_at)}
                       </td>
-                      <td className="overflow-hidden px-2.5 py-2 text-[11px] text-[#666] text-ellipsis whitespace-nowrap">
+                      <td className="overflow-hidden px-2.5 py-2 text-[11px] text-foreground/80 text-ellipsis whitespace-nowrap">
                         {getContentPreview(e)}
                       </td>
                       <td className="px-2.5 py-2 align-middle">
@@ -604,7 +604,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       ) : (
         <div className="space-y-3">
           {loading ? (
-            <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-4 py-10 text-center text-[12px] text-[#666]">
+            <div className="rounded-[10px] border border-border bg-card px-4 py-10 text-center text-[12px] text-muted-foreground">
               {t("status.loading")}
             </div>
           ) : (
@@ -642,7 +642,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       )}
 
       {!loading && events.length === 0 && !error && (
-        <p className="py-8 text-center text-[12px] text-[#666]">
+        <p className="py-8 text-center text-[12px] text-muted-foreground">
           {t("empty.noEvents")}
         </p>
       )}
@@ -777,23 +777,23 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           if (!open) setOcultarConfirm(null);
         }}
       >
-        <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
+        <AlertDialogContent className="border-border bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#e5e5e5]">{t("confirmModal.attention")}</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#999]">
+            <AlertDialogTitle className="text-foreground">{t("confirmModal.attention")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
               {ocultarConfirm
                 ? ocultarSensitiveKindDescription(ocultarConfirm.kind)
                 : null}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
-            <AlertDialogCancel className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]">
+            <AlertDialogCancel className="border-border bg-muted text-foreground hover:bg-muted/80">
               {t("confirmModal.cancel")}
             </AlertDialogCancel>
             <button
               type="button"
               onClick={() => confirmOcultarAnyway()}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-red-600/45 bg-red-600/15 px-4 text-sm font-medium text-red-200 hover:bg-red-600/25"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-destructive/40 bg-destructive/10 px-4 text-sm font-medium text-destructive hover:bg-destructive/15"
             >
               {t("confirmModal.removeAnyway")}
             </button>
@@ -807,19 +807,19 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           if (!open) setBlockTarget(null);
         }}
       >
-        <AlertDialogContent className="border-[#333] bg-[#1a1a1a]">
+        <AlertDialogContent className="border-border bg-card">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-[#e5e5e5]">
+            <AlertDialogTitle className="text-foreground">
               {t("blockModal.title")}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-[#999]">
+            <AlertDialogDescription className="text-muted-foreground">
               {t("blockModal.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 sm:gap-2">
             <AlertDialogCancel
               disabled={blockPending}
-              className="border-[#444] bg-[#222] text-[#ccc] hover:bg-[#2a2a2a]"
+              className="border-border bg-muted text-foreground hover:bg-muted/80"
             >
               {t("blockModal.cancel")}
             </AlertDialogCancel>

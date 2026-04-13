@@ -9,24 +9,24 @@ type DashboardT = (key: string, values?: Record<string, any>) => string;
 
 export function kindBadgeClass(kind: number): string {
   if (kind === 0)
-    return "bg-blue-500/20 text-blue-300 border-blue-500/40";
+    return "bg-blue-500/15 text-blue-800 border-blue-500/35 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40";
   if (kind === 1)
-    return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+    return "bg-emerald-500/15 text-emerald-800 border-emerald-500/35 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/40";
   if (kind === 3)
-    return "bg-violet-500/20 text-violet-300 border-violet-500/40";
+    return "bg-violet-500/15 text-violet-800 border-violet-500/35 dark:bg-violet-500/20 dark:text-violet-300 dark:border-violet-500/40";
   if (kind === 6)
-    return "bg-amber-500/20 text-amber-200 border-amber-500/40";
+    return "bg-amber-500/15 text-amber-900 border-amber-500/35 dark:bg-amber-500/20 dark:text-amber-200 dark:border-amber-500/40";
   if (kind === 7)
-    return "bg-pink-500/20 text-pink-300 border-pink-500/40";
+    return "bg-pink-500/15 text-pink-800 border-pink-500/35 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40";
   if (kind === 1059)
-    return "bg-orange-500/20 text-orange-300 border-orange-500/40";
+    return "bg-orange-500/15 text-orange-800 border-orange-500/35 dark:bg-orange-500/20 dark:text-orange-300 dark:border-orange-500/40";
   if (kind === 10002)
-    return "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
+    return "bg-cyan-500/15 text-cyan-800 border-cyan-500/35 dark:bg-cyan-500/20 dark:text-cyan-300 dark:border-cyan-500/40";
   if (kind >= 20000 && kind <= 29999)
-    return "bg-zinc-500/20 text-zinc-400 border-zinc-500/40";
+    return "bg-zinc-500/15 text-zinc-700 border-zinc-500/35 dark:bg-zinc-500/20 dark:text-zinc-400 dark:border-zinc-500/40";
   if (kind >= 30000 && kind <= 39999)
-    return "bg-indigo-500/20 text-indigo-300 border-indigo-500/40";
-  return "bg-zinc-600/30 text-zinc-400 border-zinc-500/30";
+    return "bg-indigo-500/15 text-indigo-800 border-indigo-500/35 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40";
+  return "bg-zinc-500/20 text-zinc-800 border-zinc-500/35 dark:bg-zinc-600/30 dark:text-zinc-400 dark:border-zinc-500/30";
 }
 
 export function kindBadgeLabel(kind: number, t: DashboardT): string {

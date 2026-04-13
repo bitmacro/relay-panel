@@ -224,9 +224,9 @@ export function EventFeedCard({
           onOpenDetail();
         }
       }}
-      className="rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] overflow-hidden transition-colors hover:border-[#3a3a3a] cursor-pointer text-left"
+      className="rounded-xl border border-border bg-card overflow-hidden transition-colors hover:border-primary/25 cursor-pointer text-left"
     >
-      <div className="flex items-start gap-3 px-4 pt-3 pb-2 border-b border-[#252525]/80">
+      <div className="flex items-start gap-3 px-4 pt-3 pb-2 border-b border-border">
         <FeedAuthorAvatar
           pubkey={e.pubkey}
           picture={authorPicture}
@@ -258,7 +258,7 @@ export function EventFeedCard({
       <div className="px-4 py-3">{renderBody()}</div>
 
       <div
-        className="flex items-center gap-2 border-t border-[#252525]/80 px-4 py-2.5 bg-[#141414]/80"
+        className="flex items-center gap-2 border-t border-border px-4 py-2.5 bg-muted/40"
         onClick={(ev) => ev.stopPropagation()}
       >
         <button

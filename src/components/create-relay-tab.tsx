@@ -75,63 +75,63 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
 
   return (
     <div className="space-y-3">
-      <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-        <div className="mb-3 text-[13px] font-medium text-[#ddd]">
+      <div className="rounded-[10px] border border-border bg-card p-4">
+        <div className="mb-3 text-[13px] font-medium text-foreground">
           {t("title")}
         </div>
         <div className="space-y-3">
           <div className="flex flex-wrap gap-2.5">
             <div className="min-w-[200px] flex-1">
-              <div className="mb-1 text-[11px] text-[#555]">{t("form.name")}</div>
+              <div className="mb-1 text-[11px] text-muted-foreground">{t("form.name")}</div>
               <input
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                 placeholder={t("form.namePlaceholder")}
-                className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+                className="w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
               />
             </div>
             <div className="min-w-[200px] flex-1">
-              <div className="mb-1 text-[11px] text-[#555]">{t("form.agentUrl")}</div>
+              <div className="mb-1 text-[11px] text-muted-foreground">{t("form.agentUrl")}</div>
               <input
                 type="text"
                 value={form.endpoint}
                 onChange={(e) => setForm((p) => ({ ...p, endpoint: e.target.value }))}
                 placeholder={t("form.agentUrlPlaceholder")}
-                className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+                className="w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
               />
             </div>
           </div>
           <div>
-            <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
+            <div className="mb-1 text-[11px] text-muted-foreground">{t("form.bearerToken")}</div>
             <BearerSecretInput
               value={form.token}
               onChange={(e) => setForm((p) => ({ ...p, token: e.target.value }))}
               placeholder={t("form.tokenPlaceholder")}
               className="max-w-[300px]"
-              inputClassName="w-full max-w-[300px] rounded border border-[#333] bg-[#141414] py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-[#ccc] placeholder:text-[#555] focus:border-[#f7931a]"
+              inputClassName="w-full max-w-[300px] rounded-md border border-input bg-background py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             />
           </div>
           <div>
-            <div className="mb-1 text-[11px] text-[#555]">{t("form.agentRelayId")}</div>
+            <div className="mb-1 text-[11px] text-muted-foreground">{t("form.agentRelayId")}</div>
             <input
               type="text"
               value={form.agent_relay_id}
               onChange={(e) => setForm((p) => ({ ...p, agent_relay_id: e.target.value }))}
               placeholder={t("form.agentRelayIdPlaceholder")}
-              className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+              className="max-w-[300px] w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
             />
           </div>
           <RelayColorPicker
             value={form.color}
             onChange={(hex) => setForm((p) => ({ ...p, color: hex }))}
           />
-          {error && <p className="text-[12px] text-[#f87171]">{error}</p>}
+          {error && <p className="text-[12px] text-destructive">{error}</p>}
           <div className="flex gap-2">
             <button
               type="button"
               onClick={onCancel}
-              className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e]"
+              className="rounded-md border border-border bg-muted/50 px-4 py-1.5 text-[12px] text-foreground hover:bg-muted"
             >
               {t("btnCancel")}
             </button>
@@ -139,7 +139,7 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
               type="button"
               onClick={handleSubmit}
               disabled={saving}
-              className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e] disabled:opacity-50"
+              className="rounded-md border border-primary/40 bg-primary/10 px-4 py-1.5 text-[12px] text-primary hover:bg-primary/15 disabled:opacity-50"
             >
               {saving ? t("btnCreating") : t("btnCreate")}
             </button>
