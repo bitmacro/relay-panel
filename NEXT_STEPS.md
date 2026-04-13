@@ -43,6 +43,10 @@ Updated list reflecting what is already implemented.
 
 - [x] relay-agent: CORS for `relay-panel.bitmacro.io`
 
+### Theme
+
+- [x] **Light / dark mode (panel)** — Relay detail views (Dashboard, Events, Access, Config) follow the active theme: semantic Tailwind/shadcn tokens instead of fixed dark hex colours; kind badges and category labels tuned for both themes. (Global theme toggle was already available; this fixes the “dark cards on light background” mismatch.)
+
 ---
 
 ## Pending
@@ -68,7 +72,6 @@ Updated list reflecting what is already implemented.
 ## Up next / backlog
 
 - [ ] Historical metrics (charts for events and DB size over time)
-- [ ] Dark / light mode
 - [ ] More specific errors (timeout vs relay not found vs network)
 - [ ] Next.js 16 — migrate from deprecated `middleware` convention to `proxy`
 - [ ] relay-api README: endpoints, authentication, environment variables
@@ -81,4 +84,4 @@ Updated list reflecting what is already implemented.
 1. **Documentation** — onboarding and operations
 2. **Domain migration** — if `.cloud` / `.pro` are the target
 3. **Observability** — production alerts
-4. **Polish** — dark/light, richer errors, historical metrics, middleware migration
+4. **Polish** — richer errors, historical metrics, middleware migration

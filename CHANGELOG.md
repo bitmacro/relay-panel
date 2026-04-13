@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-04-12
+
+### Fixed
+
+- **Light theme — relay detail tabs** — Dashboard, Events, Access, and Config no longer use hardcoded dark panels (`#1a1a1a`, etc.); they use semantic tokens (`bg-card`, `border-border`, `text-foreground`, `muted`, inputs) so they match the relay list and landing UI in light mode.
+
+### Changed
+
+- **Kind badges** (`dashboard-kind-i18n`) and **category summary colours** (`nostr-kinds`) — adjusted for readable contrast on light card backgrounds while keeping dark mode appearance.
+
 ## [0.3.0] - 2026-04-12
 
 ### Added
