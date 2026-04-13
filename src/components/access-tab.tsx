@@ -528,7 +528,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     return (
       <div
         key={`${e.pubkey}-${e.source}`}
-        className="flex items-center gap-3 border-b border-[#222] px-3 py-2.5 text-[12px] last:border-b-0"
+        className="flex items-center gap-3 border-b border-border px-3 py-2.5 text-[12px] last:border-b-0"
       >
         <AccessProfileAvatar
           key={`${e.pubkey}:${meta?.picture ?? ""}`}
@@ -538,14 +538,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         />
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-center gap-1">
-            <span className="truncate font-medium text-[#ddd]">
+            <span className="truncate font-medium text-foreground">
               {primaryLabel}
             </span>
             <a
               href={profileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 text-[#666] hover:text-[#f7931a]"
+              className="shrink-0 text-muted-foreground hover:text-primary"
               title={t("titles.viewProfile")}
               onClick={(ev) => ev.stopPropagation()}
             >
@@ -555,14 +555,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           {secondLineNeeded ? (
             <div className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
               {profileName ? (
-                <span className="max-w-full truncate text-[11px] text-[#666]">
+                <span className="max-w-full truncate text-[11px] text-muted-foreground">
                   {npubTrunc}
                 </span>
               ) : null}
               {meta?.nip05 ? (
                 <span
                   title={t("titles.nip05")}
-                  className="inline-flex max-w-[min(100%,12rem)] shrink-0 items-center gap-0.5 rounded border border-sky-500/35 bg-sky-500/10 px-1.5 py-px text-[10px] text-sky-200/90"
+                  className="inline-flex max-w-[min(100%,12rem)] shrink-0 items-center gap-0.5 rounded border border-sky-500/35 bg-sky-500/10 px-1.5 py-px text-[10px] text-sky-800 dark:text-sky-200/90"
                 >
                   <span aria-hidden className="shrink-0 opacity-90">
                     🛡️
@@ -573,7 +573,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               {meta?.lud16 ? (
                 <span
                   title={meta.lud16}
-                  className="inline-flex max-w-[min(100%,11rem)] shrink-0 items-center gap-0.5 text-[11px] text-[#888]"
+                  className="inline-flex max-w-[min(100%,11rem)] shrink-0 items-center gap-0.5 text-[11px] text-muted-foreground"
                 >
                   <span aria-hidden>⚡</span>
                   <span className="min-w-0 truncate">{meta.lud16}</span>
@@ -581,7 +581,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               ) : meta?.lud06 ? (
                 <span
                   title={meta.lud06}
-                  className="inline-flex shrink-0 items-center gap-0.5 text-[11px] text-[#888]"
+                  className="inline-flex shrink-0 items-center gap-0.5 text-[11px] text-muted-foreground"
                 >
                   <span aria-hidden>⚡</span>
                   <span>{t("labels.lnurl")}</span>
@@ -591,13 +591,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className="font-mono text-[11px] text-[#888]">
+          <span className="font-mono text-[11px] text-muted-foreground">
             {truncateHex(e.pubkey)}
           </span>
           <button
             type="button"
             title={t("titles.copyPubkeyHex")}
-            className="rounded p-1 text-[#666] hover:bg-[#2a2a2a] hover:text-[#ccc]"
+            className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             onClick={() => void navigator.clipboard.writeText(e.pubkey)}
           >
             <Copy className="size-3.5" strokeWidth={1.5} />
@@ -606,8 +606,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
         <span
           className={`min-w-[72px] shrink-0 rounded-full px-1.5 py-0.5 text-center text-[10px] font-medium ${
             e.status === "allowed"
-              ? "bg-[#0a2a1a] text-[#4ade80]"
-              : "bg-[#2a0a0a] text-[#f87171]"
+              ? "bg-green-500/15 text-green-700 dark:bg-green-500/20 dark:text-green-400"
+              : "bg-destructive/10 text-destructive"
           }`}
         >
           {e.status === "allowed" ? t("status.allowed") : t("status.blocked")}
@@ -618,7 +618,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               type="button"
               onClick={() => void unblockPublisher(e.pubkey)}
               disabled={actionPending !== null}
-              className="rounded-md border border-[#333] px-2 py-1 text-[10px] text-[#ccc] transition-colors hover:bg-[#2a2a2a] disabled:opacity-50"
+              className="rounded-md border border-border bg-muted/40 px-2 py-1 text-[10px] text-foreground transition-colors hover:bg-muted disabled:opacity-50"
             >
               {t("btnUnblock")}
             </button>
@@ -630,8 +630,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               title={t("titles.removeWhitelist")}
               className={`relative ml-auto block h-4 w-7 shrink-0 cursor-pointer rounded-full border transition-colors disabled:opacity-50 ${
                 e.status === "allowed"
-                  ? "border-[#f7931a] bg-[#f7931a]"
-                  : "border-[#333] bg-[#252525]"
+                  ? "border-primary bg-primary"
+                  : "border-border bg-muted"
               }`}
             >
               <span
@@ -641,7 +641,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               />
             </button>
           ) : (
-            <span className="text-[10px] text-[#555]">{t("dash")}</span>
+            <span className="text-[10px] text-muted-foreground">{t("dash")}</span>
           )}
         </div>
       </div>
@@ -650,9 +650,9 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
   function renderSectionHeader(label: string, count: number) {
     return (
-      <div className="border-b border-[#2a2a2a] bg-[#181818] px-3 py-2">
-        <div className="text-[12px] font-medium text-[#aaa]">{label}</div>
-        <div className="text-[11px] text-[#555]">
+      <div className="border-b border-border bg-muted/50 px-3 py-2">
+        <div className="text-[12px] font-medium text-foreground">{label}</div>
+        <div className="text-[11px] text-muted-foreground">
           {t("section.usersCount", { count })}
         </div>
       </div>
@@ -661,7 +661,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
   function renderAddWhitelistBar() {
     return (
-      <div className="flex gap-2 border-b border-[#222] bg-[#1f1f1f] px-3 py-2.5">
+      <div className="flex gap-2 border-b border-border bg-muted/40 px-3 py-2.5">
         <input
           type="text"
           value={addValue}
@@ -671,13 +671,13 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           }}
           onKeyDown={(ev) => ev.key === "Enter" && void handleAdd()}
           placeholder={t("placeholders.addWhitelist")}
-          className="flex-1 rounded-md border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+          className="flex-1 rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
         />
         <button
           type="button"
           onClick={() => void handleAdd()}
           disabled={actionPending !== null || loading}
-          className="shrink-0 rounded-md border border-[#5a3a0a] px-3 py-1.5 text-[12px] text-[#f7931a] transition-colors hover:bg-[#1e1a0e] disabled:opacity-50"
+          className="shrink-0 rounded-md border border-primary/40 bg-primary/10 px-3 py-1.5 text-[12px] text-primary transition-colors hover:bg-primary/15 disabled:opacity-50"
         >
           {t("btnAdd")}
         </button>
@@ -693,8 +693,8 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   ) {
     if (len === 0) return null;
     return (
-      <div className="flex items-center justify-between border-t border-[#222] px-3 py-2.5">
-        <span className="text-[11px] text-[#555]">
+      <div className="flex items-center justify-between border-t border-border px-3 py-2.5">
+        <span className="text-[11px] text-muted-foreground">
           {t("pagination.showing", {
             start: (pageNum - 1) * PAGE_SIZE + 1,
             end: Math.min(pageNum * PAGE_SIZE, len),
@@ -706,18 +706,18 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             type="button"
             onClick={() => setPageNum((p) => Math.max(1, p - 1))}
             disabled={pageNum <= 1}
-            className="rounded-md border border-[#333] px-2 py-1 text-[11px] text-[#888] hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md border border-border bg-muted/50 px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t("btnPrevious")}
           </button>
-          <span className="px-2 text-[11px] text-[#666]">
+          <span className="px-2 text-[11px] text-muted-foreground">
             {pageNum} / {totalP}
           </span>
           <button
             type="button"
             onClick={() => setPageNum((p) => Math.min(totalP, p + 1))}
             disabled={pageNum >= totalP}
-            className="rounded-md border border-[#333] px-2 py-1 text-[11px] text-[#888] hover:bg-[#252525] disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-md border border-border bg-muted/50 px-2 py-1 text-[11px] text-muted-foreground hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
             {t("btnNext")}
           </button>
@@ -728,7 +728,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
   if (!selectedId) {
     return (
-      <div className="py-4 text-center text-[12px] text-[#666]">
+      <div className="py-4 text-center text-[12px] text-muted-foreground">
         {t("empty.selectRelay")}
       </div>
     );
@@ -736,17 +736,17 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
   return (
     <div className="space-y-0">
-      <div className="mb-3 text-[13px] font-medium text-[#ccc]">
+      <div className="mb-3 text-[13px] font-medium text-foreground">
         {t("title")}
       </div>
       {error && (
-        <div className="mb-3 rounded-md border border-[#5a2a0a] bg-[#2a1510] px-3 py-2 text-[12px] text-[#f87171]">
+        <div className="mb-3 rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-[12px] text-destructive">
           {error}
         </div>
       )}
       {policyFailed && !loading ? (
-        <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] py-8 text-center">
-          <p className="mb-3 text-[13px] text-[#f87171]">{t("errors.loadPolicy")}</p>
+        <div className="rounded-[10px] border border-border bg-card py-8 text-center">
+          <p className="mb-3 text-[13px] text-destructive">{t("errors.loadPolicy")}</p>
           <button
             type="button"
             onClick={() => void fetchData()}
@@ -756,17 +756,17 @@ export function AccessTab({ selectedId }: AccessTabProps) {
           </button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
-          <div className="border-b border-[#222] bg-[#1f1f1f] px-3 py-2">
+        <div className="overflow-hidden rounded-[10px] border border-border bg-card">
+          <div className="border-b border-border bg-muted/40 px-3 py-2">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t("placeholders.search")}
-              className="w-full rounded-md border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+              className="w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
             />
           </div>
-          <div className="flex items-center gap-2.5 border-b border-[#222] bg-[#1f1f1f] px-3 py-2 text-[11px] font-medium text-[#555]">
+          <div className="flex items-center gap-2.5 border-b border-border bg-muted/40 px-3 py-2 text-[11px] font-medium text-muted-foreground">
             <span className="w-9 shrink-0" />
             <span className="min-w-0 flex-1">{t("table.identity")}</span>
             <span className="w-[120px] shrink-0 text-right">{t("table.pubkey")}</span>
@@ -774,7 +774,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
             <span className="min-w-[5.5rem] shrink-0 text-center">{t("table.access")}</span>
           </div>
           {loading ? (
-            <div className="px-3 py-6 text-center text-[12px] text-[#666]">
+            <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
               {t("loading")}
             </div>
           ) : splitSections ? (
@@ -782,7 +782,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               {renderSectionHeader(t("sections.whitelist"), filteredWhitelist.length)}
               {renderAddWhitelistBar()}
               {filteredWhitelist.length === 0 ? (
-                <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                <div className="px-3 py-4 text-center text-[12px] text-muted-foreground">
                   {entries.filter((x) => x.source === "whitelist").length === 0
                     ? t("empty.whitelist")
                     : t("empty.noSearchResults")}
@@ -799,7 +799,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
               {renderSectionHeader(t("sections.publishedEvents"), filteredUsers.length)}
               {filteredUsers.length === 0 ? (
-                <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                <div className="px-3 py-4 text-center text-[12px] text-muted-foreground">
                   {entries.filter((x) => x.source === "users").length === 0
                     ? t("empty.noExtraUsers")
                     : t("empty.noSearchResults")}
@@ -816,7 +816,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
 
               {renderSectionHeader(t("sections.blocked"), filteredBlocked.length)}
               {filteredBlocked.length === 0 ? (
-                <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                <div className="px-3 py-4 text-center text-[12px] text-muted-foreground">
                   {blockedPubkeys.length === 0
                     ? t("empty.noBlockedUsers")
                     : t("empty.noSearchResults")}
@@ -836,7 +836,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
               {renderSectionHeader(t("sections.activeUsers"), filtered.length)}
               {renderAddWhitelistBar()}
               {filtered.length === 0 ? (
-                <div className="px-3 py-6 text-center text-[12px] text-[#555]">
+                <div className="px-3 py-6 text-center text-[12px] text-muted-foreground">
                   {entries.length === 0
                     ? t("empty.noEntries")
                     : t("empty.noSearchResultsForQuery")}
@@ -850,7 +850,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
                 <>
                   {renderSectionHeader(t("sections.blocked"), filteredBlocked.length)}
                   {filteredBlocked.length === 0 ? (
-                    <div className="px-3 py-4 text-center text-[12px] text-[#555]">
+                    <div className="px-3 py-4 text-center text-[12px] text-muted-foreground">
                       {t("empty.noSearchResults")}
                     </div>
                   ) : (

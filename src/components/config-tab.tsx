@@ -218,64 +218,64 @@ export function ConfigTab({
     <div className="space-y-3">
       {/* Edit relay */}
       {selectedId && (
-        <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-          <div className="mb-3 text-[13px] font-medium text-[#ddd]">
+        <div className="rounded-[10px] border border-border bg-card p-4">
+          <div className="mb-3 text-[13px] font-medium text-foreground">
             {t("title")}
           </div>
           {configLoading ? (
-            <p className="text-[12px] text-[#666]">{t("loading")}</p>
+            <p className="text-[12px] text-muted-foreground">{t("loading")}</p>
           ) : config ? (
             <div className="space-y-3">
               <div className="flex flex-wrap gap-2.5">
                 <div className="min-w-[200px] flex-1">
-                  <div className="mb-1 text-[11px] text-[#555]">{t("form.agentUrl")}</div>
+                  <div className="mb-1 text-[11px] text-muted-foreground">{t("form.agentUrl")}</div>
                   <input
                     type="text"
                     value={config.endpoint}
                     onChange={(e) => setConfig((p) => (p ? { ...p, endpoint: e.target.value } : null))}
-                    className="w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc]"
+                    className="w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground shadow-sm"
                   />
                 </div>
                 <div className="min-w-[150px] flex-1">
-                  <div className="mb-1 text-[11px] text-[#555]">{t("form.bearerToken")}</div>
+                  <div className="mb-1 text-[11px] text-muted-foreground">{t("form.bearerToken")}</div>
                   <BearerSecretInput
                     value={config.token}
                     onChange={(e) => setConfig((p) => (p ? { ...p, token: e.target.value } : null))}
                     placeholder={t("form.tokenPlaceholder")}
-                    inputClassName="w-full rounded border border-[#333] bg-[#141414] py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-[#ccc] placeholder:text-[#555] focus:border-[#f7931a]"
+                    inputClassName="w-full rounded-md border border-input bg-background py-1.5 pl-2.5 pr-[4.75rem] text-[12px] text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   />
                 </div>
               </div>
               <div>
-                <div className="mb-1 text-[11px] text-[#555]">{t("form.displayName")}</div>
+                <div className="mb-1 text-[11px] text-muted-foreground">{t("form.displayName")}</div>
                 <input
                   type="text"
                   value={config.name}
                   onChange={(e) => setConfig((p) => (p ? { ...p, name: e.target.value } : null))}
-                  className="max-w-[300px] rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc]"
+                  className="max-w-[300px] rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground shadow-sm"
                 />
               </div>
               <div>
-                <div className="mb-1 text-[11px] text-[#555]">{t("form.agentRelayId")}</div>
+                <div className="mb-1 text-[11px] text-muted-foreground">{t("form.agentRelayId")}</div>
                 <input
                   type="text"
                   value={config.agent_relay_id ?? ""}
                   onChange={(e) => setConfig((p) => (p ? { ...p, agent_relay_id: e.target.value } : null))}
                   placeholder={t("form.agentRelayIdPlaceholder")}
-                  className="max-w-[300px] w-full rounded border border-[#333] bg-[#141414] px-2.5 py-1.5 text-[12px] text-[#ccc] placeholder:text-[#555]"
+                  className="max-w-[300px] w-full rounded-md border border-input bg-background px-2.5 py-1.5 text-[12px] text-foreground placeholder:text-muted-foreground shadow-sm"
                 />
               </div>
               <RelayColorPicker
                 value={config.color ?? ""}
                 onChange={(hex) => setConfig((p) => (p ? { ...p, color: hex } : null))}
               />
-              {error && <p className="text-[12px] text-[#f87171]">{error}</p>}
+              {error && <p className="text-[12px] text-destructive">{error}</p>}
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={handleSave}
                   disabled={saving}
-                  className="rounded border border-[#5a3a0a] px-4 py-1.5 text-[12px] text-[#f7931a] hover:bg-[#1e1a0e] disabled:opacity-50"
+                  className="rounded-md border border-primary/40 bg-primary/10 px-4 py-1.5 text-[12px] text-primary hover:bg-primary/15 disabled:opacity-50"
                 >
                   {saving ? t("btnSaving") : t("btnSave")}
                 </button>
@@ -283,45 +283,45 @@ export function ConfigTab({
                   type="button"
                   onClick={handleDelete}
                   disabled={deleting}
-                  className="rounded border border-[#5a1a1a] px-4 py-1.5 text-[12px] text-[#f87171] hover:bg-[#2a0a0a] disabled:opacity-50"
+                  className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-1.5 text-[12px] text-destructive hover:bg-destructive/10 disabled:opacity-50"
                 >
                   {deleting ? t("btnDeleting") : t("btnDeleteRelay")}
                 </button>
               </div>
             </div>
           ) : (
-            <p className="text-[12px] text-[#666]">{error ?? t("errors.relayNotFound")}</p>
+            <p className="text-[12px] text-muted-foreground">{error ?? t("errors.relayNotFound")}</p>
           )}
         </div>
       )}
 
       {/* Connection status */}
-      <div className="rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-        <div className="mb-3 text-[13px] font-medium text-[#ddd]">
+      <div className="rounded-[10px] border border-border bg-card p-4">
+        <div className="mb-3 text-[13px] font-medium text-foreground">
           {t("connection.title")}
         </div>
         <div className="flex flex-wrap gap-5 text-[12px]">
           <div>
-            <span className="text-[#555]">{t("connection.strfryVersion")} </span>
-            <strong className="text-[#ccc]">
+            <span className="text-muted-foreground">{t("connection.strfryVersion")} </span>
+            <strong className="text-foreground">
               {loading ? "…" : statsVersion ?? t("dash")}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">{t("connection.uptime")} </span>
-            <strong className="text-[#ccc]">
+            <span className="text-muted-foreground">{t("connection.uptime")} </span>
+            <strong className="text-foreground">
               {loading ? "…" : formatUptime(statsUptime)}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">{t("connection.relayAgent")} </span>
+            <span className="text-muted-foreground">{t("connection.relayAgent")} </span>
             <strong
               className={
                 loading
-                  ? "text-[#888]"
+                  ? "text-muted-foreground"
                   : healthOk
-                  ? "text-[#22c55e]"
-                  : "text-[#f87171]"
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-destructive"
               }
             >
               {loading ? "…" : healthOk ? t("connection.online") : t("connection.offline")}
@@ -330,24 +330,24 @@ export function ConfigTab({
               type="button"
               onClick={handleProbe}
               disabled={probing || !selectedId}
-              className="ml-2 rounded border border-[#444] px-2 py-0.5 text-[11px] text-[#888] hover:bg-[#252525] hover:text-[#ccc] disabled:opacity-50"
+              className="ml-2 rounded-md border border-border bg-muted/50 px-2 py-0.5 text-[11px] text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-50"
             >
               {probing ? t("btnProbing") : t("btnProbeConnection")}
             </button>
           </div>
           <div>
-            <span className="text-[#555]">{t("connection.endpoint")} </span>
-            <strong className="font-mono text-[11px] text-[#666]">
+            <span className="text-muted-foreground">{t("connection.endpoint")} </span>
+            <strong className="font-mono text-[11px] text-muted-foreground">
               {endpoint ?? t("dash")}
             </strong>
           </div>
         </div>
         {probeResult && (
-          <div className="mt-3 rounded border border-[#2a2a2a] bg-[#141414] px-2.5 py-1.5 text-[11px]">
+          <div className="mt-3 rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[11px]">
             {probeResult.ok ? (
-              <span className="text-[#22c55e]">{getProbeMessage(probeResult)}</span>
+              <span className="text-green-600 dark:text-green-400">{getProbeMessage(probeResult)}</span>
             ) : (
-              <span className="text-[#f87171]">{getProbeMessage(probeResult)}</span>
+              <span className="text-destructive">{getProbeMessage(probeResult)}</span>
             )}
           </div>
         )}

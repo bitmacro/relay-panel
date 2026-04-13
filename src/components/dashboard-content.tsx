@@ -240,8 +240,8 @@ export function DashboardContent({
     const meta = kindBadgeMetaI18n(row.kind, t);
     const rk = opts?.reactKey ?? String(row.kind);
     const trClass = opts?.nested
-      ? "border-b border-[#222] bg-[#151515] transition-colors last:border-b-0 hover:bg-[#1c1c1c] cursor-help"
-      : "border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#1f1f1f] cursor-help";
+      ? "border-b border-border bg-muted/40 transition-colors last:border-b-0 hover:bg-muted/60 cursor-help"
+      : "border-b border-border transition-colors last:border-b-0 hover:bg-muted/40 cursor-help";
     const padFirst = opts?.nested ? "pl-8" : "";
 
     return (
@@ -261,16 +261,16 @@ export function DashboardContent({
                 {meta.label}
               </button>
             </td>
-            <td className="min-w-0 break-words px-2.5 py-2 text-[#ccc] align-top leading-snug">
+            <td className="min-w-0 break-words px-2.5 py-2 text-foreground align-top leading-snug">
               {kindLongDescription(row.kind, t)}
             </td>
-            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">
+            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-muted-foreground">
               {kindNipReference(row.kind)}
             </td>
-            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+            <td className="px-2.5 py-2 text-right text-foreground align-top tabular-nums">
               {row.events.toLocaleString(nfLocale)}
             </td>
-            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+            <td className="px-2.5 py-2 text-right text-foreground align-top tabular-nums">
               {row.pct}
             </td>
           </tr>
@@ -324,7 +324,7 @@ export function DashboardContent({
           <tr
             role="button"
             tabIndex={0}
-            className="border-b border-[#222] transition-colors last:border-b-0 hover:bg-[#252525] cursor-pointer"
+            className="border-b border-border transition-colors last:border-b-0 hover:bg-muted/50 cursor-pointer"
             onClick={() => toggleKindGroup(expandId)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " ") {
@@ -335,7 +335,7 @@ export function DashboardContent({
           >
             <td className="px-2.5 py-2 align-top">
               <div className="flex items-center gap-1.5">
-                <span className="w-3 shrink-0 text-[10px] text-[#666]" aria-hidden>
+                <span className="w-3 shrink-0 text-[10px] text-muted-foreground" aria-hidden>
                   {expanded ? "▼" : "▶"}
                 </span>
                 <span
@@ -345,14 +345,14 @@ export function DashboardContent({
                 </span>
               </div>
             </td>
-            <td className="min-w-0 break-words px-2.5 py-2 text-[#ccc] align-top leading-snug">
+            <td className="min-w-0 break-words px-2.5 py-2 text-foreground align-top leading-snug">
               {description}
             </td>
-            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-[#888]">{nipCol}</td>
-            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+            <td className="px-2.5 py-2 align-top font-mono text-[11px] text-muted-foreground">{nipCol}</td>
+            <td className="px-2.5 py-2 text-right text-foreground align-top tabular-nums">
               {row.events.toLocaleString(nfLocale)}
             </td>
-            <td className="px-2.5 py-2 text-right text-[#ccc] align-top tabular-nums">
+            <td className="px-2.5 py-2 text-right text-foreground align-top tabular-nums">
               {row.pct}
             </td>
           </tr>
@@ -368,62 +368,62 @@ export function DashboardContent({
     <div className="space-y-4">
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-          <div className="text-[11px] text-[#555]">{t("metrics.totalEvents")}</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">
+        <div className="rounded-lg border border-border bg-card p-3">
+          <div className="text-[11px] text-muted-foreground">{t("metrics.totalEvents")}</div>
+          <div className="text-xl font-semibold text-card-foreground">
             {loading ? "…" : formatNumber(stats?.total_events)}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">strfry</div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">strfry</div>
         </div>
-        <div className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3">
-          <div className="text-[11px] text-[#555]">{t("metrics.dbSize")}</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">
+        <div className="rounded-lg border border-border bg-card p-3">
+          <div className="text-[11px] text-muted-foreground">{t("metrics.dbSize")}</div>
+          <div className="text-xl font-semibold text-card-foreground">
             {loading ? "…" : stats?.db_size ?? "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">LMDB</div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">LMDB</div>
         </div>
         <div
-          className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
+          className="rounded-lg border border-border bg-card p-3"
           title={t("metrics.uniquePubkeysTitle")}
         >
-          <div className="text-[11px] text-[#555]">{t("metrics.uniquePubkeys")}</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">
+          <div className="text-[11px] text-muted-foreground">{t("metrics.uniquePubkeys")}</div>
+          <div className="text-xl font-semibold text-card-foreground">
             {pubkeysCountLoading
               ? "…"
               : uniquePubkeysCount != null
                 ? formatNumber(uniquePubkeysCount)
                 : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.uniquePubkeysHint")}</div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">{t("metrics.uniquePubkeysHint")}</div>
         </div>
         <div
-          className="rounded-lg border border-[#2a2a2a] bg-[#1f1f1f] p-3"
+          className="rounded-lg border border-border bg-card p-3"
           title={t("metrics.blockedTitle")}
         >
-          <div className="text-[11px] text-[#555]">{t("metrics.blocked")}</div>
-          <div className="text-xl font-semibold text-[#f0f0f0]">
+          <div className="text-[11px] text-muted-foreground">{t("metrics.blocked")}</div>
+          <div className="text-xl font-semibold text-card-foreground">
             {blockedCountLoading
               ? "…"
               : blockedCount != null
                 ? formatNumber(blockedCount)
                 : "—"}
           </div>
-          <div className="mt-0.5 text-[11px] text-[#444]">{t("metrics.whitelistHint")}</div>
+          <div className="mt-0.5 text-[11px] text-muted-foreground">{t("metrics.whitelistHint")}</div>
         </div>
       </div>
 
       {/* Category summary */}
       <div>
-        <div className="mb-2.5 text-[13px] font-medium text-[#ccc]">
+        <div className="mb-2.5 text-[13px] font-medium text-foreground">
           {t("categorySummary")}
         </div>
-        <div className="overflow-hidden rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a] px-3 py-3">
+        <div className="overflow-hidden rounded-[10px] border border-border bg-card px-3 py-3">
           {kindLoading ? (
-            <p className="text-[12px] text-[#666]">{tc("loading")}</p>
+            <p className="text-[12px] text-muted-foreground">{tc("loading")}</p>
           ) : kindError ? (
-            <p className="text-[12px] text-[#f87171]">{kindError}</p>
+            <p className="text-[12px] text-destructive">{kindError}</p>
           ) : categorySummary.total === 0 ? (
-            <p className="text-[12px] text-[#555]">{t("noDataSelect")}</p>
+            <p className="text-[12px] text-muted-foreground">{t("noDataSelect")}</p>
           ) : (
             <ul className="space-y-2.5">
               {CATEGORY_SUMMARY_ORDER.map((cat) => {
@@ -444,15 +444,15 @@ export function DashboardContent({
                     >
                       {t(`category.${cat}`)}
                     </span>
-                    <span className="w-12 shrink-0 text-right tabular-nums text-[#ccc]">
+                    <span className="w-12 shrink-0 text-right tabular-nums text-foreground">
                       {n.toLocaleString(nfLocale)}
                     </span>
-                    <span className="w-12 shrink-0 text-right tabular-nums text-[#555]">
+                    <span className="w-12 shrink-0 text-right tabular-nums text-muted-foreground">
                       {pct.toFixed(1)}%
                     </span>
-                    <div className="h-2 min-w-[120px] flex-1 overflow-hidden rounded bg-[#252525]">
+                    <div className="h-2 min-w-[120px] flex-1 overflow-hidden rounded bg-muted">
                       <div
-                        className="h-full rounded bg-[#3a3a3a]"
+                        className="h-full rounded bg-primary/35 dark:bg-foreground/25"
                         style={{ width: `${barWidthPct}%` }}
                       />
                     </div>
@@ -462,7 +462,7 @@ export function DashboardContent({
             </ul>
           )}
         </div>
-        <p className="mt-1.5 text-[11px] text-[#555]">
+        <p className="mt-1.5 text-[11px] text-muted-foreground">
           {kindActivity.length > 0
             ? t("sampleFooter", {
                 count: categorySummary.total.toLocaleString(nfLocale),
@@ -474,18 +474,18 @@ export function DashboardContent({
       {/* Activity by kind */}
       <div>
         <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-          <div className="text-[13px] font-medium text-[#ccc]">{t("kindActivity")}</div>
+          <div className="text-[13px] font-medium text-foreground">{t("kindActivity")}</div>
           {kindActivity.length > 0 && !kindLoading && !kindError ? (
             <button
               type="button"
-              className="shrink-0 rounded-md border border-[#333] bg-[#252525] px-2.5 py-1 text-[11px] font-medium text-[#ccc] transition-colors hover:bg-[#2a2a2a]"
+              className="shrink-0 rounded-md border border-border bg-muted/80 px-2.5 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-muted"
               onClick={() => setKindTableExpanded((v) => !v)}
             >
               {kindTableExpanded ? t("showGrouped") : t("showAllKinds")}
             </button>
           ) : null}
         </div>
-        <div className="overflow-x-auto rounded-[10px] border border-[#2a2a2a] bg-[#1a1a1a]">
+        <div className="overflow-x-auto rounded-[10px] border border-border bg-card">
           <TooltipProvider delayDuration={300}>
             <table className="w-full min-w-[640px] table-fixed border-collapse text-[12px]">
               <colgroup>
@@ -497,19 +497,19 @@ export function DashboardContent({
               </colgroup>
               <thead>
                 <tr>
-                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                     {t("colKind")}
                   </th>
-                  <th className="min-w-0 border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="min-w-0 border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                     {t("colDescription")}
                   </th>
-                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-left text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-border bg-muted/60 px-2.5 py-1.5 text-left text-[11px] font-medium text-muted-foreground">
                     {t("colNip")}
                   </th>
-                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-border bg-muted/60 px-2.5 py-1.5 text-right text-[11px] font-medium text-muted-foreground">
                     {t("colEvents")}
                   </th>
-                  <th className="border-b border-[#252525] bg-[#1f1f1f] px-2.5 py-1.5 text-right text-[11px] font-medium text-[#555]">
+                  <th className="border-b border-border bg-muted/60 px-2.5 py-1.5 text-right text-[11px] font-medium text-muted-foreground">
                     {t("colPct")}
                   </th>
                 </tr>
@@ -519,7 +519,7 @@ export function DashboardContent({
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-2.5 py-6 text-center text-[12px] text-[#666]"
+                      className="px-2.5 py-6 text-center text-[12px] text-muted-foreground"
                     >
                       {tc("loading")}
                     </td>
@@ -527,14 +527,14 @@ export function DashboardContent({
                 ) : kindError ? (
                   <tr>
                     <td colSpan={5} className="px-2.5 py-6 text-center">
-                      <p className="text-[12px] text-[#f87171]">{kindError}</p>
+                      <p className="text-[12px] text-destructive">{kindError}</p>
                     </td>
                   </tr>
                 ) : kindActivity.length === 0 ? (
                   <tr>
                     <td
                       colSpan={5}
-                      className="px-2.5 py-6 text-center text-[12px] text-[#555]"
+                      className="px-2.5 py-6 text-center text-[12px] text-muted-foreground"
                     >
                       {t("noDataSelect")}
                     </td>
@@ -564,7 +564,7 @@ export function DashboardContent({
             </table>
           </TooltipProvider>
         </div>
-        <p className="mt-1.5 text-[11px] text-[#555]">
+        <p className="mt-1.5 text-[11px] text-muted-foreground">
           {kindActivity.length > 0
             ? t("sampleFooterKinds", {
                 count: kindSampleTotal.toLocaleString(nfLocale),
@@ -626,13 +626,13 @@ export function DashboardContent({
       </Sheet>
 
       {/* Connection status */}
-      <div className="rounded-lg border border-[#2a2a2a] bg-[#1a1a1a] p-4">
-        <div className="mb-3 text-[13px] font-medium text-[#ddd]">{t("connection")}</div>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="mb-3 text-[13px] font-medium text-foreground">{t("connection")}</div>
         <div className="flex flex-wrap gap-5 text-sm">
           <div className="min-w-0 max-w-[20rem]">
             <div>
-              <span className="text-[#555]">{t("strfryVersion")} </span>
-              <strong className="text-[#ccc]">
+              <span className="text-muted-foreground">{t("strfryVersion")} </span>
+              <strong className="text-foreground">
                 {loading
                   ? "…"
                   : (health?.strfry_version &&
@@ -642,31 +642,31 @@ export function DashboardContent({
                     "—"}
               </strong>
             </div>
-            <p className="mt-1 text-[10px] leading-snug text-[#555]">
+            <p className="mt-1 text-[10px] leading-snug text-muted-foreground">
               {t("strfryVersionHint")}
             </p>
           </div>
           {!loading && health?.status === "ok" && health?.version ? (
             <div>
-              <span className="text-[#555]">{t("relayAgentPackageVersion")} </span>
-              <strong className="text-[#ccc]">{health.version}</strong>
+              <span className="text-muted-foreground">{t("relayAgentPackageVersion")} </span>
+              <strong className="text-foreground">{health.version}</strong>
             </div>
           ) : null}
           <div>
-            <span className="text-[#555]">{t("uptime")} </span>
-            <strong className="text-[#ccc]">
+            <span className="text-muted-foreground">{t("uptime")} </span>
+            <strong className="text-foreground">
               {loading ? "…" : formatUptime(stats?.uptime)}
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">{t("relayAgent")} </span>
+            <span className="text-muted-foreground">{t("relayAgent")} </span>
             <strong
               className={
                 health?.status === "ok"
-                  ? "text-[#22c55e]"
+                  ? "text-green-600 dark:text-green-400"
                   : health?.error
-                  ? "text-[#f87171]"
-                  : "text-[#ccc]"
+                  ? "text-destructive"
+                  : "text-foreground"
               }
               title={health?.detail ?? health?.error}
             >
@@ -678,8 +678,8 @@ export function DashboardContent({
             </strong>
           </div>
           <div>
-            <span className="text-[#555]">{t("endpoint")} </span>
-            <strong className="font-mono text-[11px] text-[#666]">
+            <span className="text-muted-foreground">{t("endpoint")} </span>
+            <strong className="font-mono text-[11px] text-muted-foreground">
               {selectedRelay?.endpoint ?? "—"}
             </strong>
           </div>

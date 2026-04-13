@@ -43,11 +43,11 @@ export const CATEGORY_LABELS: Record<KindCategory, string> = {
 };
 
 export const CATEGORY_COLORS: Record<KindCategory, string> = {
-  content: "text-blue-400",
-  dms: "text-purple-400",
+  content: "text-blue-700 dark:text-blue-400",
+  dms: "text-purple-700 dark:text-purple-400",
   ephemeral: "text-muted-foreground",
-  replaceable: "text-yellow-400",
-  system: "text-green-400",
+  replaceable: "text-yellow-700 dark:text-yellow-400",
+  system: "text-green-700 dark:text-green-400",
 };
 
 /** Order for dashboard summary rows */

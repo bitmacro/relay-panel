@@ -51,7 +51,7 @@ export function BearerSecretInput({
         autoComplete="off"
         spellCheck={false}
         className={cn(
-          "min-h-10 w-full rounded-md border border-border bg-secondary py-2 pl-3 pr-[4.75rem] text-[13px] font-mono text-foreground outline-none focus:border-[#f7931a] disabled:opacity-50",
+          "min-h-10 w-full rounded-md border border-border bg-secondary py-2 pl-3 pr-[4.75rem] text-[13px] font-mono text-foreground outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50",
           inputClassName
         )}
       />
@@ -65,7 +65,7 @@ export function BearerSecretInput({
           title={t("copy")}
         >
           {copied ? (
-            <Check className="size-4 text-[#22c55e]" aria-hidden />
+            <Check className="size-4 text-green-600 dark:text-green-400" aria-hidden />
           ) : (
             <ClipboardCopy className="size-4" aria-hidden />
           )}
