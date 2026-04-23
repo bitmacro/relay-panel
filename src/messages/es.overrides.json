@@ -281,9 +281,9 @@
     },
     "footer": {
       "brand": "Relay Manager",
-      "bitmacro": "BitMacro — herramientas Bitcoin, Lightning y Nostr ↗",
-      "ecosystem": "Resumen del ecosistema →",
-      "techDocs": "Docs técnicos (NIP-07 · NIP-46) ↗",
+      "bitmacro": "BitMacro↗",
+      "ecosystem": "Relay-Manager↗",
+      "techDocs": "Docs↗",
       "copyright": "© 2026 BitMacro"
     }
   },

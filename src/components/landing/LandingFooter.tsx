@@ -1,6 +1,5 @@
 "use client";
 
-import { Github } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -8,7 +7,7 @@ import { startTransition, useEffect, useState } from "react";
 import { PANEL_PACKAGE_VERSION } from "@/lib/panel-version";
 
 const footerNavLink =
-  "footer-link inline-flex min-h-11 items-center justify-center rounded-md px-2 touch-manipulation sm:min-h-0 sm:inline sm:px-0";
+  "footer-link inline-flex items-center justify-center rounded-md px-1.5 py-0.5 text-xs leading-none touch-manipulation sm:px-0 sm:py-0";
 
 export function LandingFooter() {
   const t = useTranslations("landing.footer");
@@ -80,7 +79,7 @@ export function LandingFooter() {
         </div>
 
         <nav
-          className="flex flex-col items-stretch gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-3 sm:gap-y-2"
+          className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-3 sm:gap-y-2"
           aria-label={t("brand")}
         >
           <a href="https://bitmacro.io" className={footerNavLink}>
@@ -122,11 +121,10 @@ export function LandingFooter() {
             href="https://github.com/bitmacro/relay-connect"
             target="_blank"
             rel="noreferrer"
-            title="@bitmacro/relay-connect (BitMacro Connect SDK)"
-            className={`${footerNavLink} gap-1 font-mono`}
+            title="relay-connect (BitMacro Connect SDK)"
+            className={footerNavLink}
           >
-            <Github className="size-3.5 shrink-0 opacity-80" aria-hidden />
-            <span className="break-all text-left sm:break-normal">@bitmacro/relay-connect</span>
+            relay-connect ↗
           </Link>
         </nav>
         <p className="text-center text-[12px] text-muted-foreground">{t("copyright")}</p>
