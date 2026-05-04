@@ -20,7 +20,71 @@ interface RelayInput {
 interface RelayRow extends RelayInput {
   total_events?: number | null;
   db_size?: string | null;
+  /** Tooltip quando stats falhou (503/504/502 após retry) — não confuse com "zero eventos" */
+  statsError?: string;
   status: RelayStatus;
+}
+
+type StatsPayload = {
+  total_events: number | null;
+  db_size: string | null;
+  statsError?: string;
+};
+
+async function fetchRelayStats(relayId: string): Promise<StatsPayload> {
+  const path = `/api/relay/${relayId}/stats`;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch(path, { cache: "no-store" });
+      const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
+
+      if (r.ok) {
+        const te = j.total_events;
+        const total_events =
+          typeof te === "number" && Number.isFinite(te) ? te : null;
+        const db = j.db_size;
+        const db_size = typeof db === "string" && db.trim() ? db.trim() : null;
+        return { total_events, db_size };
+      }
+
+      const errParts = [j.error, j.detail].filter(
+        (x): x is string => typeof x === "string" && x.length > 0,
+      );
+      const hint =
+        errParts.join(": ").slice(0, 480) ||
+        `${r.status} ${r.statusText || ""}`.trim();
+
+      const retryable =
+        attempt === 0 && (r.status === 502 || r.status === 503 || r.status === 504);
+      if (retryable) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        continue;
+      }
+
+      return {
+        total_events: null,
+        db_size: null,
+        statsError: hint || "stats_unavailable",
+      };
+    } catch {
+      if (attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        continue;
+      }
+      return {
+        total_events: null,
+        db_size: null,
+        statsError: "network_error",
+      };
+    }
+  }
+
+  return {
+    total_events: null,
+    db_size: null,
+    statsError: "stats_unavailable",
+  };
 }
 
 interface RelayTableProps {
@@ -46,9 +110,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
   useEffect(() => {
     for (const relay of initialRelays) {
       Promise.all([
-        fetch(`/api/relay/${relay.id}/stats`).then((r) =>
-          r.ok ? (r.json() as Promise<{ total_events?: number; db_size?: string }>) : Promise.resolve({})
-        ),
+        fetchRelayStats(relay.id),
         fetch(`/api/relay/${relay.id}/health`).then((r) =>
           r.ok ? (r.json() as Promise<{ status?: string; error?: string }>) : Promise.resolve({})
         ),
@@ -65,8 +127,9 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
               row.id === relay.id
                 ? {
                     ...row,
-                    total_events: (stats as { total_events?: number })?.total_events ?? null,
-                    db_size: (stats as { db_size?: string })?.db_size ?? null,
+                    total_events: stats.total_events,
+                    db_size: stats.db_size,
+                    statsError: stats.statsError,
                     status,
                   }
                 : row
@@ -76,7 +139,13 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
         .catch(() => {
           setRows((prev) =>
             prev.map((row) =>
-              row.id === relay.id ? { ...row, status: "offline" as const } : row
+              row.id === relay.id
+                ? {
+                    ...row,
+                    status: "offline" as const,
+                    statsError: "network_error",
+                  }
+                : row
             )
           );
         });
@@ -213,10 +282,16 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
                       <td className="px-4 py-3.5">
                         <RelayStatusBadge status={relay.status} />
                       </td>
-                      <td className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono">
+                      <td
+                        className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono"
+                        title={relay.statsError}
+                      >
                         {formatNumber(relay.total_events, locale)}
                       </td>
-                      <td className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono">
+                      <td
+                        className="px-4 py-3.5 text-[12px] text-muted-foreground font-mono"
+                        title={relay.statsError}
+                      >
                         {relay.db_size ?? "—"}
                       </td>
                       <td className="px-4 py-3.5">

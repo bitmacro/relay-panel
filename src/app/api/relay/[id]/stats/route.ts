@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { apiUrl } from "@/lib/api";
+import { RELAY_STATS_API_PROXY_MS } from "@/lib/relay-stats-timeout";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -21,7 +22,7 @@ export async function GET(
       "X-Provider-User-Id": providerUserId,
     },
     cache: "no-store",
-    signal: AbortSignal.timeout(14_000),
+    signal: AbortSignal.timeout(RELAY_STATS_API_PROXY_MS),
   }).catch((err) => {
     const isTimeout = err instanceof Error && err.name === "AbortError";
     return new Response(

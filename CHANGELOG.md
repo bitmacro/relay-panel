@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-05-04
+
+### Fixed
+
+- **Lista `/relays` — métricas "—":** timeouts do fluxo **`GET /relay/:id/stats`** estavam alinhados a **14 s**, enquanto o **relay-agent** pode gastar até **~60 s** no `strfry scan`/LMDB; o público falhava com mais frequência → **Painel faz retry** uma vez em 503/504/502 e mostra **`title`** na célula com o erro da API.
+- **Rota `api/relay/[id]/stats`:** **`AbortSignal` ~95 s** (`RELAY_STATS_API_PROXY_MS`), acima da janela do agent.
+
+### Changed
+
+- **`src/lib/relay-stats-timeout.ts`** — constante partilhada para o próximo servidor de métricas manter valores coerentes.
+
+### Related
+
+- Deploy **relay-api** **≥ 0.1.1** em conjunto (`GET /relay/:id/stats` proxy **90 s**); sem isso o painel continua limitado pela API na Vercel.
+
 ## [0.3.0] - 2026-04-12
 
 ### Added
