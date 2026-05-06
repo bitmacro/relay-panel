@@ -76,9 +76,14 @@ function readStoredPubkeyHex(userId: string | null): string | null {
 interface EventsTabProps {
   selectedId: string | null;
   refreshTrigger?: number;
+  agentManaged?: boolean;
 }
 
-export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
+export function EventsTab({
+  selectedId,
+  refreshTrigger,
+  agentManaged = true,
+}: EventsTabProps) {
   const t = useTranslations("EventsTab");
   const td = useTranslations("dashboard");
   const { data: session } = useSession();
@@ -192,6 +197,14 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
       queueMicrotask(() => setEvents([]));
       return;
     }
+    if (!agentManaged) {
+      queueMicrotask(() => {
+        setEvents([]);
+        setError(null);
+        setLoading(false);
+      });
+      return;
+    }
     queueMicrotask(() => {
       setLoading(true);
       setError(null);
@@ -222,7 +235,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         setError(formatEventsError(err));
       })
       .finally(() => setLoading(false));
-  }, [selectedId, filterTime, authorHexForApi, refreshTrigger, formatEventsError]);
+  }, [selectedId, filterTime, authorHexForApi, refreshTrigger, formatEventsError, agentManaged]);
 
   const resolveDisplayPubkey = useCallback((hex: string) => {
     const meta = profileCacheRef.current.get(hex);
@@ -235,7 +248,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
   }, []);
 
   useEffect(() => {
-    if (!selectedId || filteredEvents.length === 0) return;
+    if (!selectedId || !agentManaged || filteredEvents.length === 0) return;
     const pubkeys = [...new Set(filteredEvents.map((e) => e.pubkey))];
     const need = pubkeys.filter((pk) => !profileCacheRef.current.has(pk));
     if (need.length === 0) return;
@@ -282,7 +295,7 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, filteredEvents, refreshTrigger]);
+  }, [selectedId, filteredEvents, refreshTrigger, agentManaged]);
 
   function handleDelete(id: string) {
     setEvents((prev) => prev.filter((e) => e.id !== id));
@@ -374,6 +387,12 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
 
   return (
     <div className="space-y-3">
+      {selectedId && !agentManaged ? (
+        <div className="rounded-lg border border-border bg-secondary/40 px-4 py-8 text-center text-[13px] text-muted-foreground leading-relaxed">
+          {t("noAgent")}
+        </div>
+      ) : (
+        <>
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[13px] font-medium text-foreground">{t("title")}</span>
         <div
@@ -641,11 +660,14 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
         </div>
       )}
 
-      {!loading && events.length === 0 && !error && (
-        <p className="py-8 text-center text-[12px] text-muted-foreground">
-          {t("empty.noEvents")}
-        </p>
-      )}
+      {!loading &&
+        events.length === 0 &&
+        !error &&
+        agentManaged && (
+          <p className="py-8 text-center text-[12px] text-muted-foreground">
+            {t("empty.noEvents")}
+          </p>
+        )}
 
       <Sheet
         open={detailEvent !== null}
@@ -770,6 +792,8 @@ export function EventsTab({ selectedId, refreshTrigger }: EventsTabProps) {
           )}
         </SheetContent>
       </Sheet>
+        </>
+      )}
 
       <AlertDialog
         open={ocultarConfirm !== null}

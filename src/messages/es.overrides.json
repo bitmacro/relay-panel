@@ -49,12 +49,14 @@
     "colDbSize": "Tamaño BD",
     "emptySearch": "Ningún relay coincide con la búsqueda.",
     "empty": "Añade tu primer relay.",
-    "manage": "Gestionar"
+    "manage": "Gestionar",
+    "catalogOnlyHint": "Solo referencia — sin relay-agent configurado."
   },
   "relayStatus": {
     "online": "En línea",
     "unhealthy": "No saludable",
-    "offline": "Sin conexión"
+    "offline": "Sin conexión",
+    "noAgent": "Solo catálogo"
   },
   "newRelay": {
     "title": "Nuevo relay",
@@ -69,7 +71,10 @@
     "agentRelayPlaceholder": "p. ej. public",
     "submit": "Añadir relay",
     "submitting": "Creando…",
-    "errRequired": "Completa nombre, URL del agente, token y agent relay ID",
+    "errRequired": "Indica un nombre visible.",
+    "errAgentPair": "La URL del agente y el bearer token deben rellenarse ambos para un relay gestionado por agente.",
+    "optionalAgentHint": "(opcional)",
+    "errAgentRelayNeedsAgent": "Agent Relay ID solo aplica con URL del agente y token.",
     "errTokenLen": "El token debe tener al menos 8 caracteres",
     "errCreate": "No se pudo crear el relay"
   },
@@ -113,6 +118,9 @@
     "sheetDescription": "Descripción",
     "sheetNote": "Nota",
     "connection": "Estado de la conexión",
+    "noAgent": {
+      "banner": "Este relay es solo catálogo: no hay URL de relay-agent almacenada. Métricas, muestras de eventos y políticas en este panel requieren credenciales de relay-agent."
+    },
     "strfryVersion": "strfry CLI (relay-agent):",
     "strfryVersionHint": "Versión del binario strfry incluido en relay-agent. Los contenedores del relay pueden usar otra versión.",
     "relayAgentPackageVersion": "Paquete relay-agent:",

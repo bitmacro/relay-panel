@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { RelayStatusBadge } from "./RelayStatusBadge";
 import { NewRelayModal } from "./NewRelayModal";
 
-type RelayStatus = "online" | "unhealthy" | "offline" | "loading";
+type RelayStatus = "online" | "unhealthy" | "offline" | "loading" | "noAgent";
 
 interface RelayInput {
   id: string;
@@ -22,6 +22,8 @@ interface RelayRow extends RelayInput {
   db_size?: string | null;
   /** Tooltip quando stats falhou (503/504/502 após retry) — não confuse com "zero eventos" */
   statsError?: string;
+  /** Relay apenas em catálogo (sem relay-agent no painel) */
+  noAgent?: boolean;
   status: RelayStatus;
 }
 
@@ -29,6 +31,7 @@ type StatsPayload = {
   total_events: number | null;
   db_size: string | null;
   statsError?: string;
+  noAgent?: boolean;
 };
 
 async function fetchRelayStats(relayId: string): Promise<StatsPayload> {
@@ -40,6 +43,13 @@ async function fetchRelayStats(relayId: string): Promise<StatsPayload> {
       const j = (await r.json().catch(() => ({}))) as Record<string, unknown>;
 
       if (r.ok) {
+        if (j.no_agent === true) {
+          return {
+            total_events: null,
+            db_size: null,
+            noAgent: true,
+          };
+        }
         const te = j.total_events;
         const total_events =
           typeof te === "number" && Number.isFinite(te) ? te : null;
@@ -109,19 +119,42 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
   // Fetch stats + health for each relay client-side
   useEffect(() => {
     for (const relay of initialRelays) {
+      if (!relay.endpoint?.trim()) {
+        setRows((prev) =>
+          prev.map((row) =>
+            row.id === relay.id
+              ? {
+                  ...row,
+                  total_events: null,
+                  db_size: null,
+                  statsError: undefined,
+                  noAgent: true,
+                  status: "noAgent",
+                }
+              : row
+          )
+        );
+        continue;
+      }
+
       Promise.all([
         fetchRelayStats(relay.id),
         fetch(`/api/relay/${relay.id}/health`).then((r) =>
-          r.ok ? (r.json() as Promise<{ status?: string; error?: string }>) : Promise.resolve({})
+          r.ok ? (r.json() as Promise<{ status?: string; error?: string; no_agent?: boolean }>) : Promise.resolve({})
         ),
       ])
         .then(([stats, health]) => {
-          const status: RelayStatus =
-            (health as { status?: string })?.status === "ok"
-              ? "online"
-              : (health as { error?: string })?.error
-              ? "unhealthy"
-              : "offline";
+          const ha = health as { status?: string; error?: string; no_agent?: boolean };
+          let status: RelayStatus;
+          if (stats.noAgent || ha.no_agent) {
+            status = "noAgent";
+          } else if (ha.status === "ok") {
+            status = "online";
+          } else if (ha.error) {
+            status = "unhealthy";
+          } else {
+            status = "offline";
+          }
           setRows((prev) =>
             prev.map((row) =>
               row.id === relay.id
@@ -129,7 +162,8 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
                     ...row,
                     total_events: stats.total_events,
                     db_size: stats.db_size,
-                    statsError: stats.statsError,
+                    statsError: stats.noAgent ? undefined : stats.statsError,
+                    noAgent: stats.noAgent || ha.no_agent === true || undefined,
                     status,
                   }
                 : row

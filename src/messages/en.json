@@ -49,12 +49,14 @@
     "colDbSize": "DB size",
     "emptySearch": "No relays match your search.",
     "empty": "Add your first relay.",
-    "manage": "Manage"
+    "manage": "Manage",
+    "catalogOnlyHint": "Listed for reference — no relay-agent configured."
   },
   "relayStatus": {
     "online": "Online",
     "unhealthy": "Unhealthy",
-    "offline": "Offline"
+    "offline": "Offline",
+    "noAgent": "Catalogue only"
   },
   "newRelay": {
     "title": "New relay",
@@ -69,7 +71,10 @@
     "agentRelayPlaceholder": "e.g. public",
     "submit": "Add relay",
     "submitting": "Creating…",
-    "errRequired": "Fill in name, agent URL, token, and agent relay ID",
+    "errRequired": "Enter a display name.",
+    "errAgentPair": "Agent URL and bearer token must both be filled for an agent-managed relay.",
+    "optionalAgentHint": "(optional)",
+    "errAgentRelayNeedsAgent": "Agent Relay ID only applies when an agent URL and token are set.",
     "errTokenLen": "Token must be at least 8 characters",
     "errCreate": "Could not create relay"
   },
@@ -113,6 +118,9 @@
     "sheetDescription": "Description",
     "sheetNote": "Note",
     "connection": "Connection status",
+    "noAgent": {
+      "banner": "This relay is catalogue-only — no relay-agent URL is stored. Metrics, event samples, and policy tools in this panel only work when relay-agent credentials are configured."
+    },
     "strfryVersion": "strfry CLI (relay-agent):",
     "strfryVersionHint": "Version of the strfry binary bundled in relay-agent. Relay containers may run a different version.",
     "relayAgentPackageVersion": "relay-agent package:",
@@ -434,10 +442,13 @@
       "save": "Error saving",
       "delete": "Error deleting",
       "relayNotFound": "Relay not found.",
-      "agentRelayIdRequired": "Agent Relay ID is required (RELAY_INSTANCES id)."
+      "agentRelayIdRequired": "Agent Relay ID is required when an agent URL and token are set (RELAY_INSTANCES id).",
+      "agentRelayWithoutAgent": "Clear Agent Relay ID if you remove the agent URL or token.",
+      "tokenMinLength": "Token must be at least 8 characters when agent credentials are set."
     },
     "probe": {
       "ok": "Connection OK{elapsed}",
+      "noAgent": "No relay-agent is configured for this row{elapsed}. Add an agent URL and token to probe connectivity.",
       "handlerTimeout": "The API proxy took too long to respond{elapsed}. Check latency to relay-api.",
       "relayNotFound": "Relay not found in database{elapsed}. Confirm the relay is configured in relay_configs.",
       "networkError": "Network error{elapsed}: {detail}.",
@@ -465,7 +476,10 @@
     "btnCreate": "Create",
     "btnCreating": "Creating…",
     "errors": {
-      "requiredFields": "Fill name, agent URL, token, and agent relay ID",
+      "nameRequired": "Enter a name for the relay.",
+      "requiredFields": "Fill required fields.",
+      "agentPair": "Agent URL and bearer token must both be filled for an agent-managed relay.",
+      "agentRelayWithoutAgent": "Agent Relay ID only applies when an agent URL and token are set.",
       "nameMaxLength": "Name must have at most 100 characters",
       "invalidAgentUrl": "Invalid agent URL (e.g. https://agent.example.com)",
       "tokenMinLength": "Token must have at least 8 characters",
@@ -474,6 +488,7 @@
   },
   "AccessTab": {
     "title": "Access control",
+    "noAgentBody": "Whitelist and moderation in this panel require relay-agent. For catalogue-only relays, manage access on the host or add agent credentials in Config.",
     "loading": "Loading…",
     "dash": "—",
     "btnAdd": "Add",
@@ -548,6 +563,12 @@
   },
   "EventsTab": {
     "title": "Events",
+    "noAgent": "This relay has no relay-agent. Event browsing and moderation actions are unavailable for catalogue-only rows.",
+    "empty": {
+      "noEvents": "No events in this sample.",
+      "noEventsInCategory": "No events in “{category}”. Try another filter or view all.",
+      "viewAll": "View all events"
+    },
     "viewMode": {
       "table": "Table view",
       "feed": "Feed view"

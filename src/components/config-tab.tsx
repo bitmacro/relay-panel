@@ -114,6 +114,8 @@ export function ConfigTab({
         return t("probe.handlerTimeout", { elapsed });
       case "relay_not_found":
         return t("probe.relayNotFound", { elapsed });
+      case "no_agent":
+        return t("probe.noAgent", { elapsed });
       case "network_error":
         return t("probe.networkError", { elapsed, detail: res.detail ?? t("probe.noDetails") });
       default:
@@ -135,18 +137,39 @@ export function ConfigTab({
 
   const handleSave = async () => {
     if (!selectedId || !config) return;
-    if (!(config.agent_relay_id?.trim() ?? "")) {
-      setError(t("errors.agentRelayIdRequired"));
+    const ep = (config.endpoint ?? "").trim();
+    const tok = (config.token ?? "").trim();
+    const aid = (config.agent_relay_id ?? "").trim();
+    const agentMode = Boolean(ep && tok);
+    if (agentMode) {
+      if (tok.length < 8) {
+        setError(t("errors.tokenMinLength"));
+        return;
+      }
+      if (!aid) {
+        setError(t("errors.agentRelayIdRequired"));
+        return;
+      }
+    } else if (aid) {
+      setError(t("errors.agentRelayWithoutAgent"));
       return;
     }
     setSaving(true);
     setError(null);
     const body: Record<string, string | null> = {};
-    if (config.name) body.name = config.name;
-    if (config.endpoint) body.endpoint = config.endpoint;
-    if (config.token.trim()) body.token = config.token.trim();
-    body.agent_relay_id = (config.agent_relay_id ?? "").trim();
-    body.color = config.color?.trim() || null;
+    if (config.name.trim()) body.name = config.name.trim();
+    if (agentMode) {
+      body.endpoint = ep.replace(/\/$/, "");
+      body.token = tok;
+      body.agent_relay_id = aid || null;
+    } else {
+      body.endpoint = "";
+      body.token = "";
+      body.agent_relay_id = null;
+    }
+    if (config.color !== undefined) {
+      body.color = config.color.trim() ? config.color.trim() : null;
+    }
     if (Object.keys(body).length === 0) {
       setSaving(false);
       return;
@@ -169,17 +192,21 @@ export function ConfigTab({
         );
       }
       if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.save"));
-      setConfig((prev) =>
-        prev
-          ? {
-              ...prev,
-              ...body,
-              token: (body.token as string) || prev.token,
-              agent_relay_id: body.agent_relay_id ?? prev.agent_relay_id ?? "",
-              color: body.color ?? prev.color ?? "",
-            }
-          : null
-      );
+      setConfig((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          ...(typeof body.name === "string" ? { name: body.name } : {}),
+          ...(body.endpoint !== undefined
+            ? { endpoint: body.endpoint ?? "" }
+            : {}),
+          ...(body.token !== undefined ? { token: body.token ?? "" } : {}),
+          ...(body.agent_relay_id !== undefined
+            ? { agent_relay_id: body.agent_relay_id ?? "" }
+            : {}),
+          ...(body.color !== undefined ? { color: body.color ?? "" } : {}),
+        };
+      });
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errors.save"));
@@ -346,6 +373,8 @@ export function ConfigTab({
           <div className="mt-3 rounded-md border border-border bg-muted/40 px-2.5 py-1.5 text-[11px]">
             {probeResult.ok ? (
               <span className="text-green-600 dark:text-green-400">{getProbeMessage(probeResult)}</span>
+            ) : probeResult.error === "no_agent" ? (
+              <span className="text-muted-foreground">{getProbeMessage(probeResult)}</span>
             ) : (
               <span className="text-destructive">{getProbeMessage(probeResult)}</span>
             )}

@@ -30,12 +30,23 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
     const tok = form.token.trim();
     const aid = form.agent_relay_id.trim();
 
-    if (!n || !e || !tok || !aid) {
+    if (!n) {
       setError(tr("errRequired"));
       return;
     }
-    if (tok.length < 8) {
-      setError(tr("errTokenLen"));
+
+    const agentMode = Boolean(e || tok);
+    if (agentMode) {
+      if (!e || !tok) {
+        setError(tr("errAgentPair"));
+        return;
+      }
+      if (tok.length < 8) {
+        setError(tr("errTokenLen"));
+        return;
+      }
+    } else if (aid) {
+      setError(tr("errAgentRelayNeedsAgent"));
       return;
     }
 
@@ -44,11 +55,13 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
     try {
       const body: Record<string, string | null> = {
         name: n,
-        endpoint: e.replace(/\/$/, ""),
-        token: tok,
-        agent_relay_id: aid,
         color: form.color || null,
       };
+      if (agentMode) {
+        body.endpoint = e.replace(/\/$/, "");
+        body.token = tok;
+        body.agent_relay_id = aid || null;
+      }
 
       const r = await fetch("/api/relays", {
         method: "POST",
@@ -90,6 +103,9 @@ export function NewRelayModal({ onClose }: NewRelayModalProps) {
           <div>
             <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-[0.05em] block mb-1">
               {tr("agentUrl")}
+              <span className="ml-1 normal-case font-normal text-[10px] text-muted-foreground/70">
+                {tr("optionalAgentHint")}
+              </span>
             </label>
             <input
               type="text"

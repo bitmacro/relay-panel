@@ -170,6 +170,7 @@ export function RelayPanelShell({
   }, [selectedId, refreshTrigger]);
 
   const selectedRelay = relays.find((r) => r.id === selectedId);
+  const agentManaged = Boolean(selectedRelay?.endpoint?.trim());
 
   return (
     <div className="min-h-screen bg-[#0d0d0d] text-[#e2e2e2]">
@@ -278,12 +279,19 @@ export function RelayPanelShell({
                   blockedCount={blockedCount}
                   pubkeysCountLoading={pubkeysCountLoading}
                   blockedCountLoading={blockedCountLoading}
+                  agentManaged={agentManaged}
                 />
               )}
               {activeTab === "events" && (
-                <EventsTab selectedId={selectedId} refreshTrigger={refreshTrigger} />
+                <EventsTab
+                  selectedId={selectedId}
+                  refreshTrigger={refreshTrigger}
+                  agentManaged={agentManaged}
+                />
               )}
-              {activeTab === "access" && <AccessTab selectedId={selectedId} />}
+              {activeTab === "access" && (
+                <AccessTab selectedId={selectedId} agentManaged={agentManaged} />
+              )}
               {activeTab === "config" && (
                 <ConfigTab
                   selectedId={selectedId}

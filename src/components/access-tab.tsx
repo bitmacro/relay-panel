@@ -97,6 +97,8 @@ function AccessProfileAvatar({
 
 interface AccessTabProps {
   selectedId: string | null;
+  /** false when the relay has no relay-agent (catalogue-only metadata). */
+  agentManaged?: boolean;
 }
 
 type DisplayEntry = PolicyEntry & { source: "whitelist" | "users" | "blocked" };
@@ -109,7 +111,7 @@ function truncateHex(hex: string): string {
   return `${hex.slice(0, 6)}…${hex.slice(-4)}`;
 }
 
-export function AccessTab({ selectedId }: AccessTabProps) {
+export function AccessTab({ selectedId, agentManaged = true }: AccessTabProps) {
   const t = useTranslations("AccessTab");
   const [entries, setEntries] = useState<DisplayEntry[]>([]);
   const [blockedPubkeys, setBlockedPubkeys] = useState<string[]>([]);
@@ -239,6 +241,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
       setBlockedPubkeys([]);
       return;
     }
+    if (!agentManaged) {
+      setEntries([]);
+      setBlockedPubkeys([]);
+      setError(null);
+      setPolicyFailed(false);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     setPolicyFailed(false);
@@ -287,7 +297,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     } finally {
       setLoading(false);
     }
-  }, [selectedId, t]);
+  }, [selectedId, agentManaged, t]);
 
   useEffect(() => {
     fetchData();
@@ -301,7 +311,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
   }, [search, selectedId]);
 
   useEffect(() => {
-    if (!selectedId) return;
+    if (!selectedId || !agentManaged) return;
     const pkSet = new Set<string>();
     for (const e of entries) pkSet.add(e.pubkey);
     for (const pk of blockedPubkeys) pkSet.add(pk);
@@ -382,7 +392,7 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedId, entries, blockedPubkeys]);
+  }, [selectedId, agentManaged, entries, blockedPubkeys]);
 
   /** Whitelist: toggle off removes plain allow line (does not POST block). */
   async function toggleAccess(entry: DisplayEntry) {
@@ -730,6 +740,14 @@ export function AccessTab({ selectedId }: AccessTabProps) {
     return (
       <div className="py-4 text-center text-[12px] text-muted-foreground">
         {t("empty.selectRelay")}
+      </div>
+    );
+  }
+
+  if (!agentManaged) {
+    return (
+      <div className="rounded-lg border border-border bg-secondary/40 px-4 py-8 text-center text-[13px] text-muted-foreground leading-relaxed">
+        {t("noAgentBody")}
       </div>
     );
   }

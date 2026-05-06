@@ -49,12 +49,14 @@
     "colDbSize": "Tamanho Base",
     "emptySearch": "Nenhum relay encontrado.",
     "empty": "Adicione o seu primeiro relay.",
-    "manage": "Gerir"
+    "manage": "Gerir",
+    "catalogOnlyHint": "Lista de referência — sem relay-agent configurado."
   },
   "relayStatus": {
     "online": "Online",
     "unhealthy": "Unhealthy",
-    "offline": "Offline"
+    "offline": "Offline",
+    "noAgent": "Só catálogo"
   },
   "newRelay": {
     "title": "Novo relay",
@@ -69,7 +71,10 @@
     "agentRelayPlaceholder": "ex: public",
     "submit": "Adicionar relay",
     "submitting": "A criar…",
-    "errRequired": "Preencha nome, URL do agente, token e agent relay ID",
+    "errRequired": "Indica um nome de display.",
+    "errAgentPair": "URL do agente e bearer token têm de estar ambos preenchidos para um relay gerido pelo agente.",
+    "optionalAgentHint": "(opcional)",
+    "errAgentRelayNeedsAgent": "Agent Relay ID só se aplica com URL do agente e token.",
     "errTokenLen": "Token deve ter pelo menos 8 caracteres",
     "errCreate": "Erro ao criar"
   },
@@ -113,6 +118,9 @@
     "sheetDescription": "Descrição",
     "sheetNote": "Nota",
     "connection": "Estado da ligação",
+    "noAgent": {
+      "banner": "Este relay é só catálogo — não há URL de relay-agent registada. Métricas, amostras de eventos e ferramentas de política neste painel apenas com credenciais de relay-agent."
+    },
     "strfryVersion": "strfry CLI (relay-agent):",
     "strfryVersionHint": "Versão do binário strfry embutido no relay-agent. Os contentores relay podem usar uma versão diferente.",
     "relayAgentPackageVersion": "Pacote relay-agent:",
@@ -434,10 +442,13 @@
       "save": "Erro ao guardar",
       "delete": "Erro ao apagar",
       "relayNotFound": "Relay não encontrado.",
-      "agentRelayIdRequired": "Agent Relay ID é obrigatório (id em RELAY_INSTANCES)."
+      "agentRelayIdRequired": "Agent Relay ID é obrigatório com URL do agente e token (id em RELAY_INSTANCES).",
+      "agentRelayWithoutAgent": "Limpa o Agent Relay ID se removeres a URL ou o token do agente.",
+      "tokenMinLength": "O token deve ter pelo menos 8 caracteres quando há credenciais de agente."
     },
     "probe": {
       "ok": "Conexão OK{elapsed}",
+      "noAgent": "Nenhum relay-agent está configurado para esta entrada{elapsed}. Define URL e token do agente para testar conectividade.",
       "handlerTimeout": "O proxy da API demorou demasiado a responder{elapsed}. Verifica a latência até ao relay-api.",
       "relayNotFound": "Relay não encontrado na base de dados{elapsed}. Confirma que o relay está configurado em relay_configs.",
       "networkError": "Erro de rede{elapsed}: {detail}.",
@@ -465,7 +476,10 @@
     "btnCreate": "Criar",
     "btnCreating": "A criar…",
     "errors": {
-      "requiredFields": "Preencha nome, URL do agente, token e agent relay ID",
+      "nameRequired": "Indica um nome para o relay.",
+      "requiredFields": "Preenche os campos obrigatórios.",
+      "agentPair": "URL do agente e bearer token têm de estar ambos preenchidos para um relay gerido pelo agente.",
+      "agentRelayWithoutAgent": "Agent Relay ID só se aplica com URL do agente e token.",
       "nameMaxLength": "Nome deve ter no máximo 100 caracteres",
       "invalidAgentUrl": "URL do agente inválida (ex.: https://agent.example.com)",
       "tokenMinLength": "Token deve ter pelo menos 8 caracteres",
@@ -474,6 +488,7 @@
   },
   "AccessTab": {
     "title": "Controlo de acesso",
+    "noAgentBody": "Lista branca e moderação neste painel exigem relay-agent. Para relays só catálogo, gere acesso na máquina ou adicione credenciais em Configuração.",
     "loading": "A carregar…",
     "dash": "—",
     "btnAdd": "Adicionar",
@@ -548,6 +563,12 @@
   },
   "EventsTab": {
     "title": "Eventos",
+    "noAgent": "Este relay não tem relay-agent. Listagem de eventos e moderação não estão disponíveis para entradas só catálogo.",
+    "empty": {
+      "noEvents": "Nenhum evento nesta amostra.",
+      "noEventsInCategory": "Nenhum evento em “{category}”. Tenta outro filtro ou ver todos.",
+      "viewAll": "Ver todos os eventos"
+    },
     "viewMode": {
       "table": "Vista tabela",
       "feed": "Vista eventos"

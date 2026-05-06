@@ -29,20 +29,30 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
     const tokenTrim = form.token.trim();
     const aid = form.agent_relay_id.trim();
 
-    if (!n || !e || !tokenTrim || !aid) {
-      setError(t("errors.requiredFields"));
+    if (!n) {
+      setError(t("errors.nameRequired"));
       return;
     }
     if (n.length > 100) {
       setError(t("errors.nameMaxLength"));
       return;
     }
-    if (!/^https?:\/\//.test(e) && !e.includes(".")) {
-      setError(t("errors.invalidAgentUrl"));
-      return;
-    }
-    if (tokenTrim.length < 8) {
-      setError(t("errors.tokenMinLength"));
+    const agentMode = Boolean(e && tokenTrim);
+    if (agentMode) {
+      if (!e || !tokenTrim) {
+        setError(t("errors.agentPair"));
+        return;
+      }
+      if (!/^https?:\/\//.test(e) && !e.includes(".")) {
+        setError(t("errors.invalidAgentUrl"));
+        return;
+      }
+      if (tokenTrim.length < 8) {
+        setError(t("errors.tokenMinLength"));
+        return;
+      }
+    } else if (aid) {
+      setError(t("errors.agentRelayWithoutAgent"));
       return;
     }
 
@@ -51,11 +61,13 @@ export function CreateRelayTab({ onCancel }: CreateRelayTabProps) {
     try {
       const body: Record<string, string | null> = {
         name: n,
-        endpoint: e.replace(/\/$/, ""),
-        token: tokenTrim,
-        agent_relay_id: aid,
         color: form.color || null,
       };
+      if (agentMode) {
+        body.endpoint = e.replace(/\/$/, "");
+        body.token = tokenTrim;
+        body.agent_relay_id = aid || null;
+      }
 
       const r = await fetch("/api/relays", {
         method: "POST",

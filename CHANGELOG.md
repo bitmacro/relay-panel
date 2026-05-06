@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-05-07
+
+### Added
+
+- Relays **só catálogo** (sem `endpoint`): estado **Catalogue only** na tabela, **`no_agent`** tratado nos fetchers; banners e placeholders no **dashboard**, separador **Events** e **Access** quando não há relay-agent.
+- **Config:** gravação com **agent opcional** (par URL+bearer obrigatório só em modo agente); **Probe** reconhece `no_agent` com mensagem neutra.
+- **Create relay:** validação alinhada ao modal **New relay** (nome obrigatório; agent opcional).
+- **i18n** (EN, pt-BR, overrides ES): textos `no_agent`, formulários e probe.
+
+### Changed
+
+- **`relay-panel-shell`:** `agentManaged` derivado de `endpoint`, passado ao dashboard/events/access.
+
+### Related
+
+- **`relay-api` ≥ 0.2.0** e migration Supabase aplicada antes de relays sem credenciais de agent na base.
+
 ## [0.3.1] - 2026-05-04
 
 ### Fixed
@@ -20,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Related
 
-- Deploy **relay-api** **≥ 0.1.1** em conjunto (`GET /relay/:id/stats` proxy **90 s**); sem isso o painel continua limitado pela API na Vercel.
+- Deploy **relay-api** **≥ 0.2.0** para relays só catálogo / `no_agent`; para métricas pesadas, manter **≥ 0.1.1** (`GET /relay/:id/stats` proxy **90 s**).
 
 ## [0.3.0] - 2026-04-12
 

@@ -44,6 +44,7 @@ interface RelayStats {
   version?: string;
   error?: string;
   detail?: string;
+  no_agent?: boolean;
   _status?: number;
   _ok?: boolean;
 }
@@ -57,6 +58,7 @@ interface RelayHealth {
   strfry_version?: string;
   error?: string;
   detail?: string;
+  no_agent?: boolean;
   _status?: number;
   _ok?: boolean;
 }
@@ -65,6 +67,8 @@ interface DashboardContentProps {
   stats: RelayStats | null;
   health: RelayHealth | null;
   selectedRelay: Relay | null;
+  /** When false (no endpoint in relay_configs), agent metrics are unavailable. */
+  agentManaged?: boolean;
   loading: boolean;
   refreshTrigger?: number;
   /** From GET /users — unique pubkeys count; null if loading failed or unknown */
@@ -89,6 +93,7 @@ export function DashboardContent({
   stats,
   health,
   selectedRelay,
+  agentManaged = true,
   loading,
   refreshTrigger,
   uniquePubkeysCount,
@@ -366,6 +371,11 @@ export function DashboardContent({
 
   return (
     <div className="space-y-4">
+      {!agentManaged ? (
+        <div className="rounded-lg border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-[13px] text-foreground/90 leading-relaxed">
+          {t("noAgent.banner")}
+        </div>
+      ) : null}
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         <div className="rounded-lg border border-border bg-card p-3">

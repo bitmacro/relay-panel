@@ -24,6 +24,7 @@ interface RelayStats {
   uptime?: number;
   version?: string;
   error?: string;
+  no_agent?: boolean;
   _status?: number;
   _ok?: boolean;
 }
@@ -34,6 +35,7 @@ interface RelayHealth {
   strfry_version?: string;
   error?: string;
   detail?: string;
+  no_agent?: boolean;
   _status?: number;
   _ok?: boolean;
 }
@@ -54,6 +56,7 @@ interface RelayDetailShellProps {
 export function RelayDetailShell({ relay }: RelayDetailShellProps) {
   const router = useRouter();
   const t = useTranslations("RelayDetailShell");
+  const agentManaged = Boolean(relay.endpoint?.trim());
   const [activeTab, setActiveTab] = useState<TabId>("dashboard");
   const [stats, setStats] = useState<RelayStats | null>(null);
   const [health, setHealth] = useState<RelayHealth | null>(null);
@@ -139,11 +142,13 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
 
   const status = loading
     ? "loading"
-    : health?.status === "ok"
-    ? "online"
-    : health?.error
-    ? "unhealthy"
-    : "offline";
+    : !agentManaged || stats?.no_agent || health?.no_agent
+      ? "noAgent"
+      : health?.status === "ok"
+        ? "online"
+        : health?.error
+          ? "unhealthy"
+          : "offline";
 
   const wssUrl = relay.endpoint
     ? `wss://${relay.endpoint.replace(/^https?:\/\//, "")}`
@@ -178,7 +183,9 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
             <div className="text-[12px] text-muted-foreground font-mono">{wssUrl}</div>
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <RelayStatusBadge status={status as "online" | "unhealthy" | "offline" | "loading"} />
+            <RelayStatusBadge
+              status={status as "online" | "unhealthy" | "offline" | "loading" | "noAgent"}
+            />
             <button
               type="button"
               onClick={handleRefresh}
@@ -216,6 +223,7 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
             stats={stats}
             health={health}
             selectedRelay={relay}
+            agentManaged={agentManaged}
             loading={loading}
             refreshTrigger={refreshTrigger}
             uniquePubkeysCount={uniquePubkeysCount}
@@ -225,9 +233,15 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
           />
         )}
         {activeTab === "events" && (
-          <EventsTab selectedId={relay.id} refreshTrigger={refreshTrigger} />
+          <EventsTab
+            selectedId={relay.id}
+            refreshTrigger={refreshTrigger}
+            agentManaged={agentManaged}
+          />
         )}
-        {activeTab === "access" && <AccessTab selectedId={relay.id} />}
+        {activeTab === "access" && (
+          <AccessTab selectedId={relay.id} agentManaged={agentManaged} />
+        )}
         {activeTab === "config" && (
           <ConfigTab
             selectedId={relay.id}

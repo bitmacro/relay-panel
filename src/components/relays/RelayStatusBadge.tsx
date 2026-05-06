@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-type Status = "online" | "unhealthy" | "offline" | "loading";
+type Status = "online" | "unhealthy" | "offline" | "loading" | "noAgent";
 
 interface RelayStatusBadgeProps {
   status: Status;
@@ -16,6 +16,14 @@ export function RelayStatusBadge({ status }: RelayStatusBadgeProps) {
       <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-muted text-muted-foreground">
         <span className="w-[5px] h-[5px] rounded-full bg-current" />
         —
+      </span>
+    );
+  }
+  if (status === "noAgent") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-[3px] rounded-full text-[11px] font-medium bg-sky-500/15 text-sky-600 dark:text-sky-400">
+        <span className="w-[5px] h-[5px] rounded-full bg-current" />
+        {t("noAgent")}
       </span>
     );
   }
