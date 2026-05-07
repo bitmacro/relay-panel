@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-05-07
+
+### Fixed
+
+- Ao **eliminar** um relay (Configuração), redireccionar para **`/relays`** em vez de manter **`/relays/:id`** (evita 404 após DELETE).
+
 ## [0.4.0] - 2026-05-07
 
 ### Added

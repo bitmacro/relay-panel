@@ -233,7 +233,7 @@ export function ConfigTab({
         );
       }
       if (!r.ok) throw new Error(json.error ?? json.detail ?? t("errors.delete"));
-      router.refresh();
+      router.replace("/relays");
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errors.delete"));
     } finally {
