@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- GitHub sign-in: Auth.js handlers run on **Node** (not Vercel Edge); GitHub OAuth uses `state` instead of PKCE (Edge PKCE cookies caused `CallbackRouteError`).
-- Sign-in page shows a readable error instead of the NextAuth `/api/auth/error` card.
+- GitHub OAuth callback: Edge middleware no longer runs on `/api/auth` (it was merging/dropping `Set-Cookie`); Auth.js handlers are exported unwrapped on Node; GitHub token exchange uses `client_secret_post`; `NEXTAUTH_*` / `GITHUB_CLIENT_*` env names are mapped and trimmed.
+- Auth.js callback errors are visible on Vercel Runtime Logs (no longer Loki-only) with cause name — never tokens or cookies.
 
 ### Changed
 
-- Auth failures log name/cause only (no tokens, cookies, or OAuth `code`) via `serverLogger` / Loki.
+- Sign-in page shows a readable error instead of the NextAuth `/api/auth/error` card.
 
 ## [0.4.1] - 2026-05-07
 

@@ -108,7 +108,8 @@ async function createLog(
           message,
           ...extra,
         });
-        if (isProduction) return;
+        // Keep error/warn on Vercel Runtime Logs; Loki-only hid Auth.js callback causes.
+        if (isProduction && level !== "error" && level !== "warn") return;
       } catch {
         /* console fallback */
       }
