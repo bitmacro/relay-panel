@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- GitHub OAuth callback: Edge middleware no longer runs on `/api/auth` (it was merging/dropping `Set-Cookie`); Auth.js handlers are exported unwrapped on Node; GitHub token exchange uses `client_secret_post`; `NEXTAUTH_*` / `GITHUB_CLIENT_*` env names are mapped and trimmed.
+- GitHub sign-in uses a server action (HTML form) so the OAuth `state` cookie is set on a real navigation. Client `signIn("github")` used `fetch`; the cookie never stuck, so GitHub never received the client secret (`Never used`).
 - Auth.js callback errors are visible on Vercel Runtime Logs (no longer Loki-only) with cause name — never tokens or cookies.
 
 ### Changed
