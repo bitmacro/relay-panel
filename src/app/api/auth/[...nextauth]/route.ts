@@ -1,18 +1,15 @@
+import type { NextRequest } from "next/server";
 import { handlers } from "@/lib/auth";
 import { serverLogger } from "@/utils/logger";
 
 export const runtime = "nodejs";
 
-function authAction(req: Request): string {
-  try {
-    const path = new URL(req.url).pathname.replace(/^\/api\/auth\/?/, "");
-    return path || "(root)";
-  } catch {
-    return "(unknown)";
-  }
+function authAction(req: NextRequest): string {
+  const path = req.nextUrl.pathname.replace(/^\/api\/auth\/?/, "");
+  return path || "(root)";
 }
 
-async function wrap(method: "GET" | "POST", req: Request): Promise<Response> {
+async function wrap(method: "GET" | "POST", req: NextRequest): Promise<Response> {
   const action = authAction(req);
   const handle = method === "GET" ? handlers.GET : handlers.POST;
   try {
@@ -37,10 +34,10 @@ async function wrap(method: "GET" | "POST", req: Request): Promise<Response> {
   }
 }
 
-export function GET(req: Request) {
+export function GET(req: NextRequest) {
   return wrap("GET", req);
 }
 
-export function POST(req: Request) {
+export function POST(req: NextRequest) {
   return wrap("POST", req);
 }
