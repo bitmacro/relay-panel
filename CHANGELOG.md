@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- GitHub sign-in uses a server action (HTML form) so the OAuth `state` cookie is set on a real navigation. Client `signIn("github")` used `fetch`; the cookie never stuck, so GitHub never received the client secret (`Never used`).
+- GitHub sign-in is a native `POST /api/auth/signin/github` (browser navigation). Server Actions still did not persist the OAuth `state` cookie. Callback logs check names only (`oauth_checks`); Auth.js `type` is logged because production minifies class names to `x`/`y`.
 - Auth.js callback errors are visible on Vercel Runtime Logs (no longer Loki-only) with cause name — never tokens or cookies.
 
 ### Changed

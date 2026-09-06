@@ -27,18 +27,36 @@ export function publicAuthErrorFields(err: unknown): {
   if (!(err instanceof Error)) {
     return { name: "Error", message: "non_error" };
   }
-  const cause = err.cause;
-  const causeName =
-    cause instanceof Error
-      ? cause.name
-      : cause && typeof cause === "object" && "name" in cause
-        ? String((cause as { name: unknown }).name)
-        : undefined;
+  const type = authJsType(err);
+  const inner = innerAuthError(err);
+  const innerType = inner ? authJsType(inner) : undefined;
   return {
-    name: err.name || "Error",
-    message: truncate(stripSecrets(err.message), 180),
-    ...(causeName ? { cause_name: causeName } : {}),
+    name: stableName(type, err.name),
+    message: truncate(stripSecrets(inner?.message ?? err.message), 180),
+    ...(innerType || inner?.name
+      ? { cause_name: stableName(innerType, inner?.name ?? "") }
+      : {}),
   };
+}
+
+function authJsType(err: object): string | undefined {
+  const t = (err as { type?: unknown }).type;
+  return typeof t === "string" && t.length > 1 ? t : undefined;
+}
+
+function stableName(type: string | undefined, name: string): string {
+  if (type && type.length > 2) return type;
+  if (name && name.length > 2) return name;
+  return type || name || "Error";
+}
+
+function innerAuthError(err: Error): Error | undefined {
+  const cause = err.cause;
+  if (!cause || typeof cause !== "object") return undefined;
+  const nested = (cause as { err?: unknown }).err;
+  if (nested instanceof Error) return nested;
+  if (cause instanceof Error) return cause;
+  return undefined;
 }
 
 function stripSecrets(text: string): string {
