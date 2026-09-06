@@ -12,15 +12,11 @@ function authAction(req: Request): string {
   }
 }
 
-async function wrap(
-  method: "GET" | "POST",
-  req: Request,
-  ctx?: unknown
-): Promise<Response> {
+async function wrap(method: "GET" | "POST", req: Request): Promise<Response> {
   const action = authAction(req);
   const handle = method === "GET" ? handlers.GET : handlers.POST;
   try {
-    const res = await handle(req, ctx as never);
+    const res = await handle(req);
     if (res.status >= 400) {
       await serverLogger.warn("AUTH", `${method} /api/auth/${action} HTTP ${res.status}`, {
         event: "auth.http",
@@ -41,10 +37,10 @@ async function wrap(
   }
 }
 
-export function GET(req: Request, ctx: unknown) {
-  return wrap("GET", req, ctx);
+export function GET(req: Request) {
+  return wrap("GET", req);
 }
 
-export function POST(req: Request, ctx: unknown) {
-  return wrap("POST", req, ctx);
+export function POST(req: Request) {
+  return wrap("POST", req);
 }
