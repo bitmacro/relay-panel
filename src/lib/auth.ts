@@ -45,7 +45,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GitHub({
       clientId: github?.clientId,
       clientSecret: github?.clientSecret,
-      // Confidential OAuth App: state only. PKCE cookies were dropped by Edge middleware.
+      // GitHub RFC 9207 (Apr 2026): callback includes iss=https://github.com/login/oauth.
+      // Auth.js beta.25 has no issuer → oauth4webapi compares against authjs.dev → CallbackRouteError.
+      issuer: "https://github.com/login/oauth",
       checks: ["state"],
       client: { token_endpoint_auth_method: "client_secret_post" },
     }),

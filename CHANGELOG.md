@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- GitHub OAuth callback: set provider `issuer` to `https://github.com/login/oauth` (RFC 9207). GitHub now sends `iss` on the callback; Auth.js 5.0.0-beta.25 compared it to `https://authjs.dev` and threw `unexpected "iss" (issuer) response parameter value`.
 - GitHub sign-in is a native `POST /api/auth/signin/github` (browser navigation). Server Actions still did not persist the OAuth `state` cookie. Callback logs check names only (`oauth_checks`); Auth.js `type` is logged because production minifies class names to `x`/`y`.
 - Auth.js callback errors are visible on Vercel Runtime Logs (no longer Loki-only) with cause name — never tokens or cookies.
 
