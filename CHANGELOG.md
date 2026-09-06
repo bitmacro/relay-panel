@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- GitHub sign-in: Auth.js handlers run on **Node** (not Vercel Edge); GitHub OAuth uses `state` instead of PKCE (Edge PKCE cookies caused `CallbackRouteError`).
+- Sign-in page shows a readable error instead of the NextAuth `/api/auth/error` card.
+
+### Changed
+
+- Auth failures log name/cause only (no tokens, cookies, or OAuth `code`) via `serverLogger` / Loki.
+
 ## [0.4.1] - 2026-05-07
 
 ### Fixed

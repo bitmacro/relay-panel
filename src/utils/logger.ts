@@ -18,13 +18,41 @@ export interface LogContext {
 const isClient = typeof window !== "undefined";
 const isProduction = process.env.NODE_ENV === "production";
 
-const PII_KEYS = ["userId", "userEmail", "user", "email", "password", "token"];
+const PII_KEYS = [
+  "userId",
+  "userEmail",
+  "user",
+  "email",
+  "password",
+  "token",
+  "secret",
+  "client_secret",
+  "authorization",
+  "cookie",
+  "cookies",
+  "nsec",
+  "pkce",
+  "code_verifier",
+  "challengeToken",
+  "refresh_token",
+  "access_token",
+];
 
 function sanitizeForLoki(obj: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(obj)) {
     const lower = k.toLowerCase();
     if (PII_KEYS.includes(k) || lower.includes("email") || lower.includes("password")) continue;
+    if (
+      lower.includes("secret") ||
+      lower.includes("token") ||
+      lower.includes("authorization") ||
+      lower.includes("cookie") ||
+      lower.includes("pkce") ||
+      lower.includes("nsec")
+    ) {
+      continue;
+    }
     out[k] = v;
   }
   return out;

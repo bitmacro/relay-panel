@@ -1,16 +1,41 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
+import { publicAuthErrorFields } from "@/lib/auth-public-error";
 import { getAuthSecret } from "@/lib/auth-secret";
 import { authorizeNostrNip07 } from "@/lib/nostr-nip07-authorize";
+import { serverLogger } from "@/utils/logger";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   secret: getAuthSecret(),
+  logger: {
+    error(error) {
+      const fields = publicAuthErrorFields(error);
+      void serverLogger.error("AUTH", `Auth.js ${fields.name}`, undefined, {
+        event: "authjs.error",
+        auth_error: fields.name,
+        cause_name: fields.cause_name,
+      });
+    },
+    warn(code) {
+      void serverLogger.warn("AUTH", String(code), { event: "authjs.warn" });
+    },
+  },
+  events: {
+    async signIn({ account }) {
+      await serverLogger.info("AUTH", "sign-in ok", {
+        event: "auth.signin.ok",
+        provider: account?.provider ?? "unknown",
+      });
+    },
+  },
   providers: [
     GitHub({
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      // OAuth App (not GitHub App): PKCE cookies break on Vercel Edge → CallbackRouteError.
+      checks: ["state"],
     }),
     Credentials({
       id: "nostr",
@@ -25,6 +50,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   pages: {
     signIn: "/auth/signin",
+    error: "/auth/signin",
   },
   callbacks: {
     redirect({ url, baseUrl }) {
