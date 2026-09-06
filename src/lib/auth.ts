@@ -1,10 +1,19 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
+import {
+  githubOAuthConfigured,
+  githubOAuthCredentials,
+  syncAuthJsEnvFromLegacy,
+} from "@/lib/auth-github";
 import { publicAuthErrorFields } from "@/lib/auth-public-error";
 import { getAuthSecret } from "@/lib/auth-secret";
 import { authorizeNostrNip07 } from "@/lib/nostr-nip07-authorize";
 import { serverLogger } from "@/utils/logger";
+
+syncAuthJsEnvFromLegacy();
+
+const github = githubOAuthCredentials();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -16,6 +25,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         event: "authjs.error",
         auth_error: fields.name,
         cause_name: fields.cause_name,
+        auth_message: fields.message,
+        github_oauth_configured: githubOAuthConfigured(),
       });
     },
     warn(code) {
@@ -32,10 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   providers: [
     GitHub({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
-      // OAuth App (not GitHub App): PKCE cookies break on Vercel Edge → CallbackRouteError.
+      clientId: github?.clientId,
+      clientSecret: github?.clientSecret,
+      // Confidential OAuth App: state only. PKCE cookies were dropped by Edge middleware.
       checks: ["state"],
+      client: { token_endpoint_auth_method: "client_secret_post" },
     }),
     Credentials({
       id: "nostr",

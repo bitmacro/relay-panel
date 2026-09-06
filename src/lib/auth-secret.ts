@@ -4,7 +4,8 @@
  */
 export function getAuthSecret(): string | undefined {
   const fromEnv = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-  if (fromEnv) return fromEnv;
+  const trimmed = fromEnv?.trim();
+  if (trimmed) return trimmed;
   if (process.env.NODE_ENV !== "development") return undefined;
 
   if (typeof console !== "undefined") {
