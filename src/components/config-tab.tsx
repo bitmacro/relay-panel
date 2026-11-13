@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { BearerSecretInput } from "@/components/BearerSecretInput";
 import { RelayColorPicker } from "./relay-color-picker";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ConfigTabProps {
   selectedId: string | null;
@@ -46,6 +55,7 @@ export function ConfigTab({
   const [configLoading, setConfigLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [probing, setProbing] = useState(false);
   const [probeResult, setProbeResult] = useState<{
@@ -216,7 +226,9 @@ export function ConfigTab({
   };
 
   const handleDelete = async () => {
-    if (!selectedId || !window.confirm(t("confirmDelete"))) return;
+    // Modal próprio: window.confirm() devolve false em webviews/browsers embebidos.
+    setConfirmDeleteOpen(false);
+    if (!selectedId) return;
     setDeleting(true);
     setError(null);
     try {
@@ -308,7 +320,7 @@ export function ConfigTab({
                 </button>
                 <button
                   type="button"
-                  onClick={handleDelete}
+                  onClick={() => setConfirmDeleteOpen(true)}
                   disabled={deleting}
                   className="rounded-md border border-destructive/40 bg-destructive/5 px-4 py-1.5 text-[12px] text-destructive hover:bg-destructive/10 disabled:opacity-50"
                 >
@@ -381,6 +393,29 @@ export function ConfigTab({
           </div>
         )}
       </div>
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent className="border-border bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">{t("btnDeleteRelay")}</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              {t("confirmDelete")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2 sm:gap-2">
+            <AlertDialogCancel className="border-border bg-muted text-foreground hover:bg-muted/80">
+              {t("btnCancel")}
+            </AlertDialogCancel>
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={deleting}
+              className="inline-flex h-9 items-center justify-center rounded-md border border-destructive/40 bg-destructive/10 px-4 text-sm font-medium text-destructive hover:bg-destructive/15 disabled:opacity-50"
+            >
+              {deleting ? t("btnDeleting") : t("btnDeleteRelay")}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
