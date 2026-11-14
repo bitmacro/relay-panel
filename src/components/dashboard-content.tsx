@@ -264,6 +264,8 @@ export function DashboardContent({
                 }}
               >
                 {meta.label}
+                {/* Range kinds (2xxxx/3xxxx) share one label; without the number every row read "Ephemeral". */}
+                {row.kind >= 20000 && row.kind <= 39999 ? ` ${row.kind}` : null}
               </button>
             </td>
             <td className="min-w-0 break-words px-2.5 py-2 text-foreground align-top leading-snug">

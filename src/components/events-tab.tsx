@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import {
   getKindInfo,
+  KIND_MAP,
   type KindCategory,
 } from "@/lib/nostr-kinds";
 import {
@@ -57,6 +58,23 @@ const CATEGORY_OPTIONS: { value: CategoryFilterValue; key: string }[] = [
 
 function isEphemeralKind(kind: number): boolean {
   return kind >= 20000 && kind <= 29999;
+}
+
+/**
+ * Kinds to ask the agent for, so the filter runs on the relay and not on a
+ * 50-event sample (a sample full of other kinds showed "No events").
+ * Categories with known kinds go to the agent; ranges (ephemeral, replaceable)
+ * and "no_ephemeral" stay client-side because a Nostr filter cannot express them.
+ */
+function kindsForAgent(category: CategoryFilterValue, kind: string): string {
+  if (kind !== "") return kind;
+  if (category === "content" || category === "dms" || category === "system") {
+    return Object.entries(KIND_MAP)
+      .filter(([, info]) => info.category === category)
+      .map(([k]) => k)
+      .join(",");
+  }
+  return "";
 }
 
 function readStoredPubkeyHex(userId: string | null): string | null {
@@ -162,6 +180,11 @@ export function EventsTab({
     [authorFilterInput]
   );
 
+  const agentKinds = useMemo(
+    () => kindsForAgent(filterCategory, filterKind),
+    [filterCategory, filterKind]
+  );
+
   const kindOptions = useMemo(() => {
     const unique = [...new Set(events.map((e) => e.kind))].sort((a, b) => a - b);
     if (filterCategory === "all") return unique;
@@ -219,6 +242,9 @@ export function EventsTab({
     if (authorHexForApi) {
       params.set("authors", authorHexForApi);
     }
+    if (agentKinds) {
+      params.set("kinds", agentKinds);
+    }
     fetch(`/api/relay/${selectedId}/events?${params.toString()}`)
       .then(async (r) => {
         const json = await r.json();
@@ -235,7 +261,7 @@ export function EventsTab({
         setError(formatEventsError(err));
       })
       .finally(() => setLoading(false));
-  }, [selectedId, filterTime, authorHexForApi, refreshTrigger, formatEventsError, agentManaged]);
+  }, [selectedId, filterTime, authorHexForApi, agentKinds, refreshTrigger, formatEventsError, agentManaged]);
 
   const resolveDisplayPubkey = useCallback((hex: string) => {
     const meta = profileCacheRef.current.get(hex);

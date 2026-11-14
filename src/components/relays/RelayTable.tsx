@@ -7,7 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { RelayStatusBadge } from "./RelayStatusBadge";
 import { NewRelayModal } from "./NewRelayModal";
 
-type RelayStatus = "online" | "unhealthy" | "offline" | "loading" | "noAgent";
+import { deriveRelayStatus, setRelayStatus, type RelayStatus } from "@/lib/relay-status";
 
 interface RelayInput {
   id: string;
@@ -120,6 +120,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
   useEffect(() => {
     for (const relay of initialRelays) {
       if (!relay.endpoint?.trim()) {
+        setRelayStatus(relay.id, "noAgent");
         setRows((prev) =>
           prev.map((row) =>
             row.id === relay.id
@@ -139,22 +140,24 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
 
       Promise.all([
         fetchRelayStats(relay.id),
-        fetch(`/api/relay/${relay.id}/health`).then((r) =>
-          r.ok ? (r.json() as Promise<{ status?: string; error?: string; no_agent?: boolean }>) : Promise.resolve({})
-        ),
+        fetch(`/api/relay/${relay.id}/health`).then(async (r) => ({
+          ok: r.ok,
+          body: (await r.json().catch(() => ({}))) as {
+            status?: string;
+            error?: string;
+            no_agent?: boolean;
+          },
+        })),
       ])
         .then(([stats, health]) => {
-          const ha = health as { status?: string; error?: string; no_agent?: boolean };
-          let status: RelayStatus;
-          if (stats.noAgent || ha.no_agent) {
-            status = "noAgent";
-          } else if (ha.status === "ok") {
-            status = "online";
-          } else if (ha.error) {
-            status = "unhealthy";
-          } else {
-            status = "offline";
-          }
+          const ha = health.body;
+          const status: RelayStatus = deriveRelayStatus({
+            agentManaged: true,
+            noAgent: stats.noAgent || ha.no_agent === true,
+            httpOk: health.ok,
+            health: ha,
+          });
+          setRelayStatus(relay.id, status);
           setRows((prev) =>
             prev.map((row) =>
               row.id === relay.id
@@ -171,6 +174,7 @@ export function RelayTable({ relays: initialRelays }: RelayTableProps) {
           );
         })
         .catch(() => {
+          setRelayStatus(relay.id, "offline");
           setRows((prev) =>
             prev.map((row) =>
               row.id === relay.id
