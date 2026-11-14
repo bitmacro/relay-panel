@@ -430,6 +430,7 @@
     "btnSave": "Save",
     "btnSaving": "Saving…",
     "btnDeleteRelay": "Delete relay",
+    "btnCancel": "Cancel",
     "btnDeleting": "Deleting…",
     "btnProbeConnection": "Check connection",
     "btnProbing": "Checking…",
