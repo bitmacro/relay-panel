@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Dashboard → View all kinds:** ephemeral and addressable rows show the kind number ("Ephemeral 22242") instead of only the category name.
 - **Relay status:** one rule (`src/lib/relay-status.ts`) for the table, the detail header and the sidebar. Agent not answering 2xx (down, 401, 503) is **Offline** everywhere; **Unhealthy** only when the agent answers but strfry is not ok. The sidebar dot was always green; it now shows the real status (one health request per relay, no polling).
 - Config → **Delete relay**: modal de confirmação próprio (AlertDialog) em vez de `window.confirm()`, que devolve `false` em webviews e browsers embebidos e fazia o botão parecer morto.
 - GitHub OAuth callback: set provider `issuer` to `https://github.com/login/oauth` (RFC 9207). GitHub now sends `iss` on the callback; Auth.js 5.0.0-beta.25 compared it to `https://authjs.dev` and threw `unexpected "iss" (issuer) response parameter value`.
