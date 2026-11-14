@@ -18,11 +18,27 @@ import { useTheme } from "@/components/theme-provider";
 import { useAppLocale } from "@/components/intl-client-provider";
 import { localeShortLabel, nextLocale } from "@/lib/locale-ui";
 import { cn } from "@/lib/utils";
+import {
+  deriveRelayStatus,
+  hasRelayStatus,
+  setRelayStatus,
+  useRelayStatuses,
+  type RelayStatus,
+} from "@/lib/relay-status";
+
+const STATUS_DOT: Record<RelayStatus, string> = {
+  online: "bg-[#22c55e] shadow-[0_0_4px_#22c55e]",
+  unhealthy: "bg-[#eab308]",
+  offline: "bg-[#ef4444]",
+  noAgent: "bg-sky-500",
+  loading: "bg-muted-foreground/40",
+};
 
 export interface SidebarRelay {
   id: string;
   name: string | null;
   color?: string | null;
+  endpoint?: string | null;
 }
 
 interface SidebarNavContentProps {
@@ -38,6 +54,7 @@ function SidebarNavContent({
 }: SidebarNavContentProps) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
+  const statuses = useRelayStatuses();
 
   const isRelaysActive = pathname === "/relays" || pathname === "/onboarding";
 
@@ -98,7 +115,12 @@ function SidebarNavContent({
                 <span className="flex-1 overflow-hidden text-ellipsis whitespace-nowrap">
                   {relay.name ?? relay.id}
                 </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] shadow-[0_0_4px_#22c55e] shrink-0" />
+                <span
+                  className={cn(
+                    "w-1.5 h-1.5 rounded-full shrink-0",
+                    STATUS_DOT[statuses[relay.id] ?? "loading"]
+                  )}
+                />
               </Link>
             );
           })}
@@ -238,6 +260,41 @@ interface SidebarProps {
 export function Sidebar({ relays, mobileOpen, onMobileOpenChange }: SidebarProps) {
   const tNav = useTranslations("nav");
   const [showModal, setShowModal] = useState(false);
+
+  // Fill the shared status for relays nobody else has checked yet (table/detail
+  // usually answer first). One health request per relay, no polling.
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      for (const relay of relays) {
+        if (hasRelayStatus(relay.id)) continue;
+        if (!relay.endpoint?.trim()) {
+          setRelayStatus(relay.id, "noAgent");
+          continue;
+        }
+        fetch(`/api/relay/${relay.id}/health`, { cache: "no-store" })
+          .then(async (r) => {
+            const body = (await r.json().catch(() => ({}))) as {
+              status?: string;
+              no_agent?: boolean;
+            };
+            if (hasRelayStatus(relay.id)) return;
+            setRelayStatus(
+              relay.id,
+              deriveRelayStatus({
+                agentManaged: true,
+                noAgent: body.no_agent === true,
+                httpOk: r.ok,
+                health: body,
+              })
+            );
+          })
+          .catch(() => {
+            if (!hasRelayStatus(relay.id)) setRelayStatus(relay.id, "offline");
+          });
+      }
+    }, 3000);
+    return () => window.clearTimeout(timer);
+  }, [relays]);
 
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 768px)");

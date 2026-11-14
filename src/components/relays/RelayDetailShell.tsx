@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { deriveRelayStatus, setRelayStatus } from "@/lib/relay-status";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -142,13 +143,16 @@ export function RelayDetailShell({ relay }: RelayDetailShellProps) {
 
   const status = loading
     ? "loading"
-    : !agentManaged || stats?.no_agent || health?.no_agent
-      ? "noAgent"
-      : health?.status === "ok"
-        ? "online"
-        : health?.error
-          ? "unhealthy"
-          : "offline";
+    : deriveRelayStatus({
+        agentManaged,
+        noAgent: Boolean(stats?.no_agent || health?.no_agent),
+        httpOk: Boolean(health?._ok),
+        health,
+      });
+
+  useEffect(() => {
+    if (status !== "loading") setRelayStatus(relay.id, status);
+  }, [relay.id, status]);
 
   const wssUrl = relay.endpoint
     ? `wss://${relay.endpoint.replace(/^https?:\/\//, "")}`
