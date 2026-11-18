@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Sign-in page shows a readable error instead of the NextAuth `/api/auth/error` card.
 
+## [0.4.2] - 2026-11-18
+
+### Fixed
+
+- Ajuste de textos de compliance: remove “Grátis para 1 relay” (en/pt/es).
+
 ## [0.4.1] - 2026-05-07
 
 ### Fixed
